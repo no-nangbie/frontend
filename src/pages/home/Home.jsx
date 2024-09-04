@@ -1,20 +1,12 @@
-// components/Home.jsx
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
 
-function Home() {
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const email = localStorage.getItem('email');
-    
-    // 이메일이 없으면 /login으로 리다이렉트
-    if (!email) {
-      navigate('/login');
-    }
-  }, [navigate]);
-
-  return <h1>Welcome to the Home Page</h1>;
+function Menu() {
+  return (
+    <div>
+      <h2>나의 냉장고 메인 페이지</h2>
+      {/* 메인 콘텐츠 */}
+    </div>
+  );
 }
 
-export default Home;
+export default Menu;
