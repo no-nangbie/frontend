@@ -37,7 +37,7 @@ function Fridge() {
       <Header>
         <FilterSection>
           <Dropdown>
-            <label>식재료종류</label>
+            <label>식재료 종류</label>
             <select onChange={handleCategoryChange}>
               <option value="전체">전체</option>
               <option value="채소 및 과일류">채소 및 과일류</option>
