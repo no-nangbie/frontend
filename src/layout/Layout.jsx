@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { useLocation, useNavigate, Outlet } from 'react-router-dom';
@@ -7,21 +6,22 @@ function Layout() {
   const location = useLocation();
   const navigate = useNavigate(); // useNavigate 훅 사용
 
-    useEffect(() => {
-      const email = localStorage.getItem('email');
-      
-      // 이메일이 없으면 /login으로 리다이렉트
-      if (!email) {
-        navigate('/login');
-      }
-    }, [navigate]);
+  //회원가입 관련해서 완성하면은 아래 주석을 풀어주세요
+  // useEffect(() => {
+  //   const email = localStorage.getItem('email');
+    
+  //   // 이메일이 없으면 /login으로 리다이렉트
+  //   if (!email) {
+  //     navigate('/login');
+  //   }
+  // }, [navigate]);
 
   const hideLayout = location.pathname === '/login';
 
   // 경로에 따른 헤더 제목 설정
   const getHeaderTitle = () => {
     switch (location.pathname) {
-      case '/home':
+      case '/fridge':
         return '나의 냉장고';
       case '/recipe':
         return '레시피';
@@ -43,15 +43,15 @@ function Layout() {
       )}
 
       <MainContent>
-        <Outlet /> {/* 여기서 각 페이지의 메인 컨텐츠가 렌더링됨 */}
+          <Outlet /> {/* 여기서 각 페이지의 메인 컨텐츠가 렌더링됨 */}
       </MainContent>
 
       {!hideLayout && (
         <Footer>
           <Nav>
-            <NavItem active={location.pathname === '/'} onClick={() => navigate('/home')}>
+            <NavItem active={location.pathname === '/'} onClick={() => navigate('/fridge')}>
               <Icon src="/icons/fridge.png" alt="냉장고" />
-              <NavText active={location.pathname === '/home'}>나의 냉장고</NavText>
+              <NavText active={location.pathname === '/fridge'}>나의 냉장고</NavText>
             </NavItem>
             <NavItem active={location.pathname === '/recipe'} onClick={() => navigate('/recipe')}>
               <Icon src="/icons/recipe.png" alt="레시피" />
@@ -82,7 +82,7 @@ const Container = styled.div`
 `;
 
 const Header = styled.header`
-  background-color: #007bff;
+  background-color: #0089D7;
   height: 50px;
   display: flex;
   align-items: center;
@@ -98,6 +98,14 @@ const Heading = styled.h1`
 const MainContent = styled.main`
   flex: 1;
   background-color: #f0f0f0;
+  overflow: hidden; /* 부모에서는 스크롤 막기 */
+`;
+
+const OutletWrapper = styled.div`
+  height: 100%;
+  overflow-y: auto; /* 스크롤 적용 */
+  padding: 20px; /* 내부 padding 추가 */
+  box-sizing: border-box;
 `;
 
 const Footer = styled.footer`
@@ -119,11 +127,11 @@ const NavItem = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  color: ${(props) => (props.active ? '#007bff' : '#888')}; /* 활성화 상태에 따라 색상 변경 */
+  color: ${(props) => (props.active ? '#0089D7' : '#888')}; /* 활성화 상태에 따라 색상 변경 */
   cursor: pointer;
 
   &:hover {
-    color: #007bff;
+    color: #0089D7;
   }
 `;
 
@@ -135,5 +143,6 @@ const Icon = styled.img`
 const NavText = styled.span`
   font-size: 12px;
   margin-top: 5px;
-  color: ${(props) => (props.active ? '#007bff' : '#888')}; /* 활성화 상태에 따라 텍스트 색상 변경 */
+  color: ${(props) => (props.active ? '#0089D7' : '#888')}; /* 활성화 상태에 따라 텍스트 색상 변경 */
 `;
+
