@@ -28,7 +28,7 @@ function Fridge() {
       <Header>
         <FilterSection>
           <Dropdown>
-            <label>식재료 종류</label>
+            <label>식재료종류</label>
             <select>
               <option>전체</option>
               <option>채소</option>
