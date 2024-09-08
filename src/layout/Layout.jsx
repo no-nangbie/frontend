@@ -45,7 +45,7 @@ function Layout() {
     }
   };
 
-  const getButtonColor1 = () => {
+  const getFirstBtnImg = () => {
     switch (location.pathname) {
       case '/recipe':
         return boardFix; 
@@ -54,7 +54,7 @@ function Layout() {
     }
   };
   
-  const getButtonColor2 = () => {
+  const getSecondBtnImg = () => {
     switch (location.pathname) {
       case '/fridge':
         return menuMinus;
@@ -65,7 +65,7 @@ function Layout() {
     }
   };
 
-  const getButtonColor3 = () => {
+  const getThirdBtnImg = () => {
     switch (location.pathname) {
       case '/fridge':
         return menuPlus; 
@@ -84,13 +84,13 @@ function Layout() {
           <ButtonContainer>
             {/* /fridge 페이지에서는 2번째, 3번째 버튼만 보여야 함 */}
             {location.pathname === '/board' && (
-              <ColoredButton src={getButtonColor1()} onClick={() => alert('첫 번째 버튼 클릭됨!')} />
+              <ColoredButton src={getFirstBtnImg()} onClick={() => alert('첫 번째 버튼 클릭됨!')} />
             )}
             {(location.pathname === '/fridge' || location.pathname === '/board') && (
-              <ColoredButton src={getButtonColor2()} onClick={() => alert('두 번째 버튼 클릭됨!')} />
+              <ColoredButton src={getSecondBtnImg()} onClick={() => alert('두 번째 버튼 클릭됨!')} />
             )}
             {(location.pathname === '/fridge' || location.pathname === '/recipe' || location.pathname === '/board') && (
-              <ColoredButton src={getButtonColor3()} onClick={() => alert('세 번째 버튼 클릭됨!')} />
+              <ColoredButton src={getThirdBtnImg()} onClick={() => alert('세 번째 버튼 클릭됨!')} />
             )}
           </ButtonContainer>
         </Header>
