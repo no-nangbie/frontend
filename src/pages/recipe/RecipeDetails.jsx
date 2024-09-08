@@ -303,12 +303,12 @@ const ButtonContainer = styled.div`
 `;
 
 const ActionButton = styled.button`
-  background-color: #0089D7;
+  background-color: #2D9CDB;
   color: #FFFFFF;
   width: 100%;
   height: 50px;
   padding: 10px 40px; /* 버튼이 길어지도록 padding 설정 */
-  border: 2px solid #0089D7; /* 파란색 테두리 */
+  border: 2px solid #2D9CDB; /* 파란색 테두리 */
   border-radius: 10px; /* 둥근 모서리 */
   cursor: pointer;
   font-size: 16px;

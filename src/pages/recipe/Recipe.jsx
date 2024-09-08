@@ -218,7 +218,7 @@ const Dropdown = styled.div`
 const SearchBar = styled.div`
   display: flex;
   align-items: center;
-  border: 2px solid #0089D7;
+  border: 2px solid #2D9CDB;
   border-radius: 10px;
   background-color: white;
   width: 100%;
@@ -234,7 +234,7 @@ const InputGroup = styled.div`
   display: flex;
   align-items: center;
   margin-bottom: 20px;
-  border: 2px solid #0089D7;
+  border: 2px solid #2D9CDB;
   border-radius: 30px;
   background-color: #FFF;
   width: 100%;
@@ -248,7 +248,7 @@ const Label = styled.div`
   font-size: 13px;
   text-align: center;
   line-height: 30px; 
-  border-right: 2px solid #0089D7;
+  border-right: 2px solid #2D9CDB;
   border-radius: 20px 0 0 20px;
 `;
 
@@ -281,7 +281,7 @@ const InputGroup2_1thLine = styled.div`
   display: flex;
   align-items: center;
   margin-bottom: 20px;
-  border: 2px solid #0089D7;
+  border: 2px solid #2D9CDB;
   border-radius: 30px;
   background-color: #f5f5f5;
   width: 40vh; /* 각 InputGroup의 너비 */
@@ -293,7 +293,7 @@ const InputGroup2_2thLine = styled.div`
   display: flex;
   align-items: center;
   margin-bottom: 20px;
-  border: 2px solid #0089D7;
+  border: 2px solid #2D9CDB;
   border-radius: 30px;
   background-color: #f5f5f5;
   width: 40vh; /* 각 InputGroup의 너비 */

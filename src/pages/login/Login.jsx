@@ -57,7 +57,7 @@ const Container = styled.div`
 
 const Header = styled.header`
   width: 100%;
-  background-color: #0089D7;
+  background-color: #2D9CDB;
   height: 50px;
   text-align: left;
   color: white;
@@ -73,7 +73,7 @@ const Heading = styled.h1`
 
 const LoginBox = styled.div`
   background-color: white;
-  border: 2px solid #0089D7;
+  border: 2px solid #2D9CDB;
   border-radius: 10px;
   padding: 30px;
   width: 300px;
@@ -95,7 +95,7 @@ const InputGroup = styled.div`
   display: flex;
   align-items: center;
   margin-bottom: 20px;
-  border: 2px solid #0089D7;
+  border: 2px solid #2D9CDB;
   border-radius: 30px;
   background-color: #f5f5f5;
 `;
@@ -107,9 +107,9 @@ const Label = styled.div`
   font-size: 14px;
   text-align: center;
   padding: 10px 0;
-  border-right: 2px solid #0089D7;
+  border-right: 2px solid #2D9CDB;
   border-radius: 20px 0 0 20px;
-  border-right: 2px solid #0089D7;
+  border-right: 2px solid #2D9CDB;
 `;
 
 const TextArea = styled.input`
@@ -122,7 +122,7 @@ const TextArea = styled.input`
 `;
 
 const LoginButton = styled.button`
-  background-color: #0089D7;
+  background-color: #2D9CDB;
   color: white;
   border: none;
   padding: 10px;
@@ -147,6 +147,6 @@ const SignupAnchor = styled.a`
   color: #333;
 
   &:hover {
-    color: #0089D7;
+    color: #2D9CDB;
   }
 `;
