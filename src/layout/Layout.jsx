@@ -97,15 +97,10 @@ const Heading = styled.h1`
 
 const MainContent = styled.main`
   flex: 1;
+  display: block;
+  height:100vh;
   background-color: #f0f0f0;
   overflow: hidden; /* 부모에서는 스크롤 막기 */
-`;
-
-const OutletWrapper = styled.div`
-  height: 100%;
-  overflow-y: auto; /* 스크롤 적용 */
-  padding: 20px; /* 내부 padding 추가 */
-  box-sizing: border-box;
 `;
 
 const Footer = styled.footer`

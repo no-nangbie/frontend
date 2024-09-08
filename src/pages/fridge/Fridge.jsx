@@ -146,7 +146,7 @@ const ScrollableContainer = styled.div`
   padding: 20px;
   background-color: #f4f4f4;
   width: 100%;
-  height: 100vh; /* 스크롤 가능 영역 */
+  height: 100%; /* 스크롤 가능 영역 */
   overflow-y: auto;
 `;
 
