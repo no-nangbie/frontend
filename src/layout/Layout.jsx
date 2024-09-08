@@ -1,6 +1,19 @@
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { useLocation, useNavigate, Outlet } from 'react-router-dom';
+import menuPlus from '../resources/icon/menu_plus.png';
+import menuMinus from '../resources/icon/menu_minus.png';
+import boardPlus from '../resources/icon/board_plus.png';
+import boardMinus from '../resources/icon/board_minus.png';
+import boardFix from '../resources/icon/board_fix.png';
+import board from '../resources/icon/board.png';
+import menu from '../resources/icon/menu.png';
+import recipe from '../resources/icon/recipe.png';
+import fridge from '../resources/icon/fridge.png';
+import board_on from '../resources/icon/board_on.png';
+import menu_on from '../resources/icon/menu_on.png';
+import recipe_on from '../resources/icon/recipe_on.png';
+import fridge_on from '../resources/icon/fridge_on.png';
 
 function Layout() {
   const location = useLocation();
@@ -15,10 +28,8 @@ function Layout() {
   //     navigate('/login');
   //   }
   // }, [navigate]);
-
   const hideLayout = location.pathname === '/login';
 
-  // 경로에 따른 헤더 제목 설정
   const getHeaderTitle = () => {
     switch (location.pathname) {
       case '/fridge':
@@ -30,7 +41,38 @@ function Layout() {
       case '/menu':
         return '메뉴';
       default:
-        return '나의 냉장고'; // 기본값
+        return '나의 냉장고';
+    }
+  };
+
+  const getButtonColor1 = () => {
+    switch (location.pathname) {
+      case '/recipe':
+        return boardFix; 
+      case '/board':
+        return boardFix; 
+    }
+  };
+  
+  const getButtonColor2 = () => {
+    switch (location.pathname) {
+      case '/fridge':
+        return menuMinus;
+      case '/recipe':
+        return boardMinus;
+      case '/board':
+        return boardMinus;
+    }
+  };
+
+  const getButtonColor3 = () => {
+    switch (location.pathname) {
+      case '/fridge':
+        return menuPlus; 
+      case '/recipe':
+        return boardPlus;
+      case '/board':
+        return boardPlus;
     }
   };
 
@@ -38,31 +80,55 @@ function Layout() {
     <Container>
       {!hideLayout && (
         <Header>
-          <Heading>{getHeaderTitle()}</Heading> {/* 동적 헤더 제목 */}
+          <Heading>{getHeaderTitle()}</Heading>
+          <ButtonContainer>
+            {/* /fridge 페이지에서는 2번째, 3번째 버튼만 보여야 함 */}
+            {location.pathname === '/board' && (
+              <ColoredButton src={getButtonColor1()} onClick={() => alert('첫 번째 버튼 클릭됨!')} />
+            )}
+            {(location.pathname === '/fridge' || location.pathname === '/board') && (
+              <ColoredButton src={getButtonColor2()} onClick={() => alert('두 번째 버튼 클릭됨!')} />
+            )}
+            {(location.pathname === '/fridge' || location.pathname === '/recipe' || location.pathname === '/board') && (
+              <ColoredButton src={getButtonColor3()} onClick={() => alert('세 번째 버튼 클릭됨!')} />
+            )}
+          </ButtonContainer>
         </Header>
       )}
 
       <MainContent>
-          <Outlet /> {/* 여기서 각 페이지의 메인 컨텐츠가 렌더링됨 */}
+        <Outlet />
       </MainContent>
 
       {!hideLayout && (
         <Footer>
           <Nav>
-            <NavItem active={location.pathname === '/'} onClick={() => navigate('/fridge')}>
-              <Icon src="/icons/fridge.png" alt="냉장고" />
+            <NavItem active={location.pathname === '/fridge'} onClick={() => navigate('/fridge')}>
+              <Icon
+                src={location.pathname === '/fridge' ? fridge_on : fridge} 
+                alt="냉장고"
+              />
               <NavText active={location.pathname === '/fridge'}>나의 냉장고</NavText>
             </NavItem>
             <NavItem active={location.pathname === '/recipe'} onClick={() => navigate('/recipe')}>
-              <Icon src="/icons/recipe.png" alt="레시피" />
+              <Icon
+                src={location.pathname === '/recipe' ? recipe_on : recipe}
+                alt="레시피"
+              />
               <NavText active={location.pathname === '/recipe'}>레시피</NavText>
             </NavItem>
             <NavItem active={location.pathname === '/board'} onClick={() => navigate('/board')}>
-              <Icon src="/icons/board.png" alt="게시판" />
+              <Icon
+                src={location.pathname === '/board' ? board_on : board}
+                alt="게시판"
+              />
               <NavText active={location.pathname === '/board'}>게시판</NavText>
             </NavItem>
             <NavItem active={location.pathname === '/menu'} onClick={() => navigate('/menu')}>
-              <Icon src="/icons/menu.png" alt="메뉴" />
+              <Icon
+                src={location.pathname === '/menu' ? menu_on : menu}
+                alt="메뉴"
+              />
               <NavText active={location.pathname === '/menu'}>메뉴</NavText>
             </NavItem>
           </Nav>
@@ -82,12 +148,13 @@ const Container = styled.div`
 `;
 
 const Header = styled.header`
-  background-color: #0089D7;
+  background-color: #2D9CDB;
   height: 50px;
   display: flex;
   align-items: center;
   padding-left: 20px;
   color: white;
+  position: relative;
 `;
 
 const Heading = styled.h1`
@@ -95,12 +162,31 @@ const Heading = styled.h1`
   font-size: 18px;
 `;
 
+const ButtonContainer = styled.div`
+  position: absolute;
+  right: 10px;
+  display: flex;
+  gap: 10px; /* 버튼 사이 간격 */
+`;
+
+const ColoredButton = styled.img`
+  width: 42px;
+  height: 31.5px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.8;
+  }
+`;
+
 const MainContent = styled.main`
   flex: 1;
   display: block;
-  height:100vh;
+  height: 100vh;
   background-color: #f0f0f0;
-  overflow: hidden; /* 부모에서는 스크롤 막기 */
+  overflow: hidden;
 `;
 
 const Footer = styled.footer`
@@ -122,11 +208,11 @@ const NavItem = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  color: ${(props) => (props.active ? '#0089D7' : '#888')}; /* 활성화 상태에 따라 색상 변경 */
+  color: ${(props) => (props.active ? '#2D9CDB' : '#888')};
   cursor: pointer;
 
   &:hover {
-    color: #0089D7;
+    color: #2D9CDB;
   }
 `;
 
@@ -138,6 +224,5 @@ const Icon = styled.img`
 const NavText = styled.span`
   font-size: 12px;
   margin-top: 5px;
-  color: ${(props) => (props.active ? '#0089D7' : '#888')}; /* 활성화 상태에 따라 텍스트 색상 변경 */
+  color: ${(props) => (props.active ? '#2D9CDB' : '#888')};
 `;
-
