@@ -131,7 +131,7 @@ const ScrollableContainer = styled.div`
   overflow-y: auto;
   overflow-x: hidden;
   padding: 10px;
-  height: 100vh; /* Limit height of the scrollable area */
+  height: 100%; /* Limit height of the scrollable area */
   background-color: #f4f4f4;
   border-radius: 8px;
 `;
@@ -176,7 +176,7 @@ const MainContainer = styled.div`
   flex-direction: column;
   align-items: center;
   width: 100%;
-  height: 100vh; /* Full viewport height */
+  height: 100%; /* Full viewport height */
 `;
 
 const Header = styled.header`
