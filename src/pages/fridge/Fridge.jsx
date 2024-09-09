@@ -7,6 +7,8 @@ import FISH_SEAFOOD_ICON from '../../resources/icon/FISH_SEAFOOD.png';
 import EGGS_DAIRY_ICON from '../../resources/icon/EGGS_DAIRY.png';
 import SAUCES_ICON from '../../resources/icon/SAUCES.png';
 import OTHERS_ICON from '../../resources/icon/OTHERS.png';
+import Search_img from '../../resources/icon/search_3917754.png'
+
 
 
 const getFoodIcon = (category) => {
@@ -131,8 +133,8 @@ function Fridge() {
   return (
     <MainContainer>
       <Header>
-        <FilterSection>
-          <InputGroup2_1thLine>
+        {/* <FilterSection> */}
+          <InputGroupLine>
             <Label>식재료종류</Label>
             <Select onChange={handleCategoryChange}>
               <option value="전체">전체</option>
@@ -143,8 +145,8 @@ function Fridge() {
               <option value="SAUCES">소스류</option>
               <option value="OTHERS">기타</option>
             </Select>
-          </InputGroup2_1thLine>
-          <InputGroup2_2thLine>
+          </InputGroupLine>
+          <InputGroupLine>
             <Label>정렬</Label>
             <Select onChange={handleSortChange} value={sortOption}>
               <option value="expirationDate_asc">소비기한 빠른 순</option>
@@ -152,12 +154,12 @@ function Fridge() {
               <option value="memberFoodId_desc">최근 추가 순</option>
               <option value="memberFoodId_asc">과거 등록 순</option>
             </Select>
-          </InputGroup2_2thLine>
-        </FilterSection>
+          </InputGroupLine>
+        {/* </FilterSection> */}
         <SearchBar>
-          <input type="text" placeholder="검색" 
+          <TextArea type="text" placeholder="검색" 
           value={searchKeyword} onChange={(e) => setSearchKeyword(e.target.value)}/>
-          <SearchIcon onClick={handleSearchClick}>🔍</SearchIcon>
+          <SearchIcon src={Search_img} onClick={handleSearchClick} alt="search icon"></SearchIcon>
         </SearchBar>
       </Header>
 
@@ -212,17 +214,16 @@ const FilterSection = styled.div`
   padding: 0 30px; /* 양쪽에 여백을 추가 */
 `;
 
-const InputGroup2_1thLine = styled.div`
+const InputGroupLine = styled.div`
   display: flex;
   align-items: center;
   margin-bottom: 20px;
   border: 2px solid #2D9CDB;
   border-radius: 30px;
   background-color: #f5f5f5;
-  width: 40vh; /* 각 InputGroup의 너비 */
+  width: 100%; /* 각 InputGroup의 너비 */
   height: 30px;
   justify-content: center; /* 가운데 정렬 */
-  margin-right: 10px; /* 두 그룹 사이에 간격 추가 */
 `;
 
 const InputGroup2_2thLine = styled.div`
@@ -232,17 +233,16 @@ const InputGroup2_2thLine = styled.div`
   border: 2px solid #2D9CDB;
   border-radius: 30px;
   background-color: #f5f5f5;
-  width: 40vh; /* 각 InputGroup의 너비 */
+  width: 100%; /* 각 InputGroup의 너비 */
   height: 30px;
   justify-content: center; /* 가운데 정렬 */
-  margin-left: 10px; /* 두 그룹 사이에 간격 추가 */
 `;
 
 const Label = styled.div`
   width: 70px;
   background-color: white;
   font-weight: bold;
-  font-size: 13px;
+  font-size: 12px;
   text-align: center;
   line-height: 30px; 
   border-right: 2px solid #2D9CDB;
@@ -258,34 +258,31 @@ const Select = styled.select`
   text-align: center; 
   border-radius: 0 30px 30px 0;
   outline: none;
-  // appearance: none; /* 기본 드롭다운 화살표 제거 */
   background-color: transparent;
-  // background-image: url('data:image/svg+xml;base64,YOUR_BASE64_ARROW'); /* 커스텀 화살표 */
   background-repeat: no-repeat;
   background-position: right 15px center; 
-  padding-right: 30px; 
 `;
 
-const SearchBar = styled.div`
-  display: flex;
-  align-items: center;
-  border: 2px solid #2D9CDB; /* Same color as dropdown border */
-  border-radius: 10px;
-  padding: 5px;
-  background-color: white;
-  width: 70%;
+// const SearchBar = styled.div`
+//   display: flex;
+//   align-items: center;
+//   border: 2px solid #2D9CDB; /* Same color as dropdown border */
+//   border-radius: 10px;
+//   padding: 5px;
+//   background-color: white;
+//   width: 100%;
   
-  input {
-    border: none; /* 검색 입력 칸 테두리 제거 */
-    outline: none; /* 선택 시 생기는 기본 아웃라인 제거 */
-    width: 100%; /* 전체 공간 채우기 */
-    padding: 5px;
-  }
-`;
+//   input {
+//     border: none; /* 검색 입력 칸 테두리 제거 */
+//     outline: none; /* 선택 시 생기는 기본 아웃라인 제거 */
+//     width: 100%; /* 전체 공간 채우기 */
+//     padding: 5px;
+//   }
+// `;
 
-const SearchIcon = styled.div`
-  margin-left: 5px;
-`;
+// const SearchIcon = styled.div`
+//   margin-left: 5px;
+// `;
 
 const ScrollableContainer = styled.div`
   width: 100%;
@@ -331,4 +328,27 @@ const FoodMemo = styled.div`
 const FoodDate = styled.div`
   font-size: 10px;
   margin-top: 5px;
+`;
+
+const SearchBar = styled.div`
+  display: flex;
+  align-items: center;
+  border: 2px solid #2D9CDB;
+  border-radius: 10px;
+  background-color: white;
+  width: 100%;
+  height: 30px; 
+`;
+const SearchIcon = styled.img`
+  width: 20px;
+  height: 20px;
+  margin: 10px 10px;
+`;
+
+const TextArea = styled.input`
+  flex: 1;
+  border: none;
+  margin-left: 10px;
+  font-size: 14px;
+  outline: none;
 `;
