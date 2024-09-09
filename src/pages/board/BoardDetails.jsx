@@ -47,122 +47,16 @@ const BoardDetails = () => {
           <Title>재료</Title>
           <Dividers/>
           <ul>
-            <li><Span>물</Span><Span>250ml</Span></li>
-            <Uldividers/>
-            <li><Span>돼지고기 [찌개용]</Span><Span>250g</Span></li>
-            <Uldividers/>
-            <li><Span>김치</Span><Span>200g</Span></li>
-            <Uldividers/>
-            <li><Span>양파</Span><Span>반 개</Span></li>
-            <Uldividers/>
-            <li><Span>고추</Span><Span>2개</Span></li>
-            <Uldividers/>
-            <li><Span>돼지고기 [찌개용]</Span><Span>250g</Span></li>
-            <Uldividers/>
-            <li><Span>김치</Span><Span>200g</Span></li>
-            <Uldividers/>
-            <li><Span>양파</Span><Span>반 개</Span></li>
-            <Uldividers/>
-            <li><Span>고추</Span><Span>2개</Span></li>
-            <Uldividers/>
-            <li><Span>돼지고기 [찌개용]</Span><Span>250g</Span></li>
-            <Uldividers/>
-            <li><Span>김치</Span><Span>200g</Span></li>
-            <Uldividers/>
-            <li><Span>양파</Span><Span>반 개</Span></li>
-            <Uldividers/>
-            <li><Span>고추</Span><Span>2개</Span></li>
-            <Uldividers/>
-            <li><Span>고추</Span><Span>2개</Span></li>
-            <Uldividers/>
-            <li><Span>돼지고기 [찌개용]</Span><Span>250g</Span></li>
-            <Uldividers/>
-            <li><Span>김치</Span><Span>200g</Span></li>
-            <Uldividers/>
-            <li><Span>양파</Span><Span>반 개</Span></li>
-            <Uldividers/>
-            <li><Span>양파</Span><Span>반 개</Span></li>
-            <Uldividers/>
-            <li><Span>고추</Span><Span>2개</Span></li>
-            <Uldividers/>
-            <li><Span>돼지고기 [찌개용]</Span><Span>250g</Span></li>
-            <Uldividers/>
-            <li><Span>김치</Span><Span>200g</Span></li>
-            <Uldividers/>
-            <li><Span>양파</Span><Span>반 개</Span></li>
-            <Uldividers/>
-            <li><Span>고추</Span><Span>2개</Span></li>
-            <Uldividers/>
-            <li><Span>고추</Span><Span>2개</Span></li>
-            <Uldividers/>
-            <li><Span>고추</Span><Span>2개</Span></li>
-            <Uldividers/>
-            <li><Span>돼지고기 [찌개용]</Span><Span>250g</Span></li>
-            <Uldividers/>
-            <li><Span>김치</Span><Span>200g</Span></li>
-            <Uldividers/>
-            <li><Span>양파</Span><Span>반 개</Span></li>
-            <Uldividers/>
-            <li><Span>양파</Span><Span>반 개</Span></li>
-            <Uldividers/>
-            <li><Span>고추</Span><Span>2개</Span></li>
-            <Uldividers/>
-            <li><Span>돼지고기 [찌개용]</Span><Span>250g</Span></li>
-            <Uldividers/>
-            <li><Span>김치</Span><Span>200g</Span></li>
-            <Uldividers/>
-            <li><Span>양파</Span><Span>반 개</Span></li>
-            <Uldividers/>
-            <li><Span>고추</Span><Span>2개</Span></li>
-            <Uldividers/>
-            <li><Span>고추</Span><Span>2개</Span></li>
-            <Uldividers/>
-            <li><Span>고추</Span><Span>2개</Span></li>
-            <Uldividers/>
-            <li><Span>돼지고기 [찌개용]</Span><Span>250g</Span></li>
-            <Uldividers/>
-            <li><Span>김치</Span><Span>200g</Span></li>
-            <Uldividers/>
-            <li><Span>양파</Span><Span>반 개</Span></li>
-            <Uldividers/>
-            <li><Span>양파</Span><Span>반 개</Span></li>
-            <Uldividers/>
-            <li><Span>고추</Span><Span>2개</Span></li>
-            <Uldividers/>
-            <li><Span>돼지고기 [찌개용]</Span><Span>250g</Span></li>
-            <Uldividers/>
-            <li><Span>김치</Span><Span>200g</Span></li>
-            <Uldividers/>
-            <li><Span>양파</Span><Span>반 개</Span></li>
-            <Uldividers/>
-            <li><Span>고추</Span><Span>2개</Span></li>
-            <Uldividers/>
-            <li><Span>고추</Span><Span>2개</Span></li>
-            <Uldividers/>
-            <li><Span>고추</Span><Span>2개</Span></li>
-            <Uldividers/>
-            <li><Span>돼지고기 [찌개용]</Span><Span>250g</Span></li>
-            <Uldividers/>
-            <li><Span>김치</Span><Span>200g</Span></li>
-            <Uldividers/>
-            <li><Span>양파</Span><Span>반 개</Span></li>
-            <Uldividers/>
-            <li><Span>양파</Span><Span>반 개</Span></li>
-            <Uldividers/>
-            <li><Span>고추</Span><Span>2개</Span></li>
-            <Uldividers/>
-            <li><Span>돼지고기 [찌개용]</Span><Span>250g</Span></li>
-            <Uldividers/>
-            <li><Span>김치</Span><Span>200g</Span></li>
-            <Uldividers/>
-            <li><Span>양파</Span><Span>반 개</Span></li>
-            <Uldividers/>
-            <li><Span>고추</Span><Span>2개</Span></li>
+            <li><Span>물물물물물물물물물물물물물물물물물\n물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물</Span></li>
           </ul>
         </Ingredients>
-        <ButtonContainer>
-          <ActionButton>레시피 보기</ActionButton>
-        </ButtonContainer>
+        <Ingredients>
+          <Title>레시피</Title>
+          <Dividers/>
+          <ul>
+            <li><Span>레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피</Span></li>
+          </ul>
+        </Ingredients>
       </TextContainer>
     </Container>
   );
@@ -237,7 +131,7 @@ const TextContainer = styled.div`
 `;
 
 const Title = styled.h1`
-  font-size: 24px;
+  font-size: 20px;
   font-weight: bold;
   margin: 0;
   color: #2D9CDB;
