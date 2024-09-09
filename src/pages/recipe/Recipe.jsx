@@ -230,6 +230,14 @@ const SearchIcon = styled.img`
   margin: 10px 10px;
 `;
 
+const TextArea = styled.input`
+  flex: 1;
+  border: none;
+  margin-left: 10px;
+  font-size: 14px;
+  outline: none;
+`;
+
 const InputGroup = styled.div`
   display: flex;
   align-items: center;
@@ -300,12 +308,4 @@ const InputGroup2_2thLine = styled.div`
   height: 30px;
   justify-content: center; /* 가운데 정렬 */
   margin-left: 10px; /* 두 그룹 사이에 간격 추가 */
-`;
-
-const TextArea = styled.input`
-  flex: 1;
-  border: none;
-  margin-left: 10px;
-  font-size: 14px;
-  outline: none;
 `;
