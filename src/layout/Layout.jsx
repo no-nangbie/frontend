@@ -45,7 +45,7 @@ function Layout() {
     }
   };
 
-  const getFirstBtnImg = () => {
+  const getButtonColor1 = () => {
     switch (location.pathname) {
       case '/recipe':
         return boardFix; 
@@ -54,7 +54,7 @@ function Layout() {
     }
   };
   
-  const getSecondBtnImg = () => {
+  const getButtonColor2 = () => {
     switch (location.pathname) {
       case '/fridge':
         return menuMinus;
@@ -65,7 +65,7 @@ function Layout() {
     }
   };
 
-  const getThirdBtnImg = () => {
+  const getButtonColor3 = () => {
     switch (location.pathname) {
       case '/fridge':
         return menuPlus; 
@@ -76,6 +76,10 @@ function Layout() {
     }
   };
 
+  const handleButtonClick3 = () => {
+    navigate('/fridge/add');
+  };
+
   return (
     <Container>
       {!hideLayout && (
@@ -84,13 +88,16 @@ function Layout() {
           <ButtonContainer>
             {/* /fridge 페이지에서는 2번째, 3번째 버튼만 보여야 함 */}
             {location.pathname === '/board' && (
-              <ColoredButton src={getFirstBtnImg()} onClick={() => alert('첫 번째 버튼 클릭됨!')} />
+              <ColoredButton src={getButtonColor1()} onClick={() => alert('첫 번째 버튼 클릭됨!')} />
             )}
             {(location.pathname === '/fridge' || location.pathname === '/board') && (
-              <ColoredButton src={getSecondBtnImg()} onClick={() => alert('두 번째 버튼 클릭됨!')} />
+              <ColoredButton src={getButtonColor2()} onClick={() => alert('두 번째 버튼 클릭됨!')} />
             )}
-            {(location.pathname === '/fridge' || location.pathname === '/recipe' || location.pathname === '/board') && (
-              <ColoredButton src={getThirdBtnImg()} onClick={() => alert('세 번째 버튼 클릭됨!')} />
+            {(location.pathname === '/fridge') && (
+              <ColoredButton src={getButtonColor3()} onClick={handleButtonClick3} />
+            )}
+            {(location.pathname === '/recipe' || location.pathname === '/board') && (
+              <ColoredButton src={getButtonColor3()} onClick={() => alert('세 번째 버튼 클릭됨!')} />
             )}
           </ButtonContainer>
         </Header>

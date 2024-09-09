@@ -1,35 +1,124 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import styled from 'styled-components';
 
-// Data
-const foodItems = [
-  { id: 1, name: '상추', category: '채소 및 과일류', memo: '전남상추', date: '24.08.25 ~ 24.09.01', icon: '🥬', color: '#A0A0A0' },
-  { id: 2, name: '돼지고기', category: '육류', memo: '삼겹살', date: '24.08.25 ~ 24.09.02', icon: '🥩', color: '#D9534F' },
-  { id: 3, name: '고등어', category: '어류 및 해산물', memo: '자반고등어', date: '24.06.25 ~ 24.09.12', icon: '🐟', color: '#FFFFFF' },
-  { id: 4, name: '굴비', category: '어류 및 해산물', memo: '굴비', date: '24.08.25 ~ 24.09.12', icon: '🐟', color: '#FFFFFF' },
-  { id: 5, name: '고추장', category: '소스류', memo: '멸매옴', date: '24.08.25 ~ 25.09.01', icon: '🌶️', color: '#FFFFFF' },
-  { id: 6, name: '김치', category: '기타', memo: '배추김치', date: '24.08.25 ~ 25.09.01', icon: '🥗', color: '#FFFFFF' },
-  { id: 7, name: '고추', category: '채소 및 과일류', memo: '청양고추', date: '24.08.25 ~ 26.09.01', icon: '🌶️', color: '#FFFFFF' },
-  { id: 8, name: '소고기', category: '육류', memo: '채끝', date: '24.08.25 ~ 29.09.02', icon: '🥩', color: '#FFFFFF' },
-  { id: 9, name: '상추', category: '채소 및 과일류', memo: '전남상추', date: '24.08.25 ~ 24.09.01', icon: '🥬', color: '#A0A0A0' },
-  { id: 10, name: '돼지고기', category: '육류', memo: '삼겹살', date: '24.08.25 ~ 24.09.02', icon: '🥩', color: '#D9534F' },
-  { id: 11, name: '고등어', category: '어류 및 해산물', memo: '자반고등어', date: '24.06.25 ~ 24.09.12', icon: '🐟', color: '#FFFFFF' },
-  { id: 12, name: '굴비', category: '어류 및 해산물', memo: '굴비', date: '24.08.25 ~ 24.09.12', icon: '🐟', color: '#FFFFFF' },
-  { id: 13, name: '고추장', category: '소스류', memo: '멸매옴', date: '24.08.25 ~ 25.09.01', icon: '🌶️', color: '#FFFFFF' },
-  { id: 14, name: '김치', category: '소스류', memo: '배추김치', date: '24.08.25 ~ 25.09.01', icon: '🥗', color: '#FFFFFF' },
-  { id: 15, name: '고추', category: '채소 및 과일류', memo: '청양고추', date: '24.08.25 ~ 26.09.01', icon: '🌶️', color: '#FFFFFF' },
-  // Add more food items as needed to test scrolling
-];
+const getFoodIcon = (category) => {
+  switch (category) {
+    case "VEGETABLES_FRUITS":
+      return "🥬"; // Example icon for vegetables and fruits
+    case "MEAT":
+      return "🥩"; // Example icon for meat
+    case "FISH_SEAFOOD":
+      return "🐟";
+    case "EGGS_DAIRY":
+      return "🥚🥛";
+    case "SAUCES":
+      return "🍯";
+    default:
+      return "🍲"; // Default icon for unknown categories
+  }
+};
+
+const getStatusColor = (memberFoodStatus) => {
+  switch (memberFoodStatus) {
+    case "Approaching_Expiry":
+      return "#FF6C6C"; // Tomato red for approaching expiry
+    case "Near_Expiry":
+      return "#A6A6A6"; // Light gray for near expiry
+    case "Fresh":
+    default:
+      return "#FFFFFF"; // Light green for fresh items
+  }
+};
 
 // Main Component
 function Fridge() {
   const [filterCategory, setFilterCategory] = useState("전체");
+  const [foodItems, setFoodItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [sortOption, setSortOption] = useState("expirationDate_asc");
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
+
+    const fetchFoodItems = async() => {
+      try {
+        const response = await axios.get(process.env.REACT_APP_API_URL + 'my_foods', {
+          params: {
+            page: 1, size: 700, sort: sortOption
+          }
+        });
+        console.log("data : ", response.data);
+
+        if (response.data && response.data.data) {
+          setFoodItems(response.data.data);
+        } else {
+          console.error("예상과 다른 응답 데이터 형식:", response.data);
+        }
+        setLoading(false);
+      } catch (error) {
+        console.error("보유한 식재료 데이터를 가져오는데 실패했습니다.", error);
+        setLoading(false);
+      }
+    };
+
+    const searchFoods = async() => {
+      try {
+        let response;
+
+        if(searchKeyword.trim() === "") {
+          setSortOption("expirationDate_asc");
+        }
+
+        if(filterCategory === "전체") {
+          response = await axios.get(process.env.REACT_APP_API_URL + 'my_foods/search', {
+            params: {
+              page: 1, size: 700,  
+              sort: searchKeyword.trim() === "" ? "expirationDate_asc" : sortOption, keyword: searchKeyword.trim(),
+            }, 
+        });
+        } else {
+          response = await axios.get(process.env.REACT_APP_API_URL + 'my_foods/search_by_category', {
+          params: {
+            page: 1, size: 700,  sort: searchKeyword.trim() === "" ? "expirationDate_asc" : sortOption,
+            category: filterCategory, keyword: searchKeyword.trim(),
+          },
+      });
+    }
+
+      if (response !== undefined) {
+        setFoodItems(response.data.data);
+      } else {
+        console.error("예상과 다른 응답 데이터 형식 : ", response.data);
+      }
+      setLoading(false);
+      } catch (error) {
+        console.error("검색된 식재료 데이터를 가져오는데 실패했습니다." , error);
+        setLoading(false);
+      }
+    };
+
+ useEffect(() => {
+    fetchFoodItems();
+  }, [sortOption]);
+
+  const handleSearchClick = () => {
+    if (searchKeyword.trim() === "") {
+      setSortOption("expirationDate_asc")
+    }
+    setIsSearching(true);
+    searchFoods();
+    setSearchKeyword("");
+  }
 
   const handleCategoryChange = (event) => {
     setFilterCategory(event.target.value);
   };
 
-  const filteredItems = filterCategory === '전체'? foodItems : foodItems.filter(item => item.category === filterCategory);
+  const handleSortChange = (event) => {
+    setSortOption(event.target.value);
+  };
+  
+  const filteredItems = filterCategory === '전체'? foodItems : foodItems.filter(item => item.foodCategory === filterCategory);
 
 
   return (
@@ -40,39 +129,44 @@ function Fridge() {
             <label>식재료 종류</label>
             <select onChange={handleCategoryChange}>
               <option value="전체">전체</option>
-              <option value="채소 및 과일류">채소 및 과일류</option>
-              <option value="육류">육류</option>
-              <option value="어류 및 해산물">어류 및 해산물</option>
-              <option value="달걀 및 유제품">달걀 및 유제품</option>
-              <option value="소스류">소스류</option>
-              <option value="기타">기타</option>
+              <option value="VEGETABLES_FRUITS">채소 및 과일류</option>
+              <option value="MEAT">육류</option>
+              <option value="FISH_SEAFOOD">어류 및 해산물</option>
+              <option value="EGGS_DAIRY">달걀 및 유제품</option>
+              <option value="SAUCES">소스류</option>
+              <option value="OTHERS">기타</option>
             </select>
           </Dropdown>
           <Dropdown>
             <label>정렬</label>
-            <select>
+            <select onChange={handleSortChange} value={sortOption}>
+              <option value="expirationDate_asc">소비기한 빠른 순</option>
+              <option value="expirationDate_desc">소비기한 느린 순</option>
               <option value="memberFoodId_desc">최근 추가 순</option>
               <option value="memberFoodId_asc">과거 등록 순</option>
-              <option value="expirationDate_desc">소비기한 빠른 순</option>
-              <option value="expirationDate_asc">소비기한 느린 순</option>
             </select>
           </Dropdown>
         </FilterSection>
         <SearchBar>
-          <input type="text" placeholder="검색" />
-          <SearchIcon>🔍</SearchIcon>
+          <input type="text" placeholder="검색" 
+          value={searchKeyword} onChange={(e) => setSearchKeyword(e.target.value)}/>
+          <SearchIcon onClick={handleSearchClick}>🔍</SearchIcon>
         </SearchBar>
       </Header>
 
       <ScrollableContainer>
-        {filteredItems.map((item) => (
-          <FoodItem key={item.id} color={item.color}>
-            <FoodIcon>{item.icon}</FoodIcon>
-            <FoodName>{item.name}</FoodName>
+        {loading ? (
+          <div>로딩중</div>
+        ) : (
+          filteredItems.map((item) => (
+          <FoodItem key={item.id} color={getStatusColor(item.memberFoodStatus)}>
+            <FoodIcon>{getFoodIcon(item.foodCategory)}</FoodIcon>
+            <FoodName>{item.foodName}</FoodName>
             <FoodMemo>{item.memo}</FoodMemo>
-            <FoodDate>{item.date}</FoodDate>
+            <FoodDate>{item.expirationDate}</FoodDate>
           </FoodItem>
-        ))}
+        ))
+        )}
       </ScrollableContainer>
     </MainContainer>
   );
@@ -129,25 +223,31 @@ const Dropdown = styled.div`
 const SearchBar = styled.div`
   display: flex;
   align-items: center;
-  border: 1px solid #007bff;
+  border: 1px solid #007bff; /* 바깥 테두리는 그대로 유지 */
   border-radius: 10px;
   padding: 5px;
   background-color: white;
-  width: 70%; /* Make the search bar span the same width as dropdowns */
+  width: 70%;
+  
+  input {
+    border: none; /* 검색 입력 칸 테두리 제거 */
+    outline: none; /* 선택 시 생기는 기본 아웃라인 제거 */
+    width: 100%; /* 전체 공간 채우기 */
+    padding: 5px;
+  }
 `;
-
 const SearchIcon = styled.div`
   margin-left: 5px;
 `;
 
 const ScrollableContainer = styled.div`
-  display: ruby; /* 고정된 설정 */
-  text-align: center; /* 텍스트 가운데 정렬 */
-  padding: 20px;
-  background-color: #f4f4f4;
   width: 100%;
-  height: 100%; /* 스크롤 가능 영역 */
   overflow-y: auto;
+  overflow-x: hidden;
+  padding: 10px;
+  height: 100vh; /* Limit height of the scrollable area */
+  background-color: #f4f4f4;
+  border-radius: 8px;
 `;
 
 const FoodItem = styled.div`
