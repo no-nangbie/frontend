@@ -26,6 +26,7 @@ import BoardEditPage from './pages/board/BoardEdit';
 
 //menu
 import MenuPage from './pages/menu/Menu';
+
  
 function App() {
   return (
