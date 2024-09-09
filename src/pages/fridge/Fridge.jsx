@@ -1,21 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import styled from 'styled-components';
+import VEGETABLES_FRUITS_ICON  from '../../resources/icon/VEGETABLES_FRUITS.png';
+import MEAT_ICON  from '../../resources/icon/MEAT.png';
+import FISH_SEAFOOD_ICON from '../../resources/icon/FISH_SEAFOOD.png';
+import EGGS_DAIRY_ICON from '../../resources/icon/EGGS_DAIRY.png';
+import SAUCES_ICON from '../../resources/icon/SAUCES.png';
+import OTHERS_ICON from '../../resources/icon/OTHERS.png';
+
 
 const getFoodIcon = (category) => {
   switch (category) {
     case "VEGETABLES_FRUITS":
-      return "🥬"; // Example icon for vegetables and fruits
+      return <img src={VEGETABLES_FRUITS_ICON} alt="Vegetables and Fruits" width="30" height="30" />; // Example icon for vegetables and fruits
     case "MEAT":
-      return "🥩"; // Example icon for meat
+      return <img src={MEAT_ICON} alt="Meats" width="30" height="30" />; // Example icon for meat
     case "FISH_SEAFOOD":
-      return "🐟";
+      return  <img src={FISH_SEAFOOD_ICON} alt="Fishs and Seafoods" width="30" height="30" />;
     case "EGGS_DAIRY":
-      return "🥚🥛";
+      return  <img src={EGGS_DAIRY_ICON} alt="Egges and Dairy" width="30" height="30" />;
     case "SAUCES":
-      return "🍯";
+      return  <img src={SAUCES_ICON} alt="Sauces" width="30" height="30" />;
     default:
-      return "🍲"; // Default icon for unknown categories
+      return  <img src={OTHERS_ICON} alt="Others" width="30" height="30" />; // Default icon for unknown categories
   }
 };
 
@@ -223,7 +230,7 @@ const Dropdown = styled.div`
 const SearchBar = styled.div`
   display: flex;
   align-items: center;
-  border: 1px solid #007bff; /* 바깥 테두리는 그대로 유지 */
+  border: 2px solid #2D9CDB; /* 바깥 테두리는 그대로 유지 */
   border-radius: 10px;
   padding: 5px;
   background-color: white;
