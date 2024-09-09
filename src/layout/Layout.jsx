@@ -79,6 +79,9 @@ function Layout() {
   const handleButtonClick3 = () => {
     navigate('/fridge/add');
   };
+  const handleboardClick3 = () => {
+    navigate('/board/details/edit');
+  };
 
   return (
     <Container>
@@ -96,8 +99,11 @@ function Layout() {
             {(location.pathname === '/fridge') && (
               <ColoredButton src={getButtonColor3()} onClick={handleButtonClick3} />
             )}
-            {(location.pathname === '/recipe' || location.pathname === '/board') && (
+            {(location.pathname === '/recipe') && (
               <ColoredButton src={getButtonColor3()} onClick={() => alert('세 번째 버튼 클릭됨!')} />
+            )}
+            {(location.pathname === '/board') && (
+              <ColoredButton src={getButtonColor3()} onClick={handleboardClick3} />
             )}
           </ButtonContainer>
         </Header>
