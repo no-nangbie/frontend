@@ -1,23 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import styled from 'styled-components';
+import VEGETABLES_FRUITS_ICON  from '../../resources/icon/VEGETABLES_FRUITS.png';
+import MEAT_ICON  from '../../resources/icon/MEAT.png';
+import FISH_SEAFOOD_ICON from '../../resources/icon/FISH_SEAFOOD.png';
+import EGGS_DAIRY_ICON from '../../resources/icon/EGGS_DAIRY.png';
+import SAUCES_ICON from '../../resources/icon/SAUCES.png';
+import OTHERS_ICON from '../../resources/icon/OTHERS.png';
 
-const getFoodIcon = (category) => {
-  switch (category) {
-    case "VEGETABLES_FRUITS":
-      return "🥬";
-    case "MEAT":
-      return "🥩";
-    case "FISH_SEAFOOD":
-      return "🐟";
-    case "EGGS_DAIRY":
-      return "🥚🥛";
-    case "SAUCES":
-      return "🍯";
-    default:
-      return "🍲";
-  }
-};
 
 // Main Component
 function My_foods() {
@@ -70,6 +60,25 @@ function My_foods() {
     updateFoodNames();
   }, [filterCategory]);
 
+  const getCategoryLabel = (category) => {
+    switch (category) {
+      case "VEGETABLES_FRUITS":
+        return "채소 및 과일";
+      case "MEAT":
+        return "육류";
+      case "FISH_SEAFOOD":
+        return "생선 및 해산물";
+      case "EGGS_DAIRY":
+        return "달걀 및 유제품";
+      case "SAUCES":
+        return "소스류";
+      case "OTHERS":
+        return "기타";
+      default:
+        return "";
+    }
+  };
+  
   useEffect(() => {
     let result = foodItems;
     if (searchKeyword) {
@@ -117,30 +126,20 @@ function My_foods() {
     <MainContainer>
       <Header>
         <ActionButtons>
-          <ActionButton>바코드 & 사진으로 추가</ActionButton>
+          <ActionButton isFirst>바코드 & 사진으로 추가</ActionButton>
           <ActionButton>직접 입력</ActionButton>
         </ActionButtons>
       </Header>
       <FilterSection>
+        <label>식료품 카테고리 - {getCategoryLabel(filterCategory)} </label>
         <FoodIcons>
-          <IconButton onClick={() => setFilterCategory("VEGETABLES_FRUITS")}>🥬</IconButton>
-          <IconButton onClick={() => setFilterCategory("MEAT")}>🥩</IconButton>
-          <IconButton onClick={() => setFilterCategory("FISH_SEAFOOD")}>🐟</IconButton>
-          <IconButton onClick={() => setFilterCategory("EGGS_DAIRY")}>🥚🥛</IconButton>
-          <IconButton onClick={() => setFilterCategory("SAUCES")}>🍯</IconButton>
-          <IconButton onClick={() => setFilterCategory("OTHERS")}>🍲</IconButton>
+          <IconButton onClick={() => setFilterCategory("VEGETABLES_FRUITS")}><img src={VEGETABLES_FRUITS_ICON} alt="Vegetables and Fruits" width="40" height="40" /></IconButton>
+          <IconButton onClick={() => setFilterCategory("MEAT")}><img src={MEAT_ICON} alt="Meats" width="40" height="40" /></IconButton>
+          <IconButton onClick={() => setFilterCategory("FISH_SEAFOOD")}><img src={FISH_SEAFOOD_ICON} alt="Fishs and Seafoods" width="40" height="40" /></IconButton>
+          <IconButton onClick={() => setFilterCategory("EGGS_DAIRY")}><img src={EGGS_DAIRY_ICON} alt="Egges and Dairy" width="40" height="40" /></IconButton>
+          <IconButton onClick={() => setFilterCategory("SAUCES")}><img src={SAUCES_ICON} alt="Sauces" width="40" height="40" /></IconButton>
+          <IconButton onClick={() => setFilterCategory("OTHERS")}><img src={OTHERS_ICON} alt="Others" width="40" height="40" /></IconButton>
         </FoodIcons>
-        <Dropdown>
-          <label>식료품 카테고리</label>
-          <select onChange={handleCategoryChange} value={filterCategory}>
-            <option value="VEGETABLES_FRUITS">채소 및 과일류</option>
-            <option value="MEAT">육류</option>
-            <option value="FISH_SEAFOOD">어류 및 해산물</option>
-            <option value="EGGS_DAIRY">달걀 및 유제품</option>
-            <option value="SAUCES">소스류</option>
-            <option value="OTHERS">기타</option>
-          </select>
-        </Dropdown>
       </FilterSection>
       <FoodNameDropdown>
         <label>식료품 이름</label>
@@ -157,7 +156,7 @@ function My_foods() {
         onChange={(e) => setExpirationDate(e.target.value)} placeholder="소비 기한 입력" />
         <Label>메모</Label>
         <MemoField value={memo} onChange={(e) => setMemo(e.target.value)} placeholder="메모 입력" />
-        <UploadButton onClick={handleFormSubmit}>올리기</UploadButton>
+        <UploadButton onClick={handleFormSubmit}>저장</UploadButton>
       </InputSection>
     </MainContainer>
   );
@@ -177,8 +176,9 @@ const MainContainer = styled.div`
 
 const Header = styled.header`
   background-color: #D9D9D9;
-  padding: 10px;
+  padding: 20px; /* 패딩을 늘려서 길이를 확장 */
   width: 100%;
+  height: 100px; /* 원하는 높이로 설정 */
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -189,154 +189,136 @@ const Header = styled.header`
 const ActionButtons = styled.div`
   display: flex;
   justify-content: space-between;
-  width: 70%;
-  margin-bottom: 10px;
+  width: 105%; /* Increase width to fit larger buttons */
+  max-width: 600px; /* Optional: Set a max width */
 `;
 
 const ActionButton = styled.button`
-  background-color: white;
-  color: #007bff;
-  border: none;
-  border-radius: 5px;
-  padding: 10px;
+  background-color: #ffffff;
+  color: black;
+  border: 2px solid #2D9CDB;
+  border-radius: ${props => props.isFirst ? '20px 0 0 20px' : '0 20px 20px 0'};
+  padding: 10px 40px;
   cursor: pointer;
+  transition: background-color 0.3s;
+  width: 320px; /* 버튼의 너비를 고정 */
+  height: 50px;
+  font-size: 16px;
+  text-align: center;
+  overflow: hidden;
+  font-weight: bold;
+  white-space: nowrap; /* 텍스트가 줄 바꿈되지 않도록 설정 */
+  padding-left: 15px; /* 왼쪽 여백을 추가하여 텍스트가 더 많이 보이도록 설정 */
+
+  /* Hover effect */
+  &:hover {
+    background-color: #e7f1ff;
+  }
+
+  /* Remove margin between buttons */
+  &:not(:last-child) {
+    margin-right: 0;
+  }
 `;
 
 const FilterSection = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 70%;
+  width: 100%;
+  margin-top: 50px;
+  margin-bottom: 20px;
+  label {
+    font-weight: bold; /* 글씨를 굵게 설정 */
+    margin-bottom: 5px;
+  }
 `;
 
 const FoodIcons = styled.div`
   display: flex;
-  margin-bottom: 10px;
+  justify-content: center;
+  margin-bottom: 20px;
+  margin-top: 10px;
 `;
 
 const IconButton = styled.button`
   background: none;
   border: none;
-  font-size: 30px;
   cursor: pointer;
-`;
-
-const Dropdown = styled.div`
-  display: flex;
-  align-items: center;
-  margin-top: 10px;
-
-  label {
-    margin-right: 10px;
-    font-weight: bold;
-  }
-
-  select {
-    padding: 5px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-  }
+  margin: 0 5px;
 `;
 
 const FoodNameDropdown = styled.div`
   display: flex;
-  align-items: center;
-  border: 1px solid #007bff;
-  border-radius: 10px;
-  padding: 5px;
-  background-color: white;
+  flex-direction: column;
   width: 70%;
-  
-  input {
-    border: none;
-    outline: none;
-    width: 100%;
-    padding: 5px;
-  }
-`;
+  margin-bottom: 20px;
 
-const SearchIcon = styled.div`
-  margin-left: 5px;
-  cursor: pointer;
-`;
+  label {
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+
+  select {
+    padding: 10px;
+    border-radius: 5px;
+    border: 2px solid #2D9CDB;
+    width: 100%; /* 너비를 100%로 설정 */
+    height: 40px; /* 드롭다운 높이 설정 */
+    box-sizing: border-box; /* 패딩과 테두리를 포함하여 전체 너비 및 높이 계산 */
+  }
+`;  
 
 const InputSection = styled.div`
   width: 70%;
   margin-top: 10px;
-`;
-
-const Label = styled.label`
-  font-weight: bold;
+  margin-bottom: 20px;
 `;
 
 const InputField = styled.input`
   width: 100%;
   padding: 10px;
-  margin-bottom: 10px;
-  border: 1px solid #ccc;
+  border: 2px solid #2D9CDB;
   border-radius: 5px;
+  background-color: #ffffff;
+  margin-bottom: 30px;
+  margin-top: 5px;
+  height: 40px; /* 입력 필드 높이 설정 */
+  box-sizing: border-box; /* 패딩과 테두리를 포함하여 전체 너비 및 높이 계산 */
 `;
 
 const MemoField = styled.textarea`
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  width: 100%;   
+  height: 150px; // 메모 필드 크기 조정
+  padding: 10px;   
+  border: 2px solid #2D9CDB;   
+  border-radius: 5px;   
+  background-color: #ffffff;
+  margin-bottom: 20px;
+  margin-top: 5px;
+  box-sizing: border-box; /* 패딩과 테두리를 포함하여 전체 너비 및 높이 계산 */
 `;
 
 const UploadButton = styled.button`
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  padding: 10px;
-  cursor: pointer;
-`;
+  background-color: #2D9CDB; /* 배경색을 테두리 색으로 변경 */
+  color: white; /* 글씨를 하얀색으로 변경 */
+  border: 2px solid #2D9CDB; /* 테두리 색은 동일하게 유지 */
+  border-radius: 20px;   
+  padding: 10px 20px;   
+  cursor: pointer;   
+  width: 100%; /* 가운데에 길게 위치 */
+  margin-top: 50px;
+  font-weight: bold; /* 글씨를 굵게 설정 */
+  font-size: 18px; /* 글자 크기 키움 */
 
-const ScrollableContainer = styled.div`
-  width: 100%;
-  overflow-y: auto;
-  padding: 10px;
-  height: 100vh;
-  background-color: #f4f4f4;
-  border-radius: 8px;
-`;
-
-const FoodItem = styled.div`
-  display: inline-block;
-  margin: 10px;
-  text-align: center;
-  width: 120px;
-  height: 120px;
-  border-radius: 10px;
-  padding: 10px;
-  background-color: ${(props) => props.color};
-  color: #000;
-  border: 1px solid gray;
-
-  &:nth-child(3n) {
-    margin-right: 0;
+  &:hover {
+    background-color: #e7f1ff;
   }
 `;
 
 
-const FoodIcon = styled.div`
-  font-size: 30px;
-`;
 
-const FoodName = styled.div`
-  font-size: 14px;
-  margin-top: 5px;
+const Label = styled.label`
+  font-weight: bold;
+  margin-bottom: 5px;
 `;
-
-const FoodMemo = styled.div`
-  font-size: 12px;
-  margin-top: 3px;
-`;
-
-const FoodDate = styled.div`
-  font-size: 10px;
-  margin-top: 5px;
-`;
-
