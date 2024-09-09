@@ -108,7 +108,7 @@ function My_foods() {
     }
 
     try {
-      await axios.post(process.env.REACT_APP_API_URL + 'my_foods', {
+      await axios.post(process.env.REACT_APP_API_URL + 'my-foods', {
         foodName: selectedFoodName, expirationDate, memo, foodCategory
       });
       alert("보유 식재료가 성공적으로 저장되었습니다.");

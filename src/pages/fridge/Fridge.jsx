@@ -49,7 +49,7 @@ function Fridge() {
 
     const fetchFoodItems = async() => {
       try {
-        const response = await axios.get(process.env.REACT_APP_API_URL + 'my_foods', {
+        const response = await axios.get(process.env.REACT_APP_API_URL + 'my-foods', {
           params: {
             page: 1, size: 700, sort: sortOption
           }
@@ -77,14 +77,14 @@ function Fridge() {
         }
 
         if(filterCategory === "전체") {
-          response = await axios.get(process.env.REACT_APP_API_URL + 'my_foods/search', {
+          response = await axios.get(process.env.REACT_APP_API_URL + 'my-foods/search', {
             params: {
               page: 1, size: 700,  
               sort: searchKeyword.trim() === "" ? "expirationDate_asc" : sortOption, keyword: searchKeyword.trim(),
             }, 
         });
         } else {
-          response = await axios.get(process.env.REACT_APP_API_URL + 'my_foods/search_by_category', {
+          response = await axios.get(process.env.REACT_APP_API_URL + 'my-foods/search_by_category', {
           params: {
             page: 1, size: 700,  sort: searchKeyword.trim() === "" ? "expirationDate_asc" : sortOption,
             category: filterCategory, keyword: searchKeyword.trim(),
@@ -132,9 +132,9 @@ function Fridge() {
     <MainContainer>
       <Header>
         <FilterSection>
-          <Dropdown>
-            <label>식재료 종류</label>
-            <select onChange={handleCategoryChange}>
+          <InputGroup2_1thLine>
+            <Label>식재료종류</Label>
+            <Select onChange={handleCategoryChange}>
               <option value="전체">전체</option>
               <option value="VEGETABLES_FRUITS">채소 및 과일류</option>
               <option value="MEAT">육류</option>
@@ -142,17 +142,17 @@ function Fridge() {
               <option value="EGGS_DAIRY">달걀 및 유제품</option>
               <option value="SAUCES">소스류</option>
               <option value="OTHERS">기타</option>
-            </select>
-          </Dropdown>
-          <Dropdown>
-            <label>정렬</label>
-            <select onChange={handleSortChange} value={sortOption}>
+            </Select>
+          </InputGroup2_1thLine>
+          <InputGroup2_2thLine>
+            <Label>정렬</Label>
+            <Select onChange={handleSortChange} value={sortOption}>
               <option value="expirationDate_asc">소비기한 빠른 순</option>
               <option value="expirationDate_desc">소비기한 느린 순</option>
               <option value="memberFoodId_desc">최근 추가 순</option>
               <option value="memberFoodId_asc">과거 등록 순</option>
-            </select>
-          </Dropdown>
+            </Select>
+          </InputGroup2_2thLine>
         </FilterSection>
         <SearchBar>
           <input type="text" placeholder="검색" 
@@ -183,6 +183,8 @@ export default Fridge;
 
 // Styled Components
 
+// Styled Components
+
 const MainContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -204,33 +206,70 @@ const Header = styled.header`
 
 const FilterSection = styled.div`
   display: flex;
+  justify-content: space-between; /* 양쪽 끝에 균등하게 배치 */
   align-items: center;
-  justify-content: space-between;
-  width: 70%;
-  margin-bottom: 10px; /* Space between dropdowns and search bar */
+  width: 100%; /* 전체 너비 설정 */
+  padding: 0 30px; /* 양쪽에 여백을 추가 */
 `;
 
-const Dropdown = styled.div`
+const InputGroup2_1thLine = styled.div`
   display: flex;
   align-items: center;
-  margin-right: 20px;
+  margin-bottom: 20px;
+  border: 2px solid #2D9CDB;
+  border-radius: 30px;
+  background-color: #f5f5f5;
+  width: 40vh; /* 각 InputGroup의 너비 */
+  height: 30px;
+  justify-content: center; /* 가운데 정렬 */
+  margin-right: 10px; /* 두 그룹 사이에 간격 추가 */
+`;
 
-  label {
-    margin-right: 10px;
-    font-weight: bold;
-  }
+const InputGroup2_2thLine = styled.div`
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  border: 2px solid #2D9CDB;
+  border-radius: 30px;
+  background-color: #f5f5f5;
+  width: 40vh; /* 각 InputGroup의 너비 */
+  height: 30px;
+  justify-content: center; /* 가운데 정렬 */
+  margin-left: 10px; /* 두 그룹 사이에 간격 추가 */
+`;
 
-  select {
-    padding: 5px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-  }
+const Label = styled.div`
+  width: 70px;
+  background-color: white;
+  font-weight: bold;
+  font-size: 13px;
+  text-align: center;
+  line-height: 30px; 
+  border-right: 2px solid #2D9CDB;
+  border-radius: 20px 0 0 20px;
+`;
+
+const Select = styled.select`
+  flex: 1;
+  padding: 0 20px;
+  height: 100%;
+  border: none;
+  font-size: 13px;
+  text-align: center; 
+  border-radius: 0 30px 30px 0;
+  outline: none;
+  // appearance: none; /* 기본 드롭다운 화살표 제거 */
+  background-color: transparent;
+  // background-image: url('data:image/svg+xml;base64,YOUR_BASE64_ARROW'); /* 커스텀 화살표 */
+  background-repeat: no-repeat;
+  background-position: right 15px center; 
+  padding-right: 30px; 
 `;
 
 const SearchBar = styled.div`
   display: flex;
   align-items: center;
-  border: 2px solid #2D9CDB; /* 바깥 테두리는 그대로 유지 */
+  border: 2px solid #2D9CDB; /* Same color as dropdown border */
   border-radius: 10px;
   padding: 5px;
   background-color: white;
@@ -243,6 +282,7 @@ const SearchBar = styled.div`
     padding: 5px;
   }
 `;
+
 const SearchIcon = styled.div`
   margin-left: 5px;
 `;
@@ -274,7 +314,6 @@ const FoodItem = styled.div`
   }
 `;
 
-
 const FoodIcon = styled.div`
   font-size: 30px;
 `;
@@ -293,4 +332,3 @@ const FoodDate = styled.div`
   font-size: 10px;
   margin-top: 5px;
 `;
-
