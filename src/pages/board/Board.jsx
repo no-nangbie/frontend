@@ -1,83 +1,42 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
+import axios from 'axios';
 import Search_img from '../../resources/icon/search_3917754.png'
-
-// Data
-const RecipeItems = [
-  {
-    id: 1,
-    name: "돼지고기 김치찌개1",
-    image: "image_url_1",  // 실제 이미지 URL로 교체 필요
-    availableIngredients: "보유 재료 : ",  // 보유 재료 입력
-    missingIngredients: "미보유 재료 : ",  // 미보유 재료 입력
-  },
-  {
-    id: 2,
-    name: "돼지고기 김치찌개2",
-    image: "image_url_2",  // 실제 이미지 URL로 교체 필요
-    availableIngredients: "보유 재료 : ",  // 보유 재료 입력
-    missingIngredients: "미보유 재료 : ",  // 미보유 재료 입력
-  },
-  {
-    id: 3,
-    name: "돼지고기 김치찌개3",
-    image: "image_url_3",  // 실제 이미지 URL로 교체 필요
-    availableIngredients: "보유 재료 : ",  // 보유 재료 입력
-    missingIngredients: "미보유 재료 : ",  // 미보유 재료 입력
-  },
-  {
-    id: 4,
-    name: "돼지고기 김치찌개4",
-    image: "image_url_4",  // 실제 이미지 URL로 교체 필요
-    availableIngredients: "보유 재료 : ",  // 보유 재료 입력
-    missingIngredients: "미보유 재료 : ",  // 미보유 재료 입력
-  },
-  {
-    id: 5,
-    name: "돼지고기 김치찌개1",
-    image: "image_url_1",  // 실제 이미지 URL로 교체 필요
-    availableIngredients: "보유 재료 : ",  // 보유 재료 입력
-    missingIngredients: "미보유 재료 : ",  // 미보유 재료 입력
-  },
-  {
-    id: 6,
-    name: "돼지고기 김치찌개2",
-    image: "image_url_2",  // 실제 이미지 URL로 교체 필요
-    availableIngredients: "보유 재료 : ",  // 보유 재료 입력
-    missingIngredients: "미보유 재료 : ",  // 미보유 재료 입력
-  },
-  {
-    id: 7,
-    name: "돼지고기 김치찌개3",
-    image: "image_url_3",  // 실제 이미지 URL로 교체 필요
-    availableIngredients: "보유 재료 : ",  // 보유 재료 입력
-    missingIngredients: "미보유 재료 : ",  // 미보유 재료 입력
-  },
-  {
-    id: 8,
-    name: "돼지고기 김치찌개4",
-    image: "image_url_4",  // 실제 이미지 URL로 교체 필요
-    availableIngredients: "보유 재료 : ",  // 보유 재료 입력
-    missingIngredients: "미보유 재료 : ",  // 미보유 재료 입력
-  },
-  {
-    id: 9,
-    name: "돼지고기 김치찌개4",
-    image: "image_url_4",  // 실제 이미지 URL로 교체 필요
-    availableIngredients: "보유 재료 : ",  // 보유 재료 입력
-    missingIngredients: "미보유 재료 : ",  // 미보유 재료 입력
-  },
-  {
-    id: 10,
-    name: "돼지고기 김치찌개4",
-    image: "image_url_4",  // 실제 이미지 URL로 교체 필요
-    availableIngredients: "보유 재료 : ",  // 보유 재료 입력
-    missingIngredients: "미보유 재료 : ",  // 미보유 재료 입력
-  },
-];
 
 // Main Component
 function Board() {
+  const [boards, setBoards] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const memberEmail = localStorage.getItem('email') || '';
+
+  useEffect(() => {
+    if (memberEmail) {
+      fetchBoards('MENU_CATEGORY_DESSERT','CREATED_AT_ASC');
+    } else {
+      console.error('memberEmail이 설정되지 않았습니다.');
+    }
+  }, [memberEmail]);
+
+  const fetchBoards = async (type,sort) => {
+    setLoading(true);
+    try {
+      // const localUrl = 'http://localhost:8080/boards';
+      const response = await axios.get(process.env.REACT_APP_API_URL+'/boards', {
+        params: { type, sort, page: 1, size: 20 },
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      setBoards(response.data);
+      setLoading(false);
+    } catch (error) {
+      setError(error);
+      setLoading(false);
+    }
+  };
+
   return (
     <MainContainer>
       <Header>
@@ -106,7 +65,19 @@ function Board() {
       </Header>
 
       <ScrollableContainer>
-      {RecipeItems.map((item) => (
+      {boards.map((board) => (
+        <FoodItem key={board.boardid}>
+          <FoodImage src={board.imageUrl} alt={board.title} />
+          <FoodInfo>
+            <FoodName>{board.title}</FoodName>
+            <FoodIngredients>좋아요 수  : {board.likesCount}</FoodIngredients>
+            <FoodIngredients>작성자 : {board.author}</FoodIngredients>
+            <FoodIngredients>조리시간 및 음식량 : {board.cookingTime}분 / {board.servingSize}인분</FoodIngredients>
+            {/* <FoodIngredients>{board.missingIngredients}</FoodIngredients> */}
+          </FoodInfo>
+        </FoodItem>
+      ))}
+      {/* {RecipeItems.map((item) => (
         <FoodItem key={item.id}>
           <FoodImage src={item.image} alt={item.name} />
           <FoodInfo>
@@ -115,7 +86,7 @@ function Board() {
             <FoodIngredients>{item.missingIngredients}</FoodIngredients>
           </FoodInfo>
         </FoodItem>
-      ))}
+      ))} */}
       </ScrollableContainer>
     </MainContainer>
   );
