@@ -26,6 +26,8 @@ function Layout() {
   //   // 이메일이 없으면 /login으로 리다이렉트
   //   if (!email) {
   //     navigate('/login');
+  //   } else{
+  //     navigate('/fridge');
   //   }
   // }, [navigate]);
 

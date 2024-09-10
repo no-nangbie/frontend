@@ -84,7 +84,7 @@ function Signup() {
 
     //password길이 체크
     if((password.length && confirmPassword.length < 8) || (password.length && confirmPassword.length > 15)){
-      setErrorMessage('비밀번호는 8자에서 20자 사이여야 합니다.');
+      setErrorMessage('비밀번호는 8자에서 15자 사이여야 합니다.');
       return;
     }
 

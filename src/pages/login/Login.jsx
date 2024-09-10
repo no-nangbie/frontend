@@ -53,10 +53,11 @@ function Login() {
   
       if (response.status === 200) {
         const accessToken = response.headers['authorization'];
-        const refreshToken = response.headers['refresh'];
+        // const refreshToken = response.headers['refresh'];
   
-        localStorage.setItem('accessToken', accessToken);
-        localStorage.setItem('refreshToken', refreshToken);
+        localStorage.setItem('token', accessToken);
+        localStorage.setItem('email', email);
+        // localStorage.setItem('refreshToken', refreshToken);
   
         alert('로그인 성공!');
         window.location.href = '/';
