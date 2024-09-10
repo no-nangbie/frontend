@@ -11,29 +11,46 @@ import OTHERS_ICON from '../../resources/icon/OTHERS.png';
 const getFoodIcon = (category) => {
   switch (category) {
     case "VEGETABLES_FRUITS":
-      return <img src={VEGETABLES_FRUITS_ICON} alt="Vegetables and Fruits" width="30" height="30" />; // Example icon for vegetables and fruits
+      return <img src={VEGETABLES_FRUITS_ICON} alt="Vegetables and Fruits" width="40" height="40" />; // Example icon for vegetables and fruits
     case "MEAT":
-      return <img src={MEAT_ICON} alt="Meats" width="30" height="30" />; // Example icon for meat
+      return <img src={MEAT_ICON} alt="Meats" width="40" height="40" />; // Example icon for meat
     case "FISH_SEAFOOD":
-      return  <img src={FISH_SEAFOOD_ICON} alt="Fishs and Seafoods" width="30" height="30" />;
+      return  <img src={FISH_SEAFOOD_ICON} alt="Fishs and Seafoods" width="40" height="40" />;
     case "EGGS_DAIRY":
-      return  <img src={EGGS_DAIRY_ICON} alt="Egges and Dairy" width="30" height="30" />;
+      return  <img src={EGGS_DAIRY_ICON} alt="Egges and Dairy" width="40" height="40" />;
     case "SAUCES":
-      return  <img src={SAUCES_ICON} alt="Sauces" width="30" height="30" />;
+      return  <img src={SAUCES_ICON} alt="Sauces" width="40" height="40" />;
     default:
-      return  <img src={OTHERS_ICON} alt="Others" width="30" height="30" />; // Default icon for unknown categories
+      return  <img src={OTHERS_ICON} alt="Others" width="40" height="40" />; // Default icon for unknown categories
   }
 };
 
 const getStatusColor = (memberFoodStatus) => {
   switch (memberFoodStatus) {
     case "Approaching_Expiry":
-      return "#FF6C6C"; // Tomato red for approaching expiry
+      return "#bd0a04"; // Tomato red for approaching expiry
     case "Near_Expiry":
       return "#A6A6A6"; // Light gray for near expiry
     case "Fresh":
     default:
       return "#FFFFFF"; // Light green for fresh items
+  }
+};
+
+const getCategoryColor = (category) => {
+  switch (category) {
+    case "VEGETABLES_FRUITS":
+      return "#4CAF50"; // Green
+    case "MEAT":
+      return "#F44336"; // Red
+    case "FISH_SEAFOOD":
+      return "#FF9800"; // Orange
+    case "EGGS_DAIRY":
+      return "#03A9F4"; // Sky Blue
+    case "SAUCES":
+      return "#795548"; // Brown
+    default:
+      return "#9C27B0"; // Purple for others
   }
 };
 
@@ -149,16 +166,16 @@ function FridgeDelete() {
         ) : filteredItems.length === 0 ? (
           <NoDataMessage> 저장된 식료품이 없습니다</NoDataMessage>
         ) : (
-          filteredItems.map(item => (
-            <FoodItem
-              key={item.memberFoodId}
-              color={getStatusColor(item.memberFoodStatus)}
-              onClick={handleItemClick(item.memberFoodId)}
-              isSelected={selectedItems.includes(item.memberFoodId)}
+          filteredItems.map((item) => (
+            <FoodItem key={item.id} color={getStatusColor(item.memberFoodStatus)}
+            isSelected={selectedItems.includes(item.memberFoodId)}
+            onClick={handleItemClick(item.memberFoodId)}
             >
               <FoodIcon>{getFoodIcon(item.foodCategory)}</FoodIcon>
-              <FoodName>{item.foodName}</FoodName>
-              <FoodMemo>{item.memo}</FoodMemo>
+              <FoodName color={getCategoryColor(item.foodCategory)} memberFoodStatus={item.memberFoodStatus}>{item.foodName}</FoodName>
+              {item.memo ? (
+                <FoodMemo memberFoodStatus={item.memberFoodStatus}>[{item.memo}]</FoodMemo>
+              ) : null}
               <FoodDate>{item.expirationDate}</FoodDate>
             </FoodItem>
           ))
@@ -177,7 +194,7 @@ const MainContainer = styled.div`
   flex-direction: column;
   align-items: center;
   width: 100%;
-  height: 100vh; /* Full viewport height */
+  height: 100%; /* Full viewport height */
   position: relative; /* Add relative positioning */
    background-color: #f4f4f4;
 `;
@@ -255,48 +272,77 @@ const Select = styled.select`
 `;
 
 const ScrollableContainer = styled.div`
+  display: flex;
+  flex-wrap: wrap;
   width: 100%;
   overflow-y: auto;
   overflow-x: hidden;
-  height: 580px; /* 높이를 조정하여 DeleteButton이 보이게 함 */
+  padding: 10px;
   background-color: #f4f4f4;
   border-radius: 8px;
+  /* ScrollableContainer의 아래쪽 여백을 버튼 높이만큼 추가 */
+  margin-bottom: 90px; /* 식재료 삭제 버튼과의 여백 */
 `;
 
+
 const FoodItem = styled.div`
-  display: inline-block;
-  margin: 10px;
-  text-align: center;
-  width: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-basis: calc(50% - 20px); /* 두 개씩 배치 */
   height: 120px;
-  border-radius: 10px;
+  border-radius: 5px; /* 둥글기 */
   padding: 10px;
   background-color: ${(props) => props.isSelected ? '#A0D1FB' : props.color}; /* 선택된 경우 배경색 변경 */
-  color: #000;
   border: ${(props) => props.isSelected ? '2px solid #007BFF' : '1px solid gray'}; /* 선택된 경우 테두리 변경 */
-  cursor: pointer;
-  &:nth-child(3n) {
+  color: #000;
+  box-sizing: border-box;
+  margin: 10px;
+  position: relative; /* 아이콘 위치를 조정하기 위한 relative 위치 지정 */
+
+  &:nth-child(2n) { /* 각 두 번째 아이템에 대해 오른쪽 마진 0 설정 */
     margin-right: 0;
   }
 `;
 
 const FoodIcon = styled.div`
+  position: absolute;
+  right: 10px; /* 우측에서 10px 떨어진 위치 */
+  top: 50%; /* 상단에서 중앙 위치 */
+  transform: translateY(-50%); /* 중앙 정렬을 위한 변환 */
   font-size: 30px;
 `;
 
+
 const FoodName = styled.div`
-  font-size: 14px;
+  font-size: 22px;
+  font-weight: bold;
   margin-top: 5px;
+  align-self: flex-start;
+  text-align: left;
+   color: ${(props) => 
+    props.memberFoodStatus === "Approaching_Expiry" ? "#FFFFFF" :
+    props.memberFoodStatus === "Near_Expiry" ? "#000000" : 
+    props.color || '#000'};
 `;
 
 const FoodMemo = styled.div`
   font-size: 12px;
   margin-top: 3px;
+  text-align: left;
+  align-self: flex-start;
+  color: ${(props) => props.memberFoodStatus === "Approaching_Expiry" ? "#FFFFFF" : '#555'};
 `;
 
 const FoodDate = styled.div`
-  font-size: 10px;
+  position: absolute;
+  bottom: 10px; /* 하단에서 10px 위치 */
+  left: 50%; /* 수평 중앙 정렬 */
+  transform: translateX(-50%); /* 수평 중앙 정렬 */
+  font-size: 13px; /* 글자 크기 증가 */
+  font-weight: bold; /* 글자 굵게 설정 */
   margin-top: 5px;
+  letter-spacing: 1px; /* 글자 간격 */
 `;
 
 const DeleteButton = styled.div`
@@ -310,8 +356,10 @@ const DeleteButton = styled.div`
   margin-top: 20px;
   font-weight: bold;
   font-size: 18px;
-  position: relative; /* z-index를 사용하기 위한 position 설정 */
-  z-index: 1; /* 다른 요소보다 위에 표시 */
+  position: fixed; /* 고정 위치 설정 */
+  bottom: 80px; /* 화면 하단에서 20px 떨어진 위치 */
+  left: 50%; /* 화면 중앙에 위치 */
+  transform: translateX(-50%); /* 화면 중앙 정렬을 위한 변환 */
   text-align: center;
 
   &:hover {
@@ -319,18 +367,14 @@ const DeleteButton = styled.div`
   }
 `;
 
+
 const NoDataMessage = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 530px;
+  height: 100%; /* 부모의 높이에 맞게 설정 */
   font-size: 18px;
   color: #888; /* 회색 텍스트 색상 */
   font-weight: bold;
   text-align: center;
-  padding: 20px;
-  background-color: transparent; /* 배경색을 투명하게 설정 */
-  border: none; /* 테두리 제거 */
-  box-shadow: none; /* 그림자 제거 */
-  margin: 20px; /* 여백 추가 */
 `;
