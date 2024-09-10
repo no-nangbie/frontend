@@ -99,7 +99,7 @@ const BoardDetails = () => {
         </LikeButton> {/* 초록색 버튼 */}
       </ImageContainer>
       <TextContainer>
-        <Title>{post.menuCategory}|{post.title}</Title>
+        <Title>{post.menuCategory} | {post.title}</Title>
         <Dividers/>
         <Description>{post.boardContent}</Description>
         <InfoContainer>
