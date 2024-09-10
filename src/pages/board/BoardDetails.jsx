@@ -1,16 +1,18 @@
 import styled from 'styled-components';
 import axios from 'axios';
-import React, { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import React from 'react';
+import { useParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ClipLoader } from 'react-spinners';
 
-import menu_1 from '../../resources/sample/menu_1.png';
+//아이콘 이미지
 import user_icon from '../../resources/icon/user.png';
 import timer_icon from '../../resources/icon/timer.png';
 import cook_icon from '../../resources/icon/cook.png';
 import like_icon from '../../resources/icon/heart_red.png'; 
+import like_fill_icon from '../../resources/icon/heart_red_FillIn.png'; 
 
+//난이도 이미지
 import difficulty1_icon from '../../resources/icon/difficulty_1.png';
 import difficulty2_icon from '../../resources/icon/difficulty_2.png';
 import difficulty3_icon from '../../resources/icon/difficulty_3.png';
@@ -19,7 +21,16 @@ const BoardDetails = () => {
   const { boardId } = useParams();
   const queryClient = useQueryClient();
 
+  /**
+   * 특정 게시글(BoardId)정보 불러오는 메서드
+   * 
+   * @return : 성공하면 해당BoardId의 정보를 가져옴
+   *          실패하면은 error 처리
+   * 
+   * @Author : 신민준
+   */
   const fetchPost = async () => {
+    console.log('refresh')
     if (!boardId) {
       throw new Error('잘못된 게시글 ID 입니다.');
     }
@@ -35,6 +46,12 @@ const BoardDetails = () => {
     }
   };
 
+  /**
+   * React Query를 통해 정보 불러올때 예외처리
+   * fetchPost 실행결과로 받은 정보들과 재실행 키(queryKey), 그리고 상태(isLoading/isError/error)관리
+   * 
+   * @Author : 신민준
+   */
   const {
     data: post,
     isLoading,
@@ -47,22 +64,25 @@ const BoardDetails = () => {
     retry: 1
   });
 
+  /**
+   * 좋아요 처리 메서드. 
+   * 
+   * @return : 성공하면 queryClient.invalidateQueries를 통해 React Query의 queryKey를 이용하여 Refresh진행!!
+   *          하트가 채워지는 것을 보여주기 위해서 Refresh하는 것
+   *          실패하면은 ERR alert 반환
+   * 
+   * @Author : 신민준
+   */
   const likeMutation = useMutation({
     mutationFn: () => {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('token을 찾을 수 없습니다.');
-      }
-      return axios.post(`http://localhost:8080/likes`, {
-        memberId: post.memberId,
-        boardId: boardId,
-      }, {
+      return axios.post(process.env.REACT_APP_API_URL+`boards/${boardId}/like`,{}, {
         headers: {
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
         }
       });
     },
     onSuccess: () => {
+      console.log('Mutation succeeded, invalidating query...');
       queryClient.invalidateQueries(['post', boardId]);
     },
     onError: () => {
@@ -70,16 +90,63 @@ const BoardDetails = () => {
     }
   });
 
+  /**
+   * 난이도에 따른 이미지 변경 메서드
+   * Post.difficulty를 매개변수로 받아서 난이도에 따라 난이도이미지의 그래프 그림이 달라지게 설정
+   * 
+   * @return : 난이도이미지
+   * 
+   * @Author : 신민준
+   */
+  const handleDifficultyImg = (difficulty) => {
+    switch(difficulty){
+      case '쉬움':
+        return difficulty1_icon; 
+      case '보통':
+        return difficulty2_icon; 
+      default: //'DIFFICULTY_HARD'
+        return difficulty3_icon; 
+    }
+  };
+
+  /**
+   * 좋아요 이미지 처리 메서드
+   * 
+   * @return : post.LikeCheck를 인자로 받는데 이게 'T'면은 채워진 하트, 아니면 비워진 하트
+   * 
+   * @Author : 신민준
+   */
   const handleLike = () => {
     likeMutation.mutate();
   };
-  
+
+  const handleLikeImg = (likechk) => {
+    if(likechk === 'T')
+      return like_fill_icon;
+    else
+      return like_icon;
+  };
+
+  /**
+   * 로딩중일때..
+   * 
+   * @return : 빙글빙글 도는 이미지 
+   * 
+   * @Author : 신민준
+   */
   if (isLoading) return (
     <Container>
       <ClipLoader color="#007bff" loading={isLoading} size={50} />
     </Container>
   );
 
+  /**
+   * 그 외 에러처리 메서드
+   * 
+   * @return : 게시글 불러오기 실패 / post 정보 없음
+   * 
+   * @Author : 신민준
+   */
   if (isError) {
     console.error("Error loading post:", error.message);
     return <div>게시글을 불러오는데 오류가 발생했습니다: {error.message}</div>;
@@ -93,13 +160,13 @@ const BoardDetails = () => {
   return (
     <Container>
       <ImageContainer>
-        <Image src={post.imageUrl} alt="돼지고기 김치찌개" />
-        <LikeButton onClick={() => alert('초록 버튼 클릭됨!')}>
-          <LikeButtonImage src={like_icon} alt="Button Icon" /> 
-        </LikeButton> {/* 초록색 버튼 */}
+        <Image src={post.imageUrl} alt="이미지 없음" />
+        <LikeButton onClick={handleLike}>
+          <LikeButtonImage src={handleLikeImg(post.likeCheck)} alt="Button Icon" /> 
+        </LikeButton>
       </ImageContainer>
       <TextContainer>
-        <Title>{post.menuCategory} | {post.title}</Title>
+        <Title>[ {post.menuCategory} ] {post.title}</Title>
         <Dividers/>
         <Description>{post.boardContent}</Description>
         <InfoContainer>
@@ -118,7 +185,7 @@ const BoardDetails = () => {
               {post.cookingTime}분
             </InfoItem>
             <InfoItem>
-              <Icon src={difficulty1_icon} alt="쉬움" />
+              <Icon src={handleDifficultyImg(post.difficulty)} alt="쉬움" />
               {post.difficulty}
             </InfoItem>
         </InfoContainer>
