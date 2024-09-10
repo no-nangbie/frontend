@@ -133,6 +133,26 @@ function FridgeDelete() {
     }
   };
 
+  const formatDate = (dateString) => {
+    
+    // yyyyMMdd 형식을 yyyy-MM-dd 형식으로 변환
+    const formattedDateString = `${dateString.substring(0, 4)}-${dateString.substring(4, 6)}-${dateString.substring(6, 8)}`;
+    
+    // 변환된 문자열을 사용하여 Date 객체 생성
+    const date = new Date(formattedDateString);
+    
+    if (isNaN(date.getTime())) {
+      console.error("Invalid Date format:", formattedDateString);
+      return "Invalid Date";
+    }
+    
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // 월을 2자리로 포맷팅
+    const day = String(date.getDate()).padStart(2, '0'); // 일을 2자리로 포맷팅
+    
+    return `${year}-${month}-${day}`;
+  };
+
   return (
     <MainContainer>
       <Header>
@@ -176,7 +196,7 @@ function FridgeDelete() {
               {item.memo ? (
                 <FoodMemo memberFoodStatus={item.memberFoodStatus}>[{item.memo}]</FoodMemo>
               ) : null}
-              <FoodDate>{item.expirationDate}</FoodDate>
+              <FoodDate memberFoodStatus={item.memberFoodStatus}>{formatDate(item.expirationDate)}</FoodDate>
             </FoodItem>
           ))
         )}
@@ -343,6 +363,8 @@ const FoodDate = styled.div`
   font-weight: bold; /* 글자 굵게 설정 */
   margin-top: 5px;
   letter-spacing: 1px; /* 글자 간격 */
+  color: ${(props) => 
+    props.memberFoodStatus === "Approaching_Expiry" ? "#FFFFFF" : '#000000'}; /* 상태에 따라 글자색 변경 */
 `;
 
 const DeleteButton = styled.div`
@@ -370,11 +392,16 @@ const DeleteButton = styled.div`
 
 const NoDataMessage = styled.div`
   display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100%; /* 부모의 높이에 맞게 설정 */
+  justify-content: center; /* 수평 중앙 정렬 */
+  align-items: center; /* 수직 중앙 정렬 */
+  height: 100%; /* 부모 요소의 높이 전체를 차지 */
+  width: 100%; /* 부모 요소의 너비 전체를 차지 */
   font-size: 18px;
   color: #888; /* 회색 텍스트 색상 */
   font-weight: bold;
   text-align: center;
+  position: absolute; /* 부모 요소에 상대적인 위치 지정 */
+  top: 45%; /* 상단에서 50% 위치 */
+  left: 50%; /* 왼쪽에서 50% 위치 */
+  transform: translate(-50%, -40%); /* 중앙 정렬 및 약간 아래로 이동 */
 `;
