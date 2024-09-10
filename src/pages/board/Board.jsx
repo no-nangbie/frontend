@@ -2,34 +2,45 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import axios from 'axios';
 import Search_img from '../../resources/icon/search_3917754.png'
+import { useNavigate } from 'react-router-dom'; 
 
 // Main Component
 function Board() {
   const [boards, setBoards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [menuCategory, setMenuCategory] = useState("전체");
+  const [sort, setSort] = useState("날짜 ▼");
 
+  const navigate = useNavigate();
   const memberEmail = localStorage.getItem('email') || '';
 
   useEffect(() => {
     if (memberEmail) {
-      fetchBoards('MENU_CATEGORY_DESSERT','CREATED_AT_ASC');
+      fetchBoards(handleGetMenuCategory(menuCategory),handleGetSort(sort));
     } else {
       console.error('memberEmail이 설정되지 않았습니다.');
     }
-  }, [memberEmail]);
+  }, [memberEmail, sort, menuCategory]);
+
+  const handleSearchClick = () => {
+    fetchBoards(handleGetMenuCategory(menuCategory), handleGetSort(sort));
+  };
+
+  const handleClick = (boardId) => {
+    navigate(`details/${boardId}`); // 페이지 이동 처리
+  };
 
   const fetchBoards = async (type,sort) => {
     setLoading(true);
     try {
-      // const localUrl = 'http://localhost:8080/boards';
-      const response = await axios.get(process.env.REACT_APP_API_URL+'/boards', {
+      const response = await axios.get(process.env.REACT_APP_API_URL+'boards', {
         params: { type, sort, page: 1, size: 20 },
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
       });
-      setBoards(response.data);
+      setBoards(response.data.data);
       setLoading(false);
     } catch (error) {
       setError(error);
@@ -37,36 +48,91 @@ function Board() {
     }
   };
 
+  const handleSelectChange = (e) => {
+    setMenuCategory(e.target.value); // 사용자가 선택한 값을 상태에 저장
+  };
+  const handleSelectSortChange = (e) => {
+    setSort(e.target.value); // 사용자가 선택한 값을 상태에 저장
+  };
+
+  const handleGetMenuCategory = (menuCategory) => {
+    switch (menuCategory) {
+      case "전체":
+        return "ALL";
+      case "밑 반찬":
+        return "MENU_CATEGORY_SIDE";
+      case "국/찌개":
+        return "MENU_CATEGORY_SOUP";
+      case "디저트":
+        return "MENU_CATEGORY_DESSERT";
+      case "면":
+        return "MENU_CATEGORY_NOODLE";
+      case "밥/죽/떡":
+        return "MENU_CATEGORY_RICE";
+      case "김치":
+        return "MENU_CATEGORY_KIMCHI";
+      case "퓨전":
+        return "MENU_CATEGORY_FUSION";
+      case "양념":
+        return "MENU_CATEGORY_SEASONING";
+      case "양식":
+        return "MENU_CATEGORY_WESTERN";
+      default:
+        return "MENU_CATEGORY_ETC"; 
+    }
+  };
+
+  const handleGetSort = (sort) => {
+    switch (sort) {
+      case "날짜 ▼":
+        return "CREATED_AT_DESC";
+      case "날짜 ▲":
+        return "CREATED_AT_ASC";
+      case "좋아요 ▼":
+        return "LIKE_DESC";
+      case "좋아요 ▲":
+        return "LIKE_ASC";
+    }
+  };
   return (
     <MainContainer>
       <Header>
         <FilterSection>
           <InputGroup2_1thLine>
-                <Label>식재료종류</Label>
-                <Select>
-                  <option>전체</option>
-                  <option>채소</option>
-                  <option>고기</option>
-                </Select>
+                <Label>메뉴 종류</Label>
+                  <Select value={menuCategory} onChange={handleSelectChange}>
+                    <option>전체</option>
+                    <option>밑 반찬</option>
+                    <option>국/찌개</option>
+                    <option>디저트</option>
+                    <option>면</option>
+                    <option>밥/죽/떡</option>
+                    <option>김치</option>
+                    <option>퓨전</option>
+                    <option>양념</option>
+                    <option>양식</option>
+                    <option>기타</option>
+                  </Select>
             </InputGroup2_1thLine>
             <InputGroup2_2thLine>
                 <Label>정렬</Label>
-                <Select>
-                  <option>전체</option>
-                  <option>날짜순</option>
-                  <option>이름순</option>
+                <Select value={sort} onChange={handleSelectSortChange}>
+                  <option>날짜 ▼</option>
+                  <option>날짜 ▲</option>
+                  <option>좋아요 ▼</option>
+                  <option>좋아요 ▲</option>
                 </Select>
           </InputGroup2_2thLine>
         </FilterSection>
         <SearchBar>
           <TextArea type="text" placeholder="메뉴이름 검색" />
-          <SearchIcon src={Search_img} alt="search icon" /> 
+          <SearchIcon src={Search_img} alt="search icon" onClick={handleSearchClick}/> 
         </SearchBar>
       </Header>
 
       <ScrollableContainer>
       {boards.map((board) => (
-        <FoodItem key={board.boardid}>
+        <FoodItem key={board.boardId} onClick={() => handleClick(board.boardId)}>
           <FoodImage src={board.imageUrl} alt={board.title} />
           <FoodInfo>
             <FoodName>{board.title}</FoodName>
@@ -77,16 +143,6 @@ function Board() {
           </FoodInfo>
         </FoodItem>
       ))}
-      {/* {RecipeItems.map((item) => (
-        <FoodItem key={item.id}>
-          <FoodImage src={item.image} alt={item.name} />
-          <FoodInfo>
-            <FoodName>{item.name}</FoodName>
-            <FoodIngredients>{item.availableIngredients}</FoodIngredients>
-            <FoodIngredients>{item.missingIngredients}</FoodIngredients>
-          </FoodInfo>
-        </FoodItem>
-      ))} */}
       </ScrollableContainer>
     </MainContainer>
   );
@@ -189,7 +245,6 @@ const Label = styled.div`
 
 const Select = styled.select`
   flex: 1;
-  padding: 0 20px;
   height: 100%;
   border: none;
   font-size: 13px;
@@ -201,7 +256,6 @@ const Select = styled.select`
   // background-image: url('data:image/svg+xml;base64,YOUR_BASE64_ARROW'); /* 커스텀 화살표 */
   background-repeat: no-repeat;
   background-position: right 15px center; 
-  padding-right: 30px; 
 `;
 
 const FilterSection = styled.div`

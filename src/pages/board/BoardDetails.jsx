@@ -1,5 +1,10 @@
-import React from 'react';
 import styled from 'styled-components';
+import axios from 'axios';
+import React, { useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { ClipLoader } from 'react-spinners';
+
 import menu_1 from '../../resources/sample/menu_1.png';
 import user_icon from '../../resources/icon/user.png';
 import timer_icon from '../../resources/icon/timer.png';
@@ -11,50 +16,124 @@ import difficulty2_icon from '../../resources/icon/difficulty_2.png';
 import difficulty3_icon from '../../resources/icon/difficulty_3.png';
 
 const BoardDetails = () => {
+  const { boardId } = useParams();
+  const queryClient = useQueryClient();
+
+  const fetchPost = async () => {
+    if (!boardId) {
+      throw new Error('잘못된 게시글 ID 입니다.');
+    }
+    try {
+      const response = await axios.get(process.env.REACT_APP_API_URL+`boards/${boardId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      return response.data.data;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  const {
+    data: post,
+    isLoading,
+    isError,
+    error
+  } = useQuery({
+    queryKey: ['post', boardId],
+    queryFn: fetchPost,
+    enabled: !!boardId,
+    retry: 1
+  });
+
+  const likeMutation = useMutation({
+    mutationFn: () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('token을 찾을 수 없습니다.');
+      }
+      return axios.post(`http://localhost:8080/likes`, {
+        memberId: post.memberId,
+        boardId: boardId,
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['post', boardId]);
+    },
+    onError: () => {
+        alert('좋아요 처리 중 오류가 발생했습니다.');
+    }
+  });
+
+  const handleLike = () => {
+    likeMutation.mutate();
+  };
+  
+  if (isLoading) return (
+    <Container>
+      <ClipLoader color="#007bff" loading={isLoading} size={50} />
+    </Container>
+  );
+
+  if (isError) {
+    console.error("Error loading post:", error.message);
+    return <div>게시글을 불러오는데 오류가 발생했습니다: {error.message}</div>;
+  }
+
+  if (!post) {
+    console.warn("Post not found");
+    return <div>게시글을 찾을 수 없습니다.</div>;
+  }
+
   return (
     <Container>
       <ImageContainer>
-        <Image src={menu_1} alt="돼지고기 김치찌개" />
+        <Image src={post.imageUrl} alt="돼지고기 김치찌개" />
         <LikeButton onClick={() => alert('초록 버튼 클릭됨!')}>
           <LikeButtonImage src={like_icon} alt="Button Icon" /> 
         </LikeButton> {/* 초록색 버튼 */}
       </ImageContainer>
       <TextContainer>
-        <Title>돼지고기 김치찌개</Title>
+        <Title>{post.menuCategory} | {post.title}</Title>
         <Dividers/>
-        <Description>진한 국물이 맛있는 돼지고기 김치찌개 입니다.</Description>
+        <Description>{post.boardContent}</Description>
         <InfoContainer>
             <InfoItem>
               <Icon src={user_icon} alt="관리자" />
-              관리자
+              {post.author}
             </InfoItem>
             <InfoItem>
               <Icon src={cook_icon} alt="3인분" />
-              3인분
+              {post.servingSize}인분
             </InfoItem>
           </InfoContainer>
           <InfoContainer>
             <InfoItem>
               <Icon src={timer_icon} alt="30분" />
-              30분
+              {post.cookingTime}분
             </InfoItem>
             <InfoItem>
               <Icon src={difficulty1_icon} alt="쉬움" />
-              쉬움
+              {post.difficulty}
             </InfoItem>
         </InfoContainer>
         <Ingredients>
           <Title>재료</Title>
           <Dividers/>
           <ul>
-            <li><Span>물물물물물물물물물물물물물물물물물\n물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물물</Span></li>
+            <li><Span>{post.foodContent}</Span></li>
           </ul>
         </Ingredients>
         <Ingredients>
           <Title>레시피</Title>
           <Dividers/>
           <ul>
-            <li><Span>레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피레시피</Span></li>
+            <li><Span>{post.recipeContent}</Span></li>
           </ul>
         </Ingredients>
       </TextContainer>

@@ -82,7 +82,7 @@ function Recipe() {
     <MainContainer>
       <Header>
         <InputGroup>
-          <Label>메인 메뉴</Label>
+          <Label>메인 식재료</Label>
             <Select>
               <option>전체</option>
               <option>채소</option>
@@ -91,7 +91,7 @@ function Recipe() {
         </InputGroup>
         <FilterSection>
           <InputGroup2_1thLine>
-                <Label>식재료종류</Label>
+                <Label>메뉴 종류</Label>
                 <Select>
                   <option>전체</option>
                   <option>채소</option>
