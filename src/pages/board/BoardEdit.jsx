@@ -16,23 +16,57 @@ const BoardEdit = () => {
   const [selectedImage, setSelectedImage] = useState(null); // 선택한 이미지 상태 관리
   const navigate = useNavigate(); // useNavigate 훅 사용
 
-  const handleDifficultyChange = (value) => {
-    setDifficulty(value);
-  };
 
-  // 이미지 선택 핸들러
+  /**
+   * 이미지 선택 핸들러
+   * 임시저장이라 npm restart하게 되면 기존 이미지.. 다 날라갑니다..!! AWS S3를 연동을 안했기에 어쩔수 없는 상황..
+   * 이로 인해 GET blob:http://localhost:3000/d4ce75f4-39d1-42e1-a35a-41f6c980644f net::ERR_FILE_NOT_FOUND 
+   * 가 계속 Web F12 Console에 뜰꺼에요 참고하세요
+   * 
+   * @return : 파일을 선택했을 때 URL로 변환해서 이미지 미리보기가능하게 선택된이미지 임시 저장
+   * 
+   * @Author : 신민준
+   */
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
-      // 파일을 선택했을 때 URL로 변환해서 이미지 미리보기
       setSelectedImage(URL.createObjectURL(file));
     }
   };
 
-  const handleSelectChange = (e) => {
+  
+  /**
+   * 선택한 MenuCategory 저장 메서드
+   * 
+   * @return : 선택한 MenuCategory 저장
+   * 
+   * @Author : 신민준
+   */
+  const handleSelectCategoryChange = (e) => {
     setMenuCategory(e.target.value); // 사용자가 선택한 값을 상태에 저장
   };
 
+
+  /**
+   * 선택한 Difficulty 저장 메서드
+   * 
+   * @return : 선택한 Difficulty 저장
+   * 
+   * @Author : 신민준
+   */
+  const handleDifficultyChange = (value) => {
+    setDifficulty(value);
+  };
+
+
+  /**
+   * 게시판 수정 및 추가 창에서 난이도 그래프를 선택했을 때, axios에 난이도 정보를 보내주기 위한 
+   * difficulty.Enum에 맞춰 변환
+   * 
+   * @return : difficulty integer 값을 difficulty.Enum(type=String)으로 변환된 값 반환
+   * 
+   * @Author : 신민준
+   */
   const handleGetDifficulty = (difficulty) => {
     switch(difficulty){
       case 1:
@@ -44,6 +78,14 @@ const BoardEdit = () => {
     }
   }
 
+  /**
+   * 선택한 MenuCategory를 axios를 통해 body값에 보낼 수 있는 유효한 명칭으로 보내기 위해
+   * 변환해주는 메서드
+   * 
+   * @return : 한글로 적힌 MenuCategory를 BE의 MenuCategory.Enum에 맞게 변환
+   * 
+   * @Author : 신민준
+   */
   const handleGetMenuCategory = (menuCategory) => {
     switch (menuCategory) {
       case "전체":
@@ -71,13 +113,14 @@ const BoardEdit = () => {
     }
   };
 
-  // 폼 제출 핸들러 (axios로 BackEnd에 데이터 전송)
+  /**
+   * 작성된 게시글 또는 수정된 게시글의 정보를 axios로 BE에 전송하기 위한 메서드
+   * 
+   * @return : 결과를 alert로 반환
+   * 
+   * @Author : 신민준
+   */
   const handleSubmit = async () => {
-
-    switch(menuCategory){
-
-    }
-    // Data를 사용하여 이미지를 함께 전송
     const data = {
       title: title,
       boardContent: boardContent,
@@ -86,8 +129,8 @@ const BoardEdit = () => {
       cookingTime: cookingTime,
       servingSize: servingSize,
       imageUrl: selectedImage,
-      difficulty: handleGetDifficulty(difficulty),  // 함수 호출
-      menuCategory: handleGetMenuCategory(menuCategory),  // 함수 호출
+      difficulty: handleGetDifficulty(difficulty), 
+      menuCategory: handleGetMenuCategory(menuCategory), 
     };
 
     try {
@@ -113,7 +156,7 @@ const BoardEdit = () => {
         <Divider />
         <Title>메뉴 종류</Title>
         <InputGroup2_1thLine>
-          <Select value={menuCategory} onChange={handleSelectChange}>
+          <Select value={menuCategory} onChange={handleSelectCategoryChange}>
             <option>밑 반찬</option>
             <option>국/찌개</option>
             <option>디저트</option>
@@ -162,19 +205,19 @@ const BoardEdit = () => {
 
         <InfoRow>
           <InfoInputContainer>
-            <Title>음식양</Title>
+            <Title>음식양 (인분)</Title>
             <SmallInput
               type="text"
-              placeholder="음식양"
+              placeholder="숫자로만 작성해 주세요"
               value={servingSize}
               onChange={(e) => setServingSize(e.target.value)} // 입력값 상태로 저장
             />
           </InfoInputContainer>
           <InfoInputContainer>
-            <Title>소요 시간</Title>
+            <Title>소요 시간 (분)</Title>
             <SmallInput
               type="text"
-              placeholder="소요 시간"
+              placeholder="분 단위로 작성해주세요"
               value={cookingTime}
               onChange={(e) => setCookingTime(e.target.value)} // 입력값 상태로 저장
             />

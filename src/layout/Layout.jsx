@@ -20,34 +20,31 @@ function Layout() {
   const navigate = useNavigate(); // useNavigate 훅 사용
 
   // useEffect 관련 코드 주석
-  // useEffect(() => {
-  //   const email = localStorage.getItem('email');
-    
-  //   // 이메일이 없으면 /login으로 리다이렉트
-  //   if (!email) {
-  //     navigate('/login');
-  //   } else{
-  //     navigate('/fridge');
-  //   }
-  // }, [navigate]);
+  useEffect(() => {
+    const email = localStorage.getItem('email');
+    const currentPath = location.pathname;
+    if (!email && currentPath !== '/login' && currentPath !== '/signup') {
+      navigate('/login');
+    } else if (email && (currentPath === '/login' || currentPath === '/signup' || currentPath === '/')) {
+      navigate('/fridge');
+    }
+  }, [location.pathname, navigate]);
 
   const hideLayout = location.pathname === '/login' || location.pathname === '/signup';
 
   const getHeaderTitle = () => {
-    switch (location.pathname) {
-      case '/fridge':
-        return '나의 냉장고';
-      case '/recipe':
-        return '레시피';
-      case '/board':
-        return '게시판';
-      case '/menu':
-        return '메뉴';
-      case '/signup': // 회원가입 페이지일 때 헤더 제목을 변경
-        return '회원가입';
-      default:
-        return '나의 냉장고';
-    }
+    if (location.pathname.includes('/board'))
+      return '게시판';
+    else if (location.pathname.includes('/fridge'))
+      return '나의 냉장고';
+    else if (location.pathname.includes('/recipe'))
+      return '레시피';
+    else if (location.pathname.includes('/menu'))
+      return '메뉴';
+    else if (location.pathname.includes('/signup'))
+      return '회원가입';
+    else if (location.pathname.includes('/login'))
+      return '로그인';
   };
 
   const getButtonColor1 = () => {

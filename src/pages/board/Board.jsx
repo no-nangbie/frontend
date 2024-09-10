@@ -15,6 +15,13 @@ function Board() {
   const navigate = useNavigate();
   const memberEmail = localStorage.getItem('email') || '';
 
+  /**
+   * F12누르면 나오는 Application에 담겨있는 localsStorage속 email 유무 판단
+   * 
+   * @return : 로그인 되어있는지 여부 파악을 위한 작업 중 하나
+   * 
+   * @Author : 신민준
+   */
   useEffect(() => {
     if (memberEmail) {
       fetchBoards(handleGetMenuCategory(menuCategory),handleGetSort(sort));
@@ -23,14 +30,37 @@ function Board() {
     }
   }, [memberEmail, sort, menuCategory]);
 
+
+  /**
+   * Board List를 정렬 / 분류에 맞춰서 출력하는 메서드를 호출
+   * 
+   * @Author : 신민준
+   */
   const handleSearchClick = () => {
     fetchBoards(handleGetMenuCategory(menuCategory), handleGetSort(sort));
   };
 
+
+  /**
+   * Board List에서 해당 게시글을 선택했을 때 Page Navigate 작업
+   * 
+   * @return : 해당 BoardId를 상세하게 볼 수 있는 BoardDetails.jsx로 이동
+   * 
+   * @Author : 신민준
+   */
   const handleClick = (boardId) => {
     navigate(`details/${boardId}`); // 페이지 이동 처리
   };
 
+
+  /**
+   * Board ListUp 하기 위한 메서드
+   * 차후 스크롤의 위치에 따라 다음 페이지를 보여주는 방식 적용 필요
+   * 
+   * @return : MenuType과 Sort 방식에 맞추어 1번 페이지 20개의 레시피 메뉴를 보여줌
+   * 
+   * @Author : 신민준
+   */
   const fetchBoards = async (type,sort) => {
     setLoading(true);
     try {
@@ -48,13 +78,39 @@ function Board() {
     }
   };
 
-  const handleSelectChange = (e) => {
+
+  /**
+   * 선택한 MenuCategory 저장 메서드
+   * 
+   * @return : 선택한 MenuCategory 저장
+   * 
+   * @Author : 신민준
+   */
+  const handleSelectCategoryChange = (e) => {
     setMenuCategory(e.target.value); // 사용자가 선택한 값을 상태에 저장
   };
+
+
+  /**
+   * 선택한 정렬방식 저장 메서드
+   * 
+   * @return : 선택한 정렬방식 저장
+   * 
+   * @Author : 신민준
+   */
   const handleSelectSortChange = (e) => {
     setSort(e.target.value); // 사용자가 선택한 값을 상태에 저장
   };
 
+
+  /**
+   * 선택한 MenuCategory를 axios를 통해 body값에 보낼 수 있는 유효한 명칭으로 보내기 위해
+   * 변환해주는 메서드
+   * 
+   * @return : 한글로 적힌 MenuCategory를 BE의 MenuCategory.Enum에 맞게 변환
+   * 
+   * @Author : 신민준
+   */
   const handleGetMenuCategory = (menuCategory) => {
     switch (menuCategory) {
       case "전체":
@@ -82,6 +138,15 @@ function Board() {
     }
   };
 
+  
+  /**
+   * 선택한 Sort를 axios를 통해 body값에 보낼 수 있는 유효한 명칭으로 보내기 위해
+   * 변환해주는 메서드
+   * 
+   * @return : 한글로 적힌 Sort를 BE의 SortType에 맞게 변환
+   * 
+   * @Author : 신민준
+   */
   const handleGetSort = (sort) => {
     switch (sort) {
       case "날짜 ▼":
@@ -100,7 +165,7 @@ function Board() {
         <FilterSection>
           <InputGroup2_1thLine>
                 <Label>메뉴 종류</Label>
-                  <Select value={menuCategory} onChange={handleSelectChange}>
+                  <Select value={menuCategory} onChange={handleSelectCategoryChange}>
                     <option>전체</option>
                     <option>밑 반찬</option>
                     <option>국/찌개</option>
