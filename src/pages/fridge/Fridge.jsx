@@ -54,7 +54,10 @@ function Fridge() {
         const response = await axios.get(process.env.REACT_APP_API_URL + 'my-foods', {
           params: {
             page: 1, size: 700, sort: sortOption
-          }
+          },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
         });
         console.log("data : ", response.data);
 
@@ -84,12 +87,18 @@ function Fridge() {
               page: 1, size: 700,  
               sort: searchKeyword.trim() === "" ? "expirationDate_asc" : sortOption, keyword: searchKeyword.trim(),
             }, 
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
         });
         } else {
           response = await axios.get(process.env.REACT_APP_API_URL + 'my-foods/search_by_category', {
           params: {
             page: 1, size: 700,  sort: searchKeyword.trim() === "" ? "expirationDate_asc" : sortOption,
             category: filterCategory, keyword: searchKeyword.trim(),
+          },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
       });
     }
@@ -166,6 +175,8 @@ function Fridge() {
       <ScrollableContainer>
         {loading ? (
           <div>로딩중</div>
+        ) : filteredItems.length === 0 ? (
+          <NoDataMessage> 저장된 식료품이 없습니다</NoDataMessage>
         ) : (
           filteredItems.map((item) => (
           <FoodItem key={item.id} color={getStatusColor(item.memberFoodStatus)}>
@@ -351,4 +362,20 @@ const TextArea = styled.input`
   margin-left: 10px;
   font-size: 14px;
   outline: none;
+`;
+
+const NoDataMessage = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 530px;
+  font-size: 18px;
+  color: #888; /* 회색 텍스트 색상 */
+  font-weight: bold;
+  text-align: center;
+  padding: 20px;
+  background-color: transparent; /* 배경색을 투명하게 설정 */
+  border: none; /* 테두리 제거 */
+  box-shadow: none; /* 그림자 제거 */
+  margin: 20px; /* 여백 추가 */
 `;
