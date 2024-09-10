@@ -30,6 +30,8 @@ function Layout() {
   // }, [navigate]);
   const hideLayout = location.pathname === '/login';
 
+  
+
   const getHeaderTitle = () => {
     switch (location.pathname) {
       case '/fridge':
@@ -76,6 +78,10 @@ function Layout() {
     }
   };
 
+  const handleButtonClick2 = () => {
+    navigate('/fridge/delete');
+  };
+
   const handleButtonClick3 = () => {
     navigate('/fridge/add');
   };
@@ -93,7 +99,10 @@ function Layout() {
             {location.pathname === '/board' && (
               <ColoredButton src={getButtonColor1()} onClick={() => alert('첫 번째 버튼 클릭됨!')} />
             )}
-            {(location.pathname === '/fridge' || location.pathname === '/board') && (
+            {(location.pathname === '/fridge') && (
+              <ColoredButton src={getButtonColor2()} onClick={handleButtonClick2} />
+            )}
+            {(location.pathname === '/board') && (
               <ColoredButton src={getButtonColor2()} onClick={() => alert('두 번째 버튼 클릭됨!')} />
             )}
             {(location.pathname === '/fridge') && (
