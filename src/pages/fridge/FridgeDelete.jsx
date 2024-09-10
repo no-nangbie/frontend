@@ -96,7 +96,7 @@ function FridgeDelete() {
 
   const handleDeleteClick = async () => {
     if (selectedItems.length === 0) {
-      alert("삭제할 식재료를 선택해주세요.");
+      alert("삭제할 식재료를 선택해주세요. ");
       return;
     }
 
