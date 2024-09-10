@@ -19,7 +19,7 @@ function Layout() {
   const location = useLocation();
   const navigate = useNavigate(); // useNavigate 훅 사용
 
-  //회원가입 관련해서 완성하면은 아래 주석을 풀어주세요
+  // useEffect 관련 코드 주석
   // useEffect(() => {
   //   const email = localStorage.getItem('email');
     
@@ -28,9 +28,8 @@ function Layout() {
   //     navigate('/login');
   //   }
   // }, [navigate]);
-  const hideLayout = location.pathname === '/login';
 
-  
+  const hideLayout = location.pathname === '/login' || location.pathname === '/signup';
 
   const getHeaderTitle = () => {
     switch (location.pathname) {
@@ -42,6 +41,8 @@ function Layout() {
         return '게시판';
       case '/menu':
         return '메뉴';
+      case '/signup': // 회원가입 페이지일 때 헤더 제목을 변경
+        return '회원가입';
       default:
         return '나의 냉장고';
     }

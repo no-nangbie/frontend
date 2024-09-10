@@ -1,7 +1,73 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
+import axios from 'axios';
 
 function Login() {
+  // 이메일과 비밀번호를 상태로 관리
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+
+  // 로그인 버튼 클릭 시 호출되는 함수
+  // const handleLogin = async () => {
+  //   try {
+  //     // 백엔드로 로그인 요청 보내기
+  //     const response = await axios.post('http://localhost:8080/login', {
+  //       email: email,
+  //       password: password,
+  //     }, {
+  //       headers: {
+  //         'Content-Type': 'application/json'
+  //       }
+  //     });
+
+  //     // 로그인 성공 시, 응답에서 토큰을 추출
+  //     if (response.status === 200) {
+  //       const accessToken = response.headers['authorization']; // 액세스 토큰
+  //       const refreshToken = response.headers['refresh']; // 리프레시 토큰
+
+  //       // localStorage에 토큰 저장
+  //       localStorage.setItem('accessToken', accessToken);
+  //       localStorage.setItem('refreshToken', refreshToken);
+
+  //       // 로그인 성공 알림 및 페이지 이동
+  //       alert('로그인 성공!');
+  //       window.location.href = '/'; // 원하는 경로로 리다이렉트
+  //     }
+  //   } catch (error) {
+  //     // 로그인 실패 시 에러 메시지를 설정하여 사용자에게 표시
+  //     setErrorMessage('로그인 실패: 이메일이나 비밀번호를 확인해주세요.');
+  //   }
+  // };
+  const handleLogin = async () => {
+    console.log("로그인 버튼이 클릭되었습니다."); // 버튼 클릭 확인을 위한 로그
+    try {
+      const response = await axios.post('http://localhost:8080/login', {
+        email: email,
+        password: password,
+      }, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+  
+      if (response.status === 200) {
+        const accessToken = response.headers['authorization'];
+        const refreshToken = response.headers['refresh'];
+  
+        localStorage.setItem('accessToken', accessToken);
+        localStorage.setItem('refreshToken', refreshToken);
+  
+        alert('로그인 성공!');
+        window.location.href = '/';
+      }
+    } catch (error) {
+      console.error("로그인 실패: ", error);
+      setErrorMessage('로그인 실패: 이메일이나 비밀번호를 확인해주세요.');
+    }
+  };
+  
+
   return (
     <Container>
       {/* 상단 헤더 */}
@@ -16,20 +82,33 @@ function Login() {
           <LogoImg src="/path-to-your-logo.png" alt="logo" />
         </Logo>
 
-        {/* 아이디 입력 */}
+        {/* 이메일 입력 */}
         <InputGroup>
-          <Label>아이디</Label>
-          <TextArea type="text" placeholder="아이디를 입력하세요" />
+          <Label>이메일</Label>
+          <TextArea
+            type="text"
+            placeholder="이메일을 입력하세요"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)} // 이메일 입력 시 상태 업데이트
+          />
         </InputGroup>
 
         {/* 비밀번호 입력 */}
         <InputGroup>
           <Label>비밀번호</Label>
-          <TextArea type="password" placeholder="비밀번호를 입력하세요" />
+          <TextArea
+            type="password"
+            placeholder="비밀번호를 입력하세요"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)} // 비밀번호 입력 시 상태 업데이트
+          />
         </InputGroup>
 
         {/* 로그인 버튼 */}
-        <LoginButton>로그인</LoginButton>
+        <LoginButton onClick={handleLogin}>로그인</LoginButton>
+
+        {/* 에러 메시지 출력 */}
+        {errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
 
         {/* 회원가입 링크 */}
         <SignupLink>
@@ -135,6 +214,11 @@ const LoginButton = styled.button`
   &:hover {
     background-color: #0056b3;
   }
+`;
+
+const ErrorMessage = styled.p`
+  color: red;
+  margin-bottom: 10px;
 `;
 
 const SignupLink = styled.div`
