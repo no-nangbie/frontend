@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import axios from 'axios';
 import Search_img from '../../resources/icon/search_3917754.png'
+import { useNavigate } from 'react-router-dom'; 
 
 // Main Component
 function Board() {
@@ -9,6 +10,7 @@ function Board() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const navigate = useNavigate();
   const memberEmail = localStorage.getItem('email') || '';
 
   useEffect(() => {
@@ -19,17 +21,20 @@ function Board() {
     }
   }, [memberEmail]);
 
+  const handleClick = (boardId) => {
+    navigate(`details/${boardId}`); // 페이지 이동 처리
+  };
+
   const fetchBoards = async (type,sort) => {
     setLoading(true);
     try {
-      // const localUrl = 'http://localhost:8080/boards';
-      const response = await axios.get(process.env.REACT_APP_API_URL+'/boards', {
+      const response = await axios.get(process.env.REACT_APP_API_URL+'boards', {
         params: { type, sort, page: 1, size: 20 },
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
       });
-      setBoards(response.data);
+      setBoards(response.data.data);
       setLoading(false);
     } catch (error) {
       setError(error);
@@ -66,7 +71,7 @@ function Board() {
 
       <ScrollableContainer>
       {boards.map((board) => (
-        <FoodItem key={board.boardid}>
+        <FoodItem key={board.boardId} onClick={() => handleClick(board.boardId)}>
           <FoodImage src={board.imageUrl} alt={board.title} />
           <FoodInfo>
             <FoodName>{board.title}</FoodName>
@@ -77,16 +82,6 @@ function Board() {
           </FoodInfo>
         </FoodItem>
       ))}
-      {/* {RecipeItems.map((item) => (
-        <FoodItem key={item.id}>
-          <FoodImage src={item.image} alt={item.name} />
-          <FoodInfo>
-            <FoodName>{item.name}</FoodName>
-            <FoodIngredients>{item.availableIngredients}</FoodIngredients>
-            <FoodIngredients>{item.missingIngredients}</FoodIngredients>
-          </FoodInfo>
-        </FoodItem>
-      ))} */}
       </ScrollableContainer>
     </MainContainer>
   );

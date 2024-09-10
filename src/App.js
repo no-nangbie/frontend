@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 //layout
 import Layout from './layout/Layout';
@@ -28,27 +29,31 @@ import BoardEditPage from './pages/board/BoardEdit';
 import MenuPage from './pages/menu/Menu';
 
  
+const queryClient = new QueryClient();
+
 function App() {
   return (
-    <Router>
-        <Routes>
-          <Route path="/" element={<Layout />}>
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/signup" element={<SignupPage />} />
-            <Route path="/fridge" element={<FridgePage />} />
-            <Route path="/fridge/add" element={<FridgeAddPage />} />
-            <Route path="/fridge/delete" element={<FridgeDeletePage />} />
-            <Route path="/recipe" element={<RecipePage />} />
-            <Route path="/recipe/details" element={<RecipeDetailsPage />} />
-            <Route path="/recipe/details/edit" element={<RecipeEditPage />} />
-            <Route path="/recipe/details/step" element={<RecipeStepPage />} />
-            <Route path="/board" element={<BoardPage />} />
-            <Route path="/board/details" element={<BoardDetailsPage />} />
-            <Route path="/board/details/edit" element={<BoardEditPage />} />
-            <Route path="/menu" element={<MenuPage />} />
-          </Route>
-        </Routes>
-    </Router>
+    <QueryClientProvider client={queryClient}>
+      <Router>
+          <Routes>
+            <Route path="/" element={<Layout />}>
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/signup" element={<SignupPage />} />
+              <Route path="/fridge" element={<FridgePage />} />
+              <Route path="/fridge/add" element={<FridgeAddPage />} />
+              <Route path="/fridge/delete" element={<FridgeDeletePage />} />
+              <Route path="/recipe" element={<RecipePage />} />
+              <Route path="/recipe/details" element={<RecipeDetailsPage />} />
+              <Route path="/recipe/details/edit" element={<RecipeEditPage />} />
+              <Route path="/recipe/details/step" element={<RecipeStepPage />} />
+              <Route path="/board" element={<BoardPage />} />
+              <Route path="/board/details/:boardId" element={<BoardDetailsPage />} />
+              <Route path="/board/details/edit" element={<BoardEditPage />} />
+              <Route path="/menu" element={<MenuPage />} />
+            </Route>
+          </Routes>
+      </Router>
+    </QueryClientProvider>
   );
 }
 
