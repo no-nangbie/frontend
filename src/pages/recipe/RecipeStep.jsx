@@ -230,7 +230,7 @@ const WarningText = styled.p`
 
 const IngredientsList = styled.div`
   margin-bottom: 20px;
-  max-height: 200px;
+  max-height: 350px;
   overflow-y: auto;
   padding-right: 10px;
   border: 1px solid #007bff;

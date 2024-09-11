@@ -4,6 +4,7 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ClipLoader } from 'react-spinners';
+import { useNavigate } from 'react-router-dom'; // useNavigate 추가
 
 //아이콘 이미지
 import user_icon from '../../resources/icon/user.png';
@@ -18,7 +19,9 @@ import difficulty1_icon from '../../resources/icon/difficulty_1.png';
 import difficulty2_icon from '../../resources/icon/difficulty_2.png';
 import difficulty3_icon from '../../resources/icon/difficulty_3.png';
 
+
 const RecipeDetails = () => {
+  const navigate = useNavigate(); // useNavigate 훅을 사용하여 navigate 변수 선언
   const { menuId } = useParams(); // 메뉴 ID를 URL에서 가져옴
   const queryClient = useQueryClient();
 
@@ -39,6 +42,11 @@ const RecipeDetails = () => {
     'DIFFICULTY_EASY': '쉬움',
     'DIFFICULTY_MEDIUM': '보통',
     'DIFFICULTY_HARD': '어려움',
+  };
+
+  // 버튼 클릭 시 이동하는 함수 정의
+  const handleRecipeStep = () => {
+    navigate(`/recipe/details/${menuId}/step`); // 메뉴 ID와 함께 RecipeStep 페이지로 이동
   };
 
    // 난이도에 따른 이미지 매핑 함수
@@ -173,13 +181,13 @@ const RecipeDetails = () => {
               <li key={index}>
                 <Span>{ingredient.foodName}</Span>
                 <Span>{ingredient.foodQuantity}</Span>
-                <Uldividers />
+                  <Uldividers />
               </li>
             ))}
           </ul>
         </Ingredients>
         <ButtonContainer>
-          <ActionButton>레시피 보기</ActionButton>
+          <ActionButton onClick={handleRecipeStep}>레시피 보기</ActionButton>
         </ButtonContainer>
       </TextContainer>
     </Container>
@@ -195,6 +203,13 @@ const Container = styled.div`
   height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
+`;
+// Uldividers styled-component 정의
+const Uldividers = styled.div`
+  border: 0;
+  height: 1px;
+  background-color: #D9D9D9;
+  margin: 0;
 `;
 
 const ImageContainer = styled.div`
@@ -279,20 +294,27 @@ const Icon = styled.img`
   margin-right: 10px;
 `;
 
-const Ingredients = styled.div`
-  text-align: left;
-  margin: 20px 0;
+const Ingredients = styled.ul`
+  list-style: none;
+  padding-left: 0; /* 패딩 제거 */
+  margin-left: 0;  /* 마진 제거 */
+  text-align: left; /* 텍스트 왼쪽 정렬 */
 
-  ul {
-    list-style: none;
-    padding: 0;
+  li {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    font-size: 17px;
+    color: #000000;
 
-    li {
-      font-size: 14px;
-      color: #555;
-      margin-bottom: 5px;
-      display: flex;
-      justify-content: space-between;
+    span:first-child {
+      flex: 1;
+      text-align: left;
+    }
+
+    span:last-child {
+      width: 60px;
+      text-align: right;
     }
   }
 `;
@@ -301,19 +323,14 @@ const Span = styled.span`
   margin: 0 30px;
 `;
 
-const Uldividers = styled.div`
-  border: 0;
-  height: 1px;
-  background-color: #D9D9D9;
-  margin: 0;
-`;
-
 const ButtonContainer = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding-bottom: 40px;
 `;
+
+
 
 const ActionButton = styled.button`
   background-color: #2D9CDB;
