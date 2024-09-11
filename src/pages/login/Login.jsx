@@ -8,37 +8,6 @@ function Login() {
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
-  // 로그인 버튼 클릭 시 호출되는 함수
-  // const handleLogin = async () => {
-  //   try {
-  //     // 백엔드로 로그인 요청 보내기
-  //     const response = await axios.post('http://localhost:8080/login', {
-  //       email: email,
-  //       password: password,
-  //     }, {
-  //       headers: {
-  //         'Content-Type': 'application/json'
-  //       }
-  //     });
-
-  //     // 로그인 성공 시, 응답에서 토큰을 추출
-  //     if (response.status === 200) {
-  //       const accessToken = response.headers['authorization']; // 액세스 토큰
-  //       const refreshToken = response.headers['refresh']; // 리프레시 토큰
-
-  //       // localStorage에 토큰 저장
-  //       localStorage.setItem('accessToken', accessToken);
-  //       localStorage.setItem('refreshToken', refreshToken);
-
-  //       // 로그인 성공 알림 및 페이지 이동
-  //       alert('로그인 성공!');
-  //       window.location.href = '/'; // 원하는 경로로 리다이렉트
-  //     }
-  //   } catch (error) {
-  //     // 로그인 실패 시 에러 메시지를 설정하여 사용자에게 표시
-  //     setErrorMessage('로그인 실패: 이메일이나 비밀번호를 확인해주세요.');
-  //   }
-  // };
   const handleLogin = async () => {
     console.log("로그인 버튼이 클릭되었습니다."); // 버튼 클릭 확인을 위한 로그
     try {
@@ -55,7 +24,7 @@ function Login() {
         const accessToken = response.headers['authorization'];
         // const refreshToken = response.headers['refresh'];
   
-        localStorage.setItem('token', accessToken);
+        localStorage.setItem('accessToken', accessToken);
         localStorage.setItem('email', email);
         // localStorage.setItem('refreshToken', refreshToken);
   

@@ -8,6 +8,7 @@ import Layout from './layout/Layout';
 //login
 import LoginPage from './pages/login/Login';
 import SignupPage from './pages/login/signup';
+import LogoutButton from './pages/login/LogoutButton';  // 로그아웃 버튼 임포트
 
 //Fridge
 import FridgePage from './pages/fridge/Fridge';
@@ -39,6 +40,7 @@ function App() {
             <Route path="/" element={<Layout />}>
               <Route path="/login" element={<LoginPage />} />
               <Route path="/signup" element={<SignupPage />} />
+              <Route path="/logout" element={<LogoutButton />} /> {/* 로그아웃 경로 추가 */}
               <Route path="/fridge" element={<FridgePage />} />
               <Route path="/fridge/add" element={<FridgeAddPage />} />
               <Route path="/fridge/delete" element={<FridgeDeletePage />} />

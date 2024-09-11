@@ -37,7 +37,7 @@ const BoardDetails = () => {
     try {
       const response = await axios.get(process.env.REACT_APP_API_URL+`boards/${boardId}`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
         },
       });
       return response.data.data;
@@ -77,7 +77,7 @@ const BoardDetails = () => {
     mutationFn: () => {
       return axios.post(process.env.REACT_APP_API_URL+`boards/${boardId}/like`,{}, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
         }
       });
     },

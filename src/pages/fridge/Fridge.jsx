@@ -73,7 +73,7 @@ function Fridge() {
             page: 1, size: 700, sort: sortOption
           },
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
+            Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
           },
         });
         console.log("data : ", response.data);
@@ -105,7 +105,7 @@ function Fridge() {
               sort: searchKeyword.trim() === "" ? "expirationDate_asc" : sortOption, keyword: searchKeyword.trim(),
             }, 
             headers: {
-              Authorization: `Bearer ${localStorage.getItem('token')}`,
+              Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
             },
         });
         } else {
@@ -115,7 +115,7 @@ function Fridge() {
             category: filterCategory, keyword: searchKeyword.trim(),
           },
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
+            Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
           },
       });
     }
