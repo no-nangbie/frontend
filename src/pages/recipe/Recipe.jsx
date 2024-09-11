@@ -1,133 +1,254 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import Search_img from '../../resources/icon/search_3917754.png'
-
-// Data
-const RecipeItems = [
-  {
-    id: 1,
-    name: "돼지고기 김치찌개1",
-    image: "image_url_1",  // 실제 이미지 URL로 교체 필요
-    availableIngredients: "보유 재료 : ",  // 보유 재료 입력
-    missingIngredients: "미보유 재료 : ",  // 미보유 재료 입력
-  },
-  {
-    id: 2,
-    name: "돼지고기 김치찌개2",
-    image: "image_url_2",  // 실제 이미지 URL로 교체 필요
-    availableIngredients: "보유 재료 : ",  // 보유 재료 입력
-    missingIngredients: "미보유 재료 : ",  // 미보유 재료 입력
-  },
-  {
-    id: 3,
-    name: "돼지고기 김치찌개3",
-    image: "image_url_3",  // 실제 이미지 URL로 교체 필요
-    availableIngredients: "보유 재료 : ",  // 보유 재료 입력
-    missingIngredients: "미보유 재료 : ",  // 미보유 재료 입력
-  },
-  {
-    id: 4,
-    name: "돼지고기 김치찌개4",
-    image: "image_url_4",  // 실제 이미지 URL로 교체 필요
-    availableIngredients: "보유 재료 : ",  // 보유 재료 입력
-    missingIngredients: "미보유 재료 : ",  // 미보유 재료 입력
-  },
-  {
-    id: 5,
-    name: "돼지고기 김치찌개1",
-    image: "image_url_1",  // 실제 이미지 URL로 교체 필요
-    availableIngredients: "보유 재료 : ",  // 보유 재료 입력
-    missingIngredients: "미보유 재료 : ",  // 미보유 재료 입력
-  },
-  {
-    id: 6,
-    name: "돼지고기 김치찌개2",
-    image: "image_url_2",  // 실제 이미지 URL로 교체 필요
-    availableIngredients: "보유 재료 : ",  // 보유 재료 입력
-    missingIngredients: "미보유 재료 : ",  // 미보유 재료 입력
-  },
-  {
-    id: 7,
-    name: "돼지고기 김치찌개3",
-    image: "image_url_3",  // 실제 이미지 URL로 교체 필요
-    availableIngredients: "보유 재료 : ",  // 보유 재료 입력
-    missingIngredients: "미보유 재료 : ",  // 미보유 재료 입력
-  },
-  {
-    id: 8,
-    name: "돼지고기 김치찌개4",
-    image: "image_url_4",  // 실제 이미지 URL로 교체 필요
-    availableIngredients: "보유 재료 : ",  // 보유 재료 입력
-    missingIngredients: "미보유 재료 : ",  // 미보유 재료 입력
-  },
-  {
-    id: 9,
-    name: "돼지고기 김치찌개4",
-    image: "image_url_4",  // 실제 이미지 URL로 교체 필요
-    availableIngredients: "보유 재료 : ",  // 보유 재료 입력
-    missingIngredients: "미보유 재료 : ",  // 미보유 재료 입력
-  },
-  {
-    id: 10,
-    name: "돼지고기 김치찌개4",
-    image: "image_url_4",  // 실제 이미지 URL로 교체 필요
-    availableIngredients: "보유 재료 : ",  // 보유 재료 입력
-    missingIngredients: "미보유 재료 : ",  // 미보유 재료 입력
-  },
-];
+import Search_img from '../../resources/icon/search_3917754.png';
+import { useNavigate } from 'react-router-dom'; 
+import axios from 'axios';
 
 // Main Component
 function Recipe() {
+  const [recipes, setRecipes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [mainFoodCategory, setMainFoodCategory] = useState("전체");
+  const [menuCategory, setMenuCategory] = useState("전체");
+  const [sortOption, setsortOption] = useState("menuId_desc");
+  const navigate = useNavigate();
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
+  const [page, setPage] = useState(1); // 현재 페이지
+  const [hasMore, setHasMore] = useState(true); // 더 많은 데이터가 있는지 여부
+  const [memberFood, setMemberFood] = useState("전체");
+
+  const handleClick = (menuId) => {
+    navigate(`details/${menuId}`); // 페이지 이동 처리
+  };
+
+  const fetchRecipes = async (pageNumber) => {
+    setLoading(true);
+    try {
+      const params = { page: pageNumber, size: 20, sort: sortOption };
+
+      const response = menuCategory === "전체" 
+        ? await axios.get(process.env.REACT_APP_API_URL + 'menus/all', {
+            params: params, 
+            headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+           },
+          })
+        : await axios.get(process.env.REACT_APP_API_URL + 'menus', {
+            params: { ...params, menuCategory: handleGetMenuCategory(menuCategory) },
+            headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+          });
+
+      console.log('Response:', response); // 전체 응답 객체 출력
+
+      // 데이터가 존재하면 기존 데이터와 새 데이터를 병합
+      if (response.data.data.length > 0) {
+        setRecipes(prevRecipes => {
+          const newRecipes = response.data.data;
+          const uniqueRecipes = [...prevRecipes, ...newRecipes].reduce((acc, curr) => {
+            const x = acc.find(item => item.menuId === curr.menuId);
+            if (!x) {
+              return acc.concat([curr]);
+            } else {
+              return acc;
+            }
+          }, []);
+          return uniqueRecipes;
+        });
+      } else {
+        setHasMore(false);
+      }
+      
+      setLoading(false);
+    } catch (error) {
+      console.error('Error:', error); // 에러 출력
+      setError(error);
+      setLoading(false);
+    }
+  };
+
+  const searchMenu = async (pageNumber) => {
+  setLoading(true);
+  try {
+    const params = { page: pageNumber, size: 20, sort: sortOption };
+
+    let response;
+    if (searchKeyword.trim() === "") {
+      setsortOption("menuId_desc");
+    }
+
+    if (menuCategory === "전체") {
+      response = await axios.get(process.env.REACT_APP_API_URL + 'menus/search', {
+        params: { ...params, keyword: searchKeyword.trim() },
+        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+      });
+    } else {
+      response = await axios.get(process.env.REACT_APP_API_URL + 'menus/search_by_category', {
+        params: { ...params, menuCategory: handleGetMenuCategory(menuCategory), keyword: searchKeyword.trim() },
+        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+      });
+    }
+
+    if (response && response.data && response.data.data) {
+      setRecipes(response.data.data);
+      setLoading(false);
+    } else {
+      console.error("예상과 다른 응답 데이터 형식: ", response);
+      setLoading(false);
+    }
+  } catch (error) {
+    console.error("레시피 데이터를 가져오는 데 실패했습니다: ", error);
+    setLoading(false);
+  }
+};
+
+  
+
+  const handleSelectCategoryChange = (e) => {
+    setMenuCategory(e.target.value);
+    setRecipes([]); // 카테고리 변경 시 기존 데이터 지우기
+    setPage(1); // 페이지 초기화
+  };
+
+  const handleSortChange = (e) => {
+    setsortOption(e.target.value);
+    setRecipes([]); // 정렬 변경 시 기존 데이터 지우기
+    setPage(1); // 페이지 초기화
+  };
+
+  const handleGetFood = (e) => {
+    setMemberFood(e.target.value);
+    setRecipes([]);
+    setPage(1);
+  }
+
+  const handleSearchClick = () => {
+    if (searchKeyword.trim() === "") {
+      setsortOption("menuId_desc")
+    }
+    setIsSearching(true);
+    setSearchKeyword("");
+    setRecipes([]); // 검색 시 기존 데이터 지우기
+    setPage(1); // 페이지 초기화
+    searchMenu(1);
+  };
+
+  const handleGetMenuCategory = (menuCategory) => {
+    switch (menuCategory) {
+      case "전체":
+        return "ALL";
+      case "밑 반찬":
+        return "MENU_CATEGORY_SIDE";
+      case "국/찌개":
+        return "MENU_CATEGORY_SOUP";
+      case "디저트":
+        return "MENU_CATEGORY_DESSERT";
+      case "면":
+        return "MENU_CATEGORY_NOODLE";
+      case "밥/죽/떡":
+        return "MENU_CATEGORY_RICE";
+      case "김치":
+        return "MENU_CATEGORY_KIMCHI";
+      case "퓨전":
+        return "MENU_CATEGORY_FUSION";
+      case "양념":
+        return "MENU_CATEGORY_SEASONING";
+      case "양식":
+        return "MENU_CATEGORY_WESTERN";
+      default:
+        return "MENU_CATEGORY_ETC"; 
+    }
+  };
+
+
+  const handleScroll = () => {
+    const container = document.getElementById('scrollable-container');
+    if (container.scrollTop + container.clientHeight >= container.scrollHeight) {
+      if (!loading && hasMore) {
+        setPage(prevPage => {
+          const newPage = prevPage + 1;
+          fetchRecipes(newPage);
+          return newPage;
+        });
+      }
+    }
+  };
+
+  useEffect(() => {
+    fetchRecipes(page);
+  }, [sortOption, menuCategory, page]);
+
+  useEffect(() => {
+    const container = document.getElementById('scrollable-container');
+    container.addEventListener('scroll', handleScroll);
+    return () => {
+      container.removeEventListener('scroll', handleScroll);
+    };
+  }, [loading, hasMore]);
+
   return (
     <MainContainer>
       <Header>
         <InputGroup>
           <Label>메인 식재료</Label>
-            <Select>
-              <option>전체</option>
-              <option>채소</option>
-              <option>고기</option>
-            </Select>
+          <Select onChange={handleGetFood}>
+            <option>전체</option>
+            <option>채소</option>
+            <option>고기</option>
+          </Select>
         </InputGroup>
         <FilterSection>
           <InputGroup2_1thLine>
-                <Label>메뉴 종류</Label>
-                <Select>
-                  <option>전체</option>
-                  <option>채소</option>
-                  <option>고기</option>
-                </Select>
-            </InputGroup2_1thLine>
-            <InputGroup2_2thLine>
-                <Label>정렬</Label>
-                <Select>
-                  <option>전체</option>
-                  <option>날짜순</option>
-                  <option>이름순</option>
-                </Select>
+            <Label2>메뉴 종류</Label2>
+            <Select value={menuCategory} onChange={handleSelectCategoryChange}>
+              <option>전체</option>
+              <option>밑 반찬</option>
+              <option>국/찌개</option>
+              <option>디저트</option>
+              <option>면</option>
+              <option>밥/죽/떡</option>
+              <option>김치</option>
+              <option>퓨전</option>
+              <option>양념</option>
+              <option>양식</option>
+              <option>기타</option>
+            </Select>
+          </InputGroup2_1thLine>
+          <InputGroup2_2thLine>
+            <Label2>정렬</Label2>
+            <Select onChange={handleSortChange} value={sortOption}>
+              <option value="menuId_desc">날짜 ▼</option>
+              <option value="menuId_asc">날짜 ▲</option>
+              <option value="menuLikeCount_desc">좋아요 ▼</option>
+              <option value="menuLikeCount_asc">좋아요 ▲</option>
+            </Select>
           </InputGroup2_2thLine>
         </FilterSection>
+
         <SearchBar>
-          <TextArea type="text" placeholder="메뉴이름 검색" />
-          <SearchIcon src={Search_img} alt="search icon" /> 
+          <TextArea type="text" placeholder="메뉴이름 검색"
+          value={searchKeyword} onChange={(e) => setSearchKeyword(e.target.value)}/>
+          <SearchIcon src={Search_img} alt="search icon" onClick={handleSearchClick}/> 
         </SearchBar>
       </Header>
 
-      <ScrollableContainer>
-      {RecipeItems.map((item) => (
-        <FoodItem key={item.id}>
-          <FoodImage src={item.image} alt={item.name} />
-          <FoodInfo>
-            <FoodName>{item.name}</FoodName>
-            <FoodIngredients>{item.availableIngredients}</FoodIngredients>
-            <FoodIngredients>{item.missingIngredients}</FoodIngredients>
-          </FoodInfo>
-        </FoodItem>
-      ))}
+      <ScrollableContainer id="scrollable-container">
+        {recipes.map((menu, index) => (
+          <FoodItem key={`${menu.menuId}_${index}`} onClick={() => handleClick(menu.menuId)}>
+            <FoodImage src={menu.imageUrl} alt={menu.title} />
+            <FoodInfo>
+              <FoodName>{menu.menuTitle}</FoodName>
+              <FoodIngredients>좋아요 수  : {menu.likesCount}</FoodIngredients>
+              <FoodIngredients>보유 재료 : </FoodIngredients>
+              <FoodIngredients>미보유 재료 : </FoodIngredients>
+            </FoodInfo>
+          </FoodItem>
+        ))}
       </ScrollableContainer>
     </MainContainer>
   );
 }
+
 
 export default Recipe;
 
@@ -198,6 +319,7 @@ const Header = styled.header`
   border-radius: 0 0 15px 15px;
 `;
 
+
 const Dropdown = styled.div`
   display: flex;
   align-items: center;
@@ -262,7 +384,6 @@ const Label = styled.div`
 
 const Select = styled.select`
   flex: 1;
-  padding: 0 20px;
   height: 100%;
   border: none;
   font-size: 13px;
@@ -274,7 +395,6 @@ const Select = styled.select`
   // background-image: url('data:image/svg+xml;base64,YOUR_BASE64_ARROW'); /* 커스텀 화살표 */
   background-repeat: no-repeat;
   background-position: right 15px center; 
-  padding-right: 30px; 
 `;
 
 const FilterSection = styled.div`
@@ -308,4 +428,15 @@ const InputGroup2_2thLine = styled.div`
   height: 30px;
   justify-content: center; /* 가운데 정렬 */
   margin-left: 10px; /* 두 그룹 사이에 간격 추가 */
+`;
+
+const Label2 = styled.div`
+  width: 70px;
+  background-color: white;
+  font-weight: bold;
+  font-size: 13px;
+  text-align: center;
+  line-height: 30px; 
+  border-right: 2px solid #2D9CDB;
+  border-radius: 20px 0 0 20px;
 `;
