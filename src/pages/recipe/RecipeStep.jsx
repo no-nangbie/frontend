@@ -1,29 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import menu_1 from '../../resources/sample/menu_1.png';
 import micro_1 from '../../resources/icon/microphone.png';
 import micro_2 from '../../resources/icon/microphone_onclick.png';
-
+import axios from 'axios';
 
 const RecipeSteps = () => {
+  const { menuId } = useParams(); // URL에서 menuId를 가져옴
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedIngredients, setSelectedIngredients] = useState([]);
   const [micActive, setMicActive] = useState(false); // 마이크 상태를 관리하는 상태 추가
+  const [steps, setSteps] = useState([]); // 레시피 단계를 위한 상태
+  const [ingredients, setIngredients] = useState([]); // 재료 리스트를 위한 상태
 
-  const steps = [
-    "1. 돼지고기는 분량의 양념을 넣어 조물조물 해주신 후 30분 이상 재워둡니다.",
-    "2. 냄비에 썰어둔 김치와 밑간한 돼지고기, 김칫국물 5큰술, 참기름 1작은술을 넣어 약불에서 3~5분간 충분히 볶아줍니다.",
-    "3. 물을 부어 끓이기 시작하고, 강한 불에서 팔팔 끓여줍니다.",
-    "4. 맛있게 먹어줍니다.",
-  ];
+  // menuId를 사용하여 해당 메뉴의 레시피 데이터를 가져옴
+  useEffect(() => {
+    const fetchRecipeData = async () => {
+      try {
+        const response = await axios.get(`http://localhost:8080/menus/${menuId}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`, // 토큰 추가
+          },
+        });
 
-  const ingredients = [
-    { name: '물', amount: '250ml' },
-    { name: '돼지고기 [찌개용]', amount: '250g' },
-    { name: '김치', amount: '200g' },
-    { name: '양파', amount: '반 개' },
-    { name: '고추', amount: '2개' }
-  ];
+        const menuData = response.data.data;
+        setSteps(menuData.recipes); // 레시피 단계를 설정
+        setIngredients(menuData.foodMenuQuantityList); // 재료 리스트 설정
+      } catch (error) {
+        console.error('Error fetching recipe data:', error);
+      }
+    };
+
+    fetchRecipeData();
+  }, [menuId]);
 
   const handleNext = () => {
     if (currentStep < steps.length) {
@@ -41,7 +51,6 @@ const RecipeSteps = () => {
     setMicActive((prevState) => !prevState); // 클릭 시 마이크 상태 토글
   };
 
-
   const handleIngredientCheck = (ingredientName) => {
     setSelectedIngredients((prevSelected) =>
       prevSelected.includes(ingredientName)
@@ -53,7 +62,7 @@ const RecipeSteps = () => {
   return (
     <Container>
       <Header>
-        <Title>돼지고기 김치찌개</Title>
+        <Title>레시피 단계</Title>
         <Controls>
           <ButtonWrapper>
             <Button
@@ -76,7 +85,7 @@ const RecipeSteps = () => {
       {/* 레시피 단계가 마지막 단계일 때와 아닐 때를 구분 */}
       {currentStep < steps.length ? (
         <RecipeSection>
-          <BackgroundImage src={menu_1} alt="돼지고기 김치찌개" />
+          <BackgroundImage src={menu_1} alt="레시피 이미지" />
           <StepDescription>{steps[currentStep]}</StepDescription>
           {/* 마이크 버튼은 마지막 단계가 아닐 때만 표시 */}
           <MicButton onClick={toggleMic}>
@@ -89,14 +98,14 @@ const RecipeSteps = () => {
           <IngredientsTitle>사용된 재료</IngredientsTitle>
           <IngredientsList>
             {ingredients.map((ingredient) => (
-              <IngredientItem key={ingredient.name}>
+              <IngredientItem key={ingredient.foodName}>
                 <input
                   type="checkbox"
-                  checked={selectedIngredients.includes(ingredient.name)}
-                  onChange={() => handleIngredientCheck(ingredient.name)}
+                  checked={selectedIngredients.includes(ingredient.foodName)}
+                  onChange={() => handleIngredientCheck(ingredient.foodName)}
                 />
-                <span>{ingredient.name}</span>
-                <span>{ingredient.amount}</span>
+                <span>{ingredient.foodName}</span>
+                <span>{ingredient.foodQuantity}</span>
               </IngredientItem>
             ))}
           </IngredientsList>
@@ -105,18 +114,17 @@ const RecipeSteps = () => {
       )}
     </Container>
   );
-  
 };
 
 export default RecipeSteps;
 
 // styled-components
 const Container = styled.div`
-  position: relative; /* FinalStepSection을 기준으로 하는 컨테이너 */
+  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height: 100vh; /* 화면 전체 높이를 사용 */
+  height: 100vh;
   max-width: 500px;
   margin: 0 auto;
 `;
@@ -187,7 +195,7 @@ const BackgroundImage = styled.div`
   left: 0;
   width: 100%;
   height: 90%;
-  background-image: url(${() => menu_1});
+  background-image: url(${menu_1});
   background-size: cover;
   background-position: center;
   opacity: 0.15;
@@ -206,13 +214,12 @@ const StepDescription = styled.p`
 `;
 
 const FinalStepSection = styled.div`
-  position: relative; /* 혹은 absolute로 변경 가능 */
-  padding: 40px; /* 패딩을 조정하여 상하 여백을 줄임 */
-  top: -120px; /* top 값을 음수로 설정해 위로 올림 */
+  position: relative;
+  padding: 40px;
+  top: -120px;
   text-align: center;
   font-size: 18px;
 `;
-
 
 const WarningText = styled.p`
   color: red;
@@ -223,16 +230,15 @@ const WarningText = styled.p`
 
 const IngredientsList = styled.div`
   margin-bottom: 20px;
-  max-height: 200px; /* 리스트의 최대 높이 설정 */
-  overflow-y: auto; /* 세로 스크롤을 활성화 */
-  padding-right: 10px; /* 스크롤바가 나타날 때 글자가 가려지지 않게 여유 공간 설정 */
-  border: 1px solid #007bff; /* 테두리 설정 */
-  border-radius: 10px; /* 테두리를 둥글게 설정 */
+  max-height: 200px;
+  overflow-y: auto;
+  padding-right: 10px;
+  border: 1px solid #007bff;
+  border-radius: 10px;
 `;
 
-
 const IngredientsTitle = styled.h2`
-  color: #007bff; /* 파란색 */
+  color: #007bff;
   font-size: 20px;
   text-align: left;
   margin-bottom: 10px;
@@ -240,16 +246,15 @@ const IngredientsTitle = styled.h2`
   padding-bottom: 5px;
 `;
 
-
 const IngredientItem = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 10px 0;
   border-bottom: 1px solid #ddd;
-  
+
   input {
-    margin-right: 10px; /* 체크박스와 이름 사이 여백 */
+    margin-right: 10px;
   }
 
   span {
@@ -258,8 +263,8 @@ const IngredientItem = styled.div`
   }
 
   span:last-child {
-    text-align: right; /* 수량을 오른쪽으로 정렬 */
-    width: 100px; /* 수량 텍스트의 고정 너비를 설정해서 정렬을 맞춤 */
+    text-align: right;
+    width: 100px;
   }
 `;
 
@@ -271,20 +276,19 @@ const MicButton = styled.button`
   background-color: white;
   border: none;
   border-radius: 50%;
-  padding: 0;  /* 패딩을 0으로 설정하여 이미지가 버튼을 꽉 채우도록 */
-  width: 70px;  /* 버튼의 너비 */
-  height: 70px; /* 버튼의 높이 */
+  padding: 0;
+  width: 70px;
+  height: 70px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
   cursor: pointer;
 
   img {
-    width: 100%;  /* 이미지가 버튼 너비에 맞게 설정 */
-    height: 100%; /* 이미지가 버튼 높이에 맞게 설정 */
-    object-fit: cover; /* 이미지가 버튼 안에서 비율이 유지되면서 꽉 차도록 설정 */
-    border-radius: 50%; /* 이미지 모서리를 둥글게 설정 */
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
   }
 `;
-
 
 const FinishButton = styled.button`
   padding: 15px 30px;
@@ -296,4 +300,3 @@ const FinishButton = styled.button`
   font-size: 18px;
   width: 100%;
 `;
-

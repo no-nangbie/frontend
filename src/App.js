@@ -46,7 +46,8 @@ function App() {
               <Route path="/recipe/details" element={<RecipeDetailsPage />} />
               <Route path="/recipe/details/:menuId" element={<RecipeDetailsPage />} />
               <Route path="/recipe/details/edit" element={<RecipeEditPage />} />
-              <Route path="/recipe/details/step" element={<RecipeStepPage />} />
+              <Route path="/recipe/details/:menuId/step" element={<RecipeStepPage />} />
+              {/* <Route path="/recipe/details/step" element={<RecipeStepPage />} /> */}
               <Route path="/board" element={<BoardPage />} />
               <Route path="/board/details/:boardId" element={<BoardDetailsPage />} />
               <Route path="/board/details/edit" element={<BoardEditPage />} />
