@@ -1,163 +1,181 @@
-import React from 'react';
 import styled from 'styled-components';
-import menu_1 from '../../resources/sample/menu_1.png';
+import axios from 'axios';
+import React from 'react';
+import { useParams } from 'react-router-dom';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { ClipLoader } from 'react-spinners';
+
+//아이콘 이미지
 import user_icon from '../../resources/icon/user.png';
 import timer_icon from '../../resources/icon/timer.png';
 import cook_icon from '../../resources/icon/cook.png';
-import like_icon from '../../resources/icon/heart_red.png'; 
+import like_icon from '../../resources/icon/heart_red.png';
+import like_fill_icon from '../../resources/icon/heart_red_FillIn.png';
+import menu_1 from '../../resources/sample/menu_1.png';
 
+//난이도 이미지
 import difficulty1_icon from '../../resources/icon/difficulty_1.png';
 import difficulty2_icon from '../../resources/icon/difficulty_2.png';
 import difficulty3_icon from '../../resources/icon/difficulty_3.png';
 
 const RecipeDetails = () => {
+  const { menuId } = useParams(); // 메뉴 ID를 URL에서 가져옴
+  const queryClient = useQueryClient();
+
+  const categoryMap = {
+    'MENU_CATEGORY_SIDE': '밑 반찬',
+    'MENU_CATEGORY_SOUP': '국/찌개',
+    'MENU_CATEGORY_DESSERT': '디저트',
+    'MENU_CATEGORY_NOODLE': '면',
+    'MENU_CATEGORY_RICE': '밥/죽/떡',
+    'MENU_CATEGORY_KIMCHI': '김치',
+    'MENU_CATEGORY_FUSION': '퓨전',
+    'MENU_CATEGORY_SEASONING': '양념',
+    'MENU_CATEGORY_WESTERN': '양식',
+    'MENU_CATEGORY_ETC': '기타',
+  };
+
+  const difficultyMap = {
+    'DIFFICULTY_EASY': '쉬움',
+    'DIFFICULTY_MEDIUM': '보통',
+    'DIFFICULTY_HARD': '어려움',
+  };
+
+   // 난이도에 따른 이미지 매핑 함수
+   const getDifficultyImage = (difficulty) => {
+    switch (difficulty) {
+      case 'DIFFICULTY_EASY':
+        return difficulty1_icon;
+      case 'DIFFICULTY_MEDIUM':
+        return difficulty2_icon;
+      case 'DIFFICULTY_HARD':
+        return difficulty3_icon;
+      default:
+        return null; // 기본값 처리 (없을 때)
+    }
+  };
+
+  // 메뉴 데이터를 불러오는 함수
+  const fetchMenu = async () => {
+    if (!menuId) {
+      throw new Error('잘못된 메뉴 ID 입니다.');
+    }
+    try {
+      const response = await axios.get(`http://localhost:8080/menus/${menuId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`, // 토큰 사용
+        },
+      });
+      return response.data.data;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  // React Query를 사용하여 메뉴 데이터를 불러옴
+  const {
+    data: menu,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ['menu', menuId],
+    queryFn: fetchMenu,
+    enabled: !!menuId,
+    retry: 1,
+  });
+
+  // 좋아요 처리
+  const likeMutation = useMutation({
+    mutationFn: () => {
+      return axios.post(`http://localhost:8080/menus/${menuId}/like`, {}, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['menu', menuId]);
+    },
+    onError: () => {
+      alert('좋아요 처리 중 오류가 발생했습니다.');
+    },
+  });
+
+
+  // 좋아요 이미지 설정
+  const handleLikeImg = (likeCheck) => {
+    return likeCheck === 'T' ? like_fill_icon : like_icon;
+  };
+
+  // 로딩 중 처리
+  if (isLoading) return (
+    <Container>
+      <ClipLoader color="#007bff" loading={isLoading} size={50} />
+    </Container>
+  );
+
+  // 에러 처리
+  if (isError) {
+    return <div>메뉴를 불러오는데 오류가 발생했습니다: {error.message}</div>;
+  }
+
+  if (!menu) {
+    return <div>메뉴를 찾을 수 없습니다.</div>;
+  }
+
+
+  // 카테고리 매핑된 값
+  const menuCategory = categoryMap[menu.menuCategory] || '카테고리 없음';
+  // 난이도 매핑된 값
+  const difficultyText = difficultyMap[menu.difficulty] || '난이도 없음';
+  // 난이도 이미지
+  const difficultyImage = getDifficultyImage(menu.difficulty);
+
+  // 추후에 menu_1 => menu 이미지 변경
   return (
     <Container>
       <ImageContainer>
-        <Image src={menu_1} alt="돼지고기 김치찌개" />
-        <LikeButton onClick={() => alert('초록 버튼 클릭됨!')}>
-          <LikeButtonImage src={like_icon} alt="Button Icon" /> 
-        </LikeButton> {/* 초록색 버튼 */}
+        <Image src={menu_1 || '/images/default.png'} alt="이미지 없음" /> 
+        <LikeButton onClick={() => likeMutation.mutate()}>
+          <LikeButtonImage src={handleLikeImg(menu.likeCheck)} alt="Button Icon" />
+        </LikeButton>
       </ImageContainer>
       <TextContainer>
-        <Title>돼지고기 김치찌개</Title>
-        <Dividers/>
-        <Description>진한 국물이 맛있는 돼지고기 김치찌개 입니다.</Description>
+        <Title>[ {menuCategory} ] {menu.menuTitle}</Title>
+        <Dividers />
+        <Description>{menu.menuDescription}</Description>
         <InfoContainer>
-            <InfoItem>
-              <Icon src={user_icon} alt="관리자" />
-              관리자
-            </InfoItem>
-            <InfoItem>
-              <Icon src={cook_icon} alt="3인분" />
-              3인분
-            </InfoItem>
-          </InfoContainer>
-          <InfoContainer>
-            <InfoItem>
-              <Icon src={timer_icon} alt="30분" />
-              30분
-            </InfoItem>
-            <InfoItem>
-              <Icon src={difficulty1_icon} alt="쉬움" />
-              쉬움
-            </InfoItem>
+          <InfoItem>
+            <Icon src={user_icon} alt="관리자" />
+            관리자
+          </InfoItem>
+          <InfoItem>
+            <Icon src={cook_icon} alt="인분" />
+            {menu.servingSize}인분
+          </InfoItem>
+        </InfoContainer>
+        <InfoContainer>
+          <InfoItem>
+            <Icon src={timer_icon} alt="시간" />
+            {menu.cookingTime}분
+          </InfoItem>
+          <InfoItem>
+            <Icon src={difficultyImage} alt="난이도" />
+            {difficultyText}
+          </InfoItem>
         </InfoContainer>
         <Ingredients>
           <Title>재료</Title>
-          <Dividers/>
+          <Dividers />
           <ul>
-            <li><Span>물</Span><Span>250ml</Span></li>
-            <Uldividers/>
-            <li><Span>돼지고기 [찌개용]</Span><Span>250g</Span></li>
-            <Uldividers/>
-            <li><Span>김치</Span><Span>200g</Span></li>
-            <Uldividers/>
-            <li><Span>양파</Span><Span>반 개</Span></li>
-            <Uldividers/>
-            <li><Span>고추</Span><Span>2개</Span></li>
-            <Uldividers/>
-            <li><Span>돼지고기 [찌개용]</Span><Span>250g</Span></li>
-            <Uldividers/>
-            <li><Span>김치</Span><Span>200g</Span></li>
-            <Uldividers/>
-            <li><Span>양파</Span><Span>반 개</Span></li>
-            <Uldividers/>
-            <li><Span>고추</Span><Span>2개</Span></li>
-            <Uldividers/>
-            <li><Span>돼지고기 [찌개용]</Span><Span>250g</Span></li>
-            <Uldividers/>
-            <li><Span>김치</Span><Span>200g</Span></li>
-            <Uldividers/>
-            <li><Span>양파</Span><Span>반 개</Span></li>
-            <Uldividers/>
-            <li><Span>고추</Span><Span>2개</Span></li>
-            <Uldividers/>
-            <li><Span>고추</Span><Span>2개</Span></li>
-            <Uldividers/>
-            <li><Span>돼지고기 [찌개용]</Span><Span>250g</Span></li>
-            <Uldividers/>
-            <li><Span>김치</Span><Span>200g</Span></li>
-            <Uldividers/>
-            <li><Span>양파</Span><Span>반 개</Span></li>
-            <Uldividers/>
-            <li><Span>양파</Span><Span>반 개</Span></li>
-            <Uldividers/>
-            <li><Span>고추</Span><Span>2개</Span></li>
-            <Uldividers/>
-            <li><Span>돼지고기 [찌개용]</Span><Span>250g</Span></li>
-            <Uldividers/>
-            <li><Span>김치</Span><Span>200g</Span></li>
-            <Uldividers/>
-            <li><Span>양파</Span><Span>반 개</Span></li>
-            <Uldividers/>
-            <li><Span>고추</Span><Span>2개</Span></li>
-            <Uldividers/>
-            <li><Span>고추</Span><Span>2개</Span></li>
-            <Uldividers/>
-            <li><Span>고추</Span><Span>2개</Span></li>
-            <Uldividers/>
-            <li><Span>돼지고기 [찌개용]</Span><Span>250g</Span></li>
-            <Uldividers/>
-            <li><Span>김치</Span><Span>200g</Span></li>
-            <Uldividers/>
-            <li><Span>양파</Span><Span>반 개</Span></li>
-            <Uldividers/>
-            <li><Span>양파</Span><Span>반 개</Span></li>
-            <Uldividers/>
-            <li><Span>고추</Span><Span>2개</Span></li>
-            <Uldividers/>
-            <li><Span>돼지고기 [찌개용]</Span><Span>250g</Span></li>
-            <Uldividers/>
-            <li><Span>김치</Span><Span>200g</Span></li>
-            <Uldividers/>
-            <li><Span>양파</Span><Span>반 개</Span></li>
-            <Uldividers/>
-            <li><Span>고추</Span><Span>2개</Span></li>
-            <Uldividers/>
-            <li><Span>고추</Span><Span>2개</Span></li>
-            <Uldividers/>
-            <li><Span>고추</Span><Span>2개</Span></li>
-            <Uldividers/>
-            <li><Span>돼지고기 [찌개용]</Span><Span>250g</Span></li>
-            <Uldividers/>
-            <li><Span>김치</Span><Span>200g</Span></li>
-            <Uldividers/>
-            <li><Span>양파</Span><Span>반 개</Span></li>
-            <Uldividers/>
-            <li><Span>양파</Span><Span>반 개</Span></li>
-            <Uldividers/>
-            <li><Span>고추</Span><Span>2개</Span></li>
-            <Uldividers/>
-            <li><Span>돼지고기 [찌개용]</Span><Span>250g</Span></li>
-            <Uldividers/>
-            <li><Span>김치</Span><Span>200g</Span></li>
-            <Uldividers/>
-            <li><Span>양파</Span><Span>반 개</Span></li>
-            <Uldividers/>
-            <li><Span>고추</Span><Span>2개</Span></li>
-            <Uldividers/>
-            <li><Span>고추</Span><Span>2개</Span></li>
-            <Uldividers/>
-            <li><Span>고추</Span><Span>2개</Span></li>
-            <Uldividers/>
-            <li><Span>돼지고기 [찌개용]</Span><Span>250g</Span></li>
-            <Uldividers/>
-            <li><Span>김치</Span><Span>200g</Span></li>
-            <Uldividers/>
-            <li><Span>양파</Span><Span>반 개</Span></li>
-            <Uldividers/>
-            <li><Span>양파</Span><Span>반 개</Span></li>
-            <Uldividers/>
-            <li><Span>고추</Span><Span>2개</Span></li>
-            <Uldividers/>
-            <li><Span>돼지고기 [찌개용]</Span><Span>250g</Span></li>
-            <Uldividers/>
-            <li><Span>김치</Span><Span>200g</Span></li>
-            <Uldividers/>
-            <li><Span>양파</Span><Span>반 개</Span></li>
-            <Uldividers/>
-            <li><Span>고추</Span><Span>2개</Span></li>
+            {menu.foodMenuQuantityList.map((ingredient, index) => (
+              <li key={index}>
+                <Span>{ingredient.foodName}</Span>
+                <Span>{ingredient.foodQuantity}</Span>
+                <Uldividers />
+              </li>
+            ))}
           </ul>
         </Ingredients>
         <ButtonContainer>
@@ -167,7 +185,6 @@ const RecipeDetails = () => {
     </Container>
   );
 };
-
 // Styled Components
 const Container = styled.div`
   background-color: white;
@@ -175,15 +192,15 @@ const Container = styled.div`
   flex-direction: column;
   align-items: center;
   width: 100%;
-  height: 100%; /* Limit height of the scrollable area */
-  overflow-y: auto; /* 세로 스크롤 가능하게 설정 */
+  height: 100%;
+  overflow-y: auto;
   overflow-x: hidden;
 `;
 
 const ImageContainer = styled.div`
   width: 100%;
-  position: relative; /* 자식 요소가 절대 위치를 가질 수 있도록 설정 */
-  height: 50vh; /* 이미지 높이를 뷰포트 높이의 50%로 설정 */
+  position: relative;
+  height: 50vh;
   border-radius: 0 0 30px 30px;
 `;
 
@@ -195,39 +212,23 @@ const Image = styled.img`
 
 const LikeButton = styled.button`
   position: absolute;
-  bottom: 0px; /* 이미지 아래쪽에서 0px 위치 */
-  right: 0px; /* 이미지 오른쪽에서 0px 위치 */
-  width: 60px; /* 버튼 너비 */
-  height: 60px; /* 버튼 높이 */
-  background-color: white; /* 버튼 배경색 */
+  bottom: 0px;
+  right: 0px;
+  width: 60px;
+  height: 60px;
+  background-color: white;
   border: none;
-  border-radius: 20px 0 0; /* 모서리를 둥글게 */
+  border-radius: 20px 0 0;
   cursor: pointer;
   display: flex;
   align-items: center;
-  justify-content: center; /* 이미지가 중앙에 오도록 설정 */
-  opacity: 0.6; /* 20% 투명도 */
+  justify-content: center;
+  opacity: 0.6;
 `;
 
 const LikeButtonImage = styled.img`
-  width: 30px; /* 이미지 너비 */
-  height: 30px; /* 이미지 높이 */
-`;
-
-const Span = styled.div`
-  margin: 0 30px 0px 30px;
-`
-const Dividers = styled.div`
-  border: 0;
-  height: 2px;
-  background-color: #2D9CDB; /* 원하는 색상으로 변경 */
-  margin: 0 0; /* 위아래 여백 조정 */
-`;
-const Uldividers = styled.div`
-  border: 0;
-  height: 1px;
-  background-color: #D9D9D9; /* 원하는 색상으로 변경 */
-  margin: 0 0; /* 위아래 여백 조정 */
+  width: 30px;
+  height: 30px;
 `;
 
 const TextContainer = styled.div`
@@ -241,6 +242,13 @@ const Title = styled.h1`
   font-weight: bold;
   margin: 0;
   color: #2D9CDB;
+`;
+
+const Dividers = styled.div`
+  border: 0;
+  height: 2px;
+  background-color: #2D9CDB;
+  margin: 0 0;
 `;
 
 const Description = styled.p`
@@ -258,27 +266,22 @@ const InfoContainer = styled.div`
 
 const InfoItem = styled.div`
   display: flex;
-  flex-direction: row; /* 아이콘과 텍스트를 위아래로 배치 */
-  align-items: center; /* 텍스트 길이와 상관없이 아이콘 중앙에 위치 */
+  flex-direction: row;
+  align-items: center;
   font-size: 12px;
   color: #333;
-  width: 300px; /* 고정된 너비로 아이템의 위치 고정 */
+  width: 300px;
 `;
 
 const Icon = styled.img`
   width: 40px;
   height: 40px;
-  margin-right: 10px; /* 아이콘과 텍스트 사이에 간격 추가 */
+  margin-right: 10px;
 `;
 
 const Ingredients = styled.div`
   text-align: left;
   margin: 20px 0;
-
-  h2 {
-    font-size: 16px;
-    margin-bottom: 10px;
-  }
 
   ul {
     list-style: none;
@@ -289,11 +292,21 @@ const Ingredients = styled.div`
       color: #555;
       margin-bottom: 5px;
       display: flex;
-      justify-content: space-between; /* 재료와 양을 양쪽 끝에 배치 */
+      justify-content: space-between;
     }
   }
 `;
 
+const Span = styled.span`
+  margin: 0 30px;
+`;
+
+const Uldividers = styled.div`
+  border: 0;
+  height: 1px;
+  background-color: #D9D9D9;
+  margin: 0;
+`;
 
 const ButtonContainer = styled.div`
   display: flex;
@@ -307,17 +320,18 @@ const ActionButton = styled.button`
   color: #FFFFFF;
   width: 100%;
   height: 50px;
-  padding: 10px 40px; /* 버튼이 길어지도록 padding 설정 */
-  border: 2px solid #2D9CDB; /* 파란색 테두리 */
-  border-radius: 10px; /* 둥근 모서리 */
+  padding: 10px 40px;
+  border: 2px solid #2D9CDB;
+  border-radius: 10px;
   cursor: pointer;
   font-size: 16px;
   font-weight: bold;
   text-align: center;
   
   &:hover {
-    background-color: #f0f0f0; /* hover 시 배경색 변경 */
+    background-color: #f0f0f0;
   }
 `;
+
 
 export default RecipeDetails;

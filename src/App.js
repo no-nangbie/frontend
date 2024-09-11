@@ -44,6 +44,7 @@ function App() {
               <Route path="/fridge/delete" element={<FridgeDeletePage />} />
               <Route path="/recipe" element={<RecipePage />} />
               <Route path="/recipe/details" element={<RecipeDetailsPage />} />
+              <Route path="/recipe/details/:menuId" element={<RecipeDetailsPage />} />
               <Route path="/recipe/details/edit" element={<RecipeEditPage />} />
               <Route path="/recipe/details/step" element={<RecipeStepPage />} />
               <Route path="/board" element={<BoardPage />} />
