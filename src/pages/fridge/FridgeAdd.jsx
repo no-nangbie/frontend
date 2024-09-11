@@ -26,7 +26,7 @@ function My_foods() {
       const response = await axios.get(process.env.REACT_APP_API_URL + 'foods', {
         params: { page: 1, size: 700, sort: 'foodName_asc', category }, 
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
         },
       });
       console.log(response.data.data);
@@ -43,7 +43,7 @@ function My_foods() {
         const response = await axios.get(process.env.REACT_APP_API_URL + 'foods', {
           params: { page: 1, size: 700, sort: 'foodName_desc', category: filterCategory },
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
+            Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
           },
         });
         setFoodItems(response.data.data || []);
@@ -118,7 +118,7 @@ function My_foods() {
         foodName: selectedFoodName, expirationDate, memo, foodCategory: filterCategory, 
       }, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
         },
       });
       alert("보유 식재료가 성공적으로 저장되었습니다.");

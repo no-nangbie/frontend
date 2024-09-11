@@ -137,7 +137,7 @@ const BoardEdit = () => {
       const response = await axios.post(process.env.REACT_APP_API_URL+'boards', JSON.stringify(data), {
         headers: {
           'Content-Type': 'application/json',  // JSON 형식으로 전송
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
         },
       });
       console.log('데이터 전송 성공:', response.data);

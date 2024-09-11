@@ -69,7 +69,7 @@ function FridgeDelete() {
           page: 1, size: 700, sort: sortOption
         },
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
         },
       });
       console.log("data : ", response.data);
@@ -121,7 +121,7 @@ function FridgeDelete() {
       await axios.delete(process.env.REACT_APP_API_URL + 'my-foods', {
         data: selectedItems,
           headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
         },
       });
       setFoodItems(prevItems => prevItems.filter(item => !selectedItems.includes(item.memberFoodId)));

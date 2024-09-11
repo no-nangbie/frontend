@@ -67,7 +67,7 @@ function Board() {
       const response = await axios.get(process.env.REACT_APP_API_URL+'boards', {
         params: { type, sort, page: 1, size: 20 },
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
         },
       });
       setBoards(response.data.data);
