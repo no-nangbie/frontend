@@ -7,26 +7,28 @@ import micro_2 from '../../resources/icon/microphone_onclick.png';
 import axios from 'axios';
 
 const RecipeSteps = () => {
-  const { menuId } = useParams(); // URL에서 menuId를 가져옴
+  const { menuId } = useParams();
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedIngredients, setSelectedIngredients] = useState([]);
-  const [micActive, setMicActive] = useState(false); // 마이크 상태를 관리하는 상태 추가
-  const [steps, setSteps] = useState([]); // 레시피 단계를 위한 상태
-  const [ingredients, setIngredients] = useState([]); // 재료 리스트를 위한 상태
+  const [micActive, setMicActive] = useState(false); 
+  const [steps, setSteps] = useState([]);
+  const [ingredients, setIngredients] = useState([]);
+  const [recognition, setRecognition] = useState(null);
+  const [transcript, setTranscript] = useState(''); // 인식된 텍스트 상태
 
-  // menuId를 사용하여 해당 메뉴의 레시피 데이터를 가져옴
+  // 메뉴 데이터를 가져오는 함수
   useEffect(() => {
     const fetchRecipeData = async () => {
       try {
         const response = await axios.get(`http://localhost:8080/menus/${menuId}`, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`, // 토큰 추가
+            Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
           },
         });
 
         const menuData = response.data.data;
-        setSteps(menuData.recipes); // 레시피 단계를 설정
-        setIngredients(menuData.foodMenuQuantityList); // 재료 리스트 설정
+        setSteps(menuData.recipes);
+        setIngredients(menuData.foodMenuQuantityList);
       } catch (error) {
         console.error('Error fetching recipe data:', error);
       }
@@ -35,29 +37,85 @@ const RecipeSteps = () => {
     fetchRecipeData();
   }, [menuId]);
 
-  const handleNext = () => {
-    if (currentStep < steps.length) {
-      setCurrentStep(currentStep + 1);
-    }
-  };
+  // Web Speech API 초기화
+  // Web Speech API 초기화
+useEffect(() => {
+  if ('webkitSpeechRecognition' in window) {
+    const recognitionInstance = new window.webkitSpeechRecognition();
+    recognitionInstance.lang = "ko-KR";
+    recognitionInstance.continuous = true; 
+    recognitionInstance.interimResults = false; // 최종 결과만 처리
 
-  const handlePrev = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
-    }
-  };
+    recognitionInstance.onresult = (event) => {
+      let transcriptText = '';
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        transcriptText += event.results[i][0].transcript;
+      }
+      console.log('Recognized text:', transcriptText);
 
-  const toggleMic = () => {
-    setMicActive((prevState) => !prevState); // 클릭 시 마이크 상태 토글
-  };
+      const cleanedTranscript = transcriptText.trim().replace(/[.,\s]/g, '');
 
-  const handleIngredientCheck = (ingredientName) => {
-    setSelectedIngredients((prevSelected) =>
-      prevSelected.includes(ingredientName)
-        ? prevSelected.filter((name) => name !== ingredientName)
-        : [...prevSelected, ingredientName]
-    );
-  };
+      // "다음"이라는 단어를 인식하면 페이지 넘김
+      if (cleanedTranscript.includes('다음')) {
+        handleNext();
+      }
+
+      // "이전"이라는 단어를 인식하면 이전 페이지로 이동
+      if (cleanedTranscript.includes('이전')) {
+        handlePrev();
+      }
+    };
+
+    recognitionInstance.onerror = (event) => {
+      console.error('Speech recognition error:', event.error);
+    };
+
+    recognitionInstance.onend = () => {
+      // 음성 인식이 종료될 때 다시 시작
+      if (micActive) {
+        console.log("음성 인식 재시작됨")
+        recognitionInstance.start();
+      } else {
+        console.log("음성 인식 종료됨")
+      }
+    };
+
+    setRecognition(recognitionInstance);
+  }
+}, [micActive]); // micActive 상태에 따라 음성 인식 제어
+
+const handleNext = () => {
+  if (currentStep < steps.length) {
+    setCurrentStep((prevStep) => prevStep + 1);
+    setTranscript('');  // 인식된 텍스트 초기화
+  }
+};
+
+const handlePrev = () => {
+  if (currentStep > 0) {
+    setCurrentStep((prevStep) => prevStep - 1);
+  }
+};
+
+const toggleMic = () => {
+  if (!micActive && recognition) {
+    recognition.start(); // 마이크 활성화 시 음성 인식 시작
+    console.log("음성 인식 시작됨");
+  } else if (micActive && recognition) {
+    recognition.abort(); // 마이크 비활성화 시 음성 인식 종료
+    console.log("음성 인식 강제 종료됨");
+  }
+  setMicActive((prevState) => !prevState); // 마이크 상태를 토글
+};
+
+const handleIngredientCheck = (ingredientName) => {
+  setSelectedIngredients((prevSelected) =>
+    prevSelected.includes(ingredientName)
+      ? prevSelected.filter((name) => name !== ingredientName)
+      : [...prevSelected, ingredientName]
+  );
+};
+
 
   return (
     <Container>
@@ -65,29 +123,21 @@ const RecipeSteps = () => {
         <Title>레시피 단계</Title>
         <Controls>
           <ButtonWrapper>
-            <Button
-              onClick={handlePrev}
-              disabled={currentStep === 0}
-            >
+            <Button onClick={handlePrev} disabled={currentStep === 0}>
               이전
             </Button>
             <StepIndicator>{currentStep + 1} / {steps.length + 1}</StepIndicator>
-            <Button
-              onClick={handleNext}
-              disabled={currentStep === steps.length}
-            >
+            <Button onClick={handleNext} disabled={currentStep === steps.length}>
               다음
             </Button>
           </ButtonWrapper>
         </Controls>
       </Header>
-  
-      {/* 레시피 단계가 마지막 단계일 때와 아닐 때를 구분 */}
+
       {currentStep < steps.length ? (
         <RecipeSection>
           <BackgroundImage src={menu_1} alt="레시피 이미지" />
           <StepDescription>{steps[currentStep]}</StepDescription>
-          {/* 마이크 버튼은 마지막 단계가 아닐 때만 표시 */}
           <MicButton onClick={toggleMic}>
             <img src={micActive ? micro_2 : micro_1} alt="mic" />
           </MicButton>
@@ -117,6 +167,7 @@ const RecipeSteps = () => {
 };
 
 export default RecipeSteps;
+
 
 // styled-components
 const Container = styled.div`
