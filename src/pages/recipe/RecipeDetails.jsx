@@ -71,7 +71,7 @@ const RecipeDetails = () => {
     try {
       const response = await axios.get(`http://localhost:8080/menus/${menuId}`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`, // 토큰 사용
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`, // 토큰 사용
         },
       });
       return response.data.data;
