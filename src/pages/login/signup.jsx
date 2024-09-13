@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import logo from '../../resources/icon/logo.png';
 import axios from 'axios';
 
 function Signup() {
@@ -137,7 +138,7 @@ function Signup() {
 
       <SignupBox>
         <Logo>
-          <LogoImg src="/path-to-your-logo.png" alt="logo" />
+          <LogoImg src={logo} alt="logo" />
         </Logo>
 
         <SectionTitle>이메일 & 아이디</SectionTitle>
@@ -227,7 +228,7 @@ const Container = styled.div`
   justify-content: flex-start;
   height: 100vh;
   background-color: #f2f2f2;
-  max-width: 730px;
+  max-width: 730px; // 전체 페이지의 최대 너비를 조정합니다.
   width: 100%;
   margin: 0 auto;
 `;
@@ -253,7 +254,7 @@ const SignupBox = styled.div`
   border: 2px solid #2D9CDB;
   border-radius: 10px;
   padding: 30px;
-  width: 350px;
+  width: 300px; // 박스의 너비를 더 넓게 조정했습니다.
   text-align: center;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   margin-top: 5vh;
@@ -264,8 +265,8 @@ const Logo = styled.div`
 `;
 
 const LogoImg = styled.img`
-  width: 80px;
-  height: 80px;
+  width: 120px;
+  height: 70px;
 `;
 
 const SectionTitle = styled.h3`
@@ -273,6 +274,8 @@ const SectionTitle = styled.h3`
   color: #2D9CDB;
   font-size: 14px;
   margin-bottom: 10px;
+  border-bottom: 2px solid #2D9CDB; /* 파란색 하단 경계선 */
+  padding-bottom: 5px; /* 경계선과 글자 사이의 간격 */
 `;
 
 const InputGroup = styled.div`
@@ -282,10 +285,11 @@ const InputGroup = styled.div`
   border: 2px solid #2D9CDB;
   border-radius: 30px;
   background-color: #f5f5f5;
+  //width: 100%; // 입력 그룹이 박스의 전체 너비를 차지하도록 조정했습니다.
 `;
 
 const Label = styled.div`
-  width: 70px;
+  width: 90px; // 라벨의 너비를 넓게 조정했습니다.
   background-color: white;
   font-weight: bold;
   font-size: 14px;
@@ -302,6 +306,7 @@ const TextArea = styled.input`
   font-size: 14px;
   outline: none;
   border-radius: 0 30px 30px 0;
+  //width: calc(100% - 90px); // 라벨 너비에 맞춰 TextArea 너비를 자동 조정
 `;
 
 const SectionDivider = styled.div`
@@ -350,6 +355,7 @@ const ErrorMessage = styled.p`
   color: red;
   margin-top: 20px;
 `;
+
 const SuccessMessage = styled.p`
   color: green;
   margin-top: 20px;
