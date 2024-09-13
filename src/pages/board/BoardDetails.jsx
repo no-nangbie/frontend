@@ -193,14 +193,32 @@ const BoardDetails = () => {
           <Title>재료</Title>
           <Dividers/>
           <ul>
-            <li><Span>{post.foodContent}</Span></li>
+            <li>
+              <Span>
+                {post.foodContent.split('\n').map((line, index) => (
+                  <React.Fragment key={index}>
+                    {line}
+                    <br />
+                  </React.Fragment>
+                ))}
+              </Span>
+            </li>
           </ul>
         </Ingredients>
         <Ingredients>
           <Title>레시피</Title>
           <Dividers/>
           <ul>
-            <li><Span>{post.recipeContent}</Span></li>
+            <li>
+              <Span>
+                {post.recipeContent.split('\n').map((line, index) => (
+                  <React.Fragment key={index}>
+                    {line}
+                    <br />
+                  </React.Fragment>
+                ))}
+              </Span>
+            </li>
           </ul>
         </Ingredients>
       </TextContainer>
