@@ -71,7 +71,10 @@ useEffect(() => {
     recognitionInstance.onend = () => {
       // 음성 인식이 종료될 때 다시 시작
       if (micActive) {
+        console.log("음성 인식 재시작됨")
         recognitionInstance.start();
+      } else {
+        console.log("음성 인식 종료됨")
       }
     };
 
@@ -95,10 +98,10 @@ const handlePrev = () => {
 const toggleMic = () => {
   if (!micActive && recognition) {
     recognition.start(); // 마이크 활성화 시 음성 인식 시작
-    console.log("음성 인식 시작됨");
+    console.log("음성 인식 재시작됨");
   } else if (micActive && recognition) {
     recognition.stop(); // 마이크 비활성화 시 음성 인식 종료
-    console.log("음성 인식 종료됨");
+    console.log("음성 인식 강제 종료됨");
   }
   setMicActive((prevState) => !prevState); // 마이크 상태를 토글
 };
