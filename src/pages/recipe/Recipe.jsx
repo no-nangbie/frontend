@@ -239,8 +239,9 @@ function Recipe() {
             <FoodInfo>
               <FoodName>{menu.menuTitle}</FoodName>
               <FoodIngredients>좋아요 수  : {menu.likesCount}</FoodIngredients>
-              <FoodIngredients>보유 재료 : </FoodIngredients>
-              <FoodIngredients>미보유 재료 : </FoodIngredients>
+              <FoodIngredients>보유 재료 : {menu.ownedFoods ? menu.ownedFoods : "없음"}</FoodIngredients>
+              <FoodIngredients>미보유 재료 : {menu.missingFoods ? menu.missingFoods : "없음"}</FoodIngredients>
+
             </FoodInfo>
           </FoodItem>
         ))}
