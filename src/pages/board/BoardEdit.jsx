@@ -14,6 +14,7 @@ const BoardEdit = () => {
   const [menuCategory, setMenuCategory] = useState('밑 반찬'); // 기본값을 '전체'로 설정
   const [difficulty, setDifficulty] = useState(1); // 기본 난이도는 '보통'
   const [selectedImage, setSelectedImage] = useState(null); // 선택한 이미지 상태 관리
+  const [selectedImageView, setSelectedImageView] = useState(null); // 선택한 이미지 출력 상태 관리
   const navigate = useNavigate(); // useNavigate 훅 사용
 
 
@@ -30,7 +31,8 @@ const BoardEdit = () => {
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
-      setSelectedImage(URL.createObjectURL(file));
+      setSelectedImage(file);
+      setSelectedImageView(URL.createObjectURL(file))
     }
   };
 
@@ -121,31 +123,35 @@ const BoardEdit = () => {
    * @Author : 신민준
    */
   const handleSubmit = async () => {
-    const data = {
-      title: title,
-      boardContent: boardContent,
-      foodContent: foodContent,
-      recipeContent: recipeContent,
-      cookingTime: cookingTime,
-      servingSize: servingSize,
-      imageUrl: selectedImage,
-      difficulty: handleGetDifficulty(difficulty), 
-      menuCategory: handleGetMenuCategory(menuCategory), 
-    };
+    const formData = new FormData();
+  
+    // formData에 텍스트 필드 추가
+    formData.append('title', title);
+    formData.append('boardContent', boardContent);
+    formData.append('foodContent', foodContent);
+    formData.append('recipeContent', recipeContent);
+    formData.append('cookingTime', cookingTime);
+    formData.append('servingSize', servingSize);
+    formData.append('difficulty', handleGetDifficulty(difficulty));
+    formData.append('menuCategory', handleGetMenuCategory(menuCategory));
+    // 이미지 파일 추가
+    if (selectedImage) {
+      formData.append('imageFile', selectedImage); // 이미지 파일 객체 자체를 formData에 추가
+    }
 
     try {
-      const response = await axios.post(process.env.REACT_APP_API_URL+'boards', JSON.stringify(data), {
+      const response = await axios.post(process.env.REACT_APP_API_URL + 'boards', formData, {
         headers: {
-          'Content-Type': 'application/json',  // JSON 형식으로 전송
+          'Content-Type': 'multipart/form-data', // form-data 형식으로 전송
           Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
         },
       });
       console.log('데이터 전송 성공:', response.data);
-      alert("게시글 업로드 성공 했습니다.");
-      navigate('/board')
+      alert('게시글 업로드 성공 했습니다.');
+      navigate('/board');
     } catch (error) {
       console.error('데이터 전송 실패:', error);
-      alert("게시글 업로드 실패 했습니다.");
+      alert('게시글 업로드 실패 했습니다.');
     }
   };
 
@@ -180,8 +186,8 @@ const BoardEdit = () => {
             style={{ display: 'none' }}
           />
           <ImagePlaceholder>
-            {selectedImage ? (
-              <PreviewImage src={selectedImage} alt="Selected" />
+            {selectedImageView ? (
+              <PreviewImage src={selectedImageView} alt="Selected" />
             ) : (
               'image'
             )}
