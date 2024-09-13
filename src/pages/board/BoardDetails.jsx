@@ -120,11 +120,8 @@ const BoardDetails = () => {
     likeMutation.mutate();
   };
 
-  const handleLikeImg = (likechk) => {
-    if(likechk === 'T')
-      return like_fill_icon;
-    else
-      return like_icon;
+  const handleLikeImg = (likeCheck) => {
+    return likeCheck === 'T' ? like_fill_icon : like_icon;
   };
 
   /**
@@ -211,7 +208,7 @@ const BoardDetails = () => {
           <ul>
             <li>
               <Span>
-                {post.recipeContent.split('\n').map((line, index) => (
+                {post.foodContent.split('\n').map((line, index) => (
                   <React.Fragment key={index}>
                     {line}
                     <br />

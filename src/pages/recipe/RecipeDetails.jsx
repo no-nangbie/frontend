@@ -93,12 +93,27 @@ const RecipeDetails = () => {
     retry: 1,
   });
 
+  /**
+   * 좋아요 이미지 처리 메서드
+   * 
+   * @return : post.LikeCheck를 인자로 받는데 이게 'T'면은 채워진 하트, 아니면 비워진 하트
+   * 
+   * @Author : 신민준
+   */
+  const handleLike = () => {
+    likeMutation.mutate();
+  };
+
+  const handleLikeImg = (likeCheck) => {
+    return likeCheck === 'T' ? like_fill_icon : like_icon;
+  };
+
   // 좋아요 처리
   const likeMutation = useMutation({
     mutationFn: () => {
-      return axios.post(`http://localhost:8080/menus/${menuId}/like`, {}, {
+      return axios.post(process.env.REACT_APP_API_URL+`boards/${menuId}/like`,{}, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
         },
       });
     },
@@ -109,12 +124,6 @@ const RecipeDetails = () => {
       alert('좋아요 처리 중 오류가 발생했습니다.');
     },
   });
-
-
-  // 좋아요 이미지 설정
-  const handleLikeImg = (likeCheck) => {
-    return likeCheck === 'T' ? like_fill_icon : like_icon;
-  };
 
   // 로딩 중 처리
   if (isLoading) return (
@@ -145,7 +154,7 @@ const RecipeDetails = () => {
     <Container>
       <ImageContainer>
         <Image src={menu_1 || '/images/default.png'} alt="이미지 없음" /> 
-        <LikeButton onClick={() => likeMutation.mutate()}>
+        <LikeButton onClick={handleLike}>
           <LikeButtonImage src={handleLikeImg(menu.likeCheck)} alt="Button Icon" />
         </LikeButton>
       </ImageContainer>
