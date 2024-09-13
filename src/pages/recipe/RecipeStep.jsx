@@ -59,8 +59,6 @@ useEffect(() => {
       if (cleanedTranscript.includes('다음')) {
         handleNext();
       }
-
-      // "이전"이라는 단어를 인식하면 이전 페이지로 이동
       if (cleanedTranscript.includes('이전')) {
         handlePrev();
       }
@@ -100,9 +98,9 @@ const handlePrev = () => {
 const toggleMic = () => {
   if (!micActive && recognition) {
     recognition.start(); // 마이크 활성화 시 음성 인식 시작
-    console.log("음성 인식 시작됨");
+    console.log("음성 인식 재시작됨");
   } else if (micActive && recognition) {
-    recognition.abort(); // 마이크 비활성화 시 음성 인식 종료
+    recognition.stop(); // 마이크 비활성화 시 음성 인식 종료
     console.log("음성 인식 강제 종료됨");
   }
   setMicActive((prevState) => !prevState); // 마이크 상태를 토글
