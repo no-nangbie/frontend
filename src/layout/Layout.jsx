@@ -25,25 +25,22 @@ function Layout() {
     try {
       const accessToken = localStorage.getItem('accessToken');
 
-      console.log("11")
       if (!accessToken) {
         alert('로그인 상태가 아닙니다.');
         navigate('/login');
         return;
       }
 
-      console.log("11")
-      await axios.post('http://localhost:8080/auth/logout', {}, {
+      await axios.post(`${process.env.REACT_APP_API_URL}auth/logout`, {}, {
         headers: {
           Authorization: `Bearer ${accessToken}`
         }
       });
 
-      console.log("11")
       // 로그아웃 성공 시 토큰 및 이메일 삭제
       localStorage.removeItem('accessToken');
       localStorage.removeItem('email');
-      console.log("11")
+
       // 로그인 페이지로 리다이렉트
       navigate('/login');
     } catch (error) {
@@ -128,8 +125,7 @@ function Layout() {
         <Header>
           <Heading>{getHeaderTitle()}</Heading>
           <ButtonContainer>
-            {/* 로그아웃 버튼 추가 */}
-            <LogoutButton onClick={handleLogout}>로그아웃</LogoutButton>
+            
             {/* /fridge 페이지에서는 2번째, 3번째 버튼만 보여야 함 */}
             {location.pathname === '/board' && (
               <ColoredButton src={getButtonColor1()} onClick={() => alert('첫 번째 버튼 클릭됨!')} />
@@ -149,6 +145,8 @@ function Layout() {
             {(location.pathname === '/board') && (
               <ColoredButton src={getButtonColor3()} onClick={handleboardClick3} />
             )}
+            {/* 로그아웃 버튼 추가 */}
+            <LogoutButton onClick={handleLogout}>로그아웃</LogoutButton>
           </ButtonContainer>
         </Header>
       )}
@@ -239,7 +237,7 @@ const ColoredButton = styled.img`
 `;
 
 const LogoutButton = styled.button`
-  background-color: #FF6347;
+  background-color: #2D9CDB;
   color: white;
   border: none;
   padding: 10px;
