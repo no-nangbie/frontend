@@ -9,7 +9,8 @@ function Recipe() {
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [mainFoodCategory, setMainFoodCategory] = useState("전체");
+  const [mainFoodCategory, setMainFoodCategory] = useState([]);
+  const [selectedFoodCategory, setSelectedFoodCategory] = useState("전체"); 
   const [menuCategory, setMenuCategory] = useState("전체");
   const [sortOption, setsortOption] = useState("menuId_desc");
   const navigate = useNavigate();
@@ -17,7 +18,6 @@ function Recipe() {
   const [isSearching, setIsSearching] = useState(false);
   const [page, setPage] = useState(1); // 현재 페이지
   const [hasMore, setHasMore] = useState(true); // 더 많은 데이터가 있는지 여부
-  const [memberFood, setMemberFood] = useState("전체");
 
   const handleClick = (menuId) => {
     navigate(`details/${menuId}`); // 페이지 이동 처리
@@ -27,87 +27,97 @@ function Recipe() {
     setLoading(true);
     try {
       const params = { page: pageNumber, size: 20, sort: sortOption };
-
       const response = menuCategory === "전체" 
         ? await axios.get(process.env.REACT_APP_API_URL + 'menus/all', {
-            params: params, 
-            headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-           },
+            params,
+            headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
           })
         : await axios.get(process.env.REACT_APP_API_URL + 'menus', {
             params: { ...params, menuCategory: handleGetMenuCategory(menuCategory) },
             headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
           });
-
-      console.log('Response:', response); // 전체 응답 객체 출력
-
-      // 데이터가 존재하면 기존 데이터와 새 데이터를 병합
-      if (response.data.data.length > 0) {
+  
+      const menuList = response.data.data;
+  
+      // selectedFoodCategory가 '전체'가 아닌 경우에만 필터링 적용
+      const filteredMenuList = selectedFoodCategory !== "전체" && selectedFoodCategory.length > 0
+        ? menuList.filter(menu =>
+            menu.foodMenuQuantityList.some(food => food.foodName === selectedFoodCategory)
+          )
+        : menuList;
+  
+      // 상태에 필터링된 메뉴 리스트를 직접 업데이트
+      if (filteredMenuList.length > 0) {
         setRecipes(prevRecipes => {
-          const newRecipes = response.data.data;
-          const uniqueRecipes = [...prevRecipes, ...newRecipes].reduce((acc, curr) => {
-            const x = acc.find(item => item.menuId === curr.menuId);
-            if (!x) {
-              return acc.concat([curr]);
-            } else {
-              return acc;
+          const uniqueRecipes = [...prevRecipes, ...filteredMenuList].reduce((acc, curr) => {
+            if (!acc.some(item => item.menuId === curr.menuId)) {
+              acc.push(curr);
             }
+            return acc;
           }, []);
           return uniqueRecipes;
         });
       } else {
         setHasMore(false);
       }
-      
+  
       setLoading(false);
     } catch (error) {
-      console.error('Error:', error); // 에러 출력
+      console.error('Error:', error);
       setError(error);
       setLoading(false);
     }
   };
-
-  const searchMenu = async (pageNumber) => {
-  setLoading(true);
-  try {
-    const params = { page: pageNumber, size: 20, sort: sortOption };
-
-    let response;
-    if (searchKeyword.trim() === "") {
-      setsortOption("menuId_desc");
-    }
-
-    if (menuCategory === "전체") {
-      response = await axios.get(process.env.REACT_APP_API_URL + 'menus/search', {
-        params: { ...params, keyword: searchKeyword.trim() },
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
-      });
-    } else {
-      response = await axios.get(process.env.REACT_APP_API_URL + 'menus/search_by_category', {
-        params: { ...params, menuCategory: handleGetMenuCategory(menuCategory), keyword: searchKeyword.trim() },
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
-      });
-    }
-
-    if (response && response.data && response.data.data) {
-      setRecipes(response.data.data);
-      setLoading(false);
-    } else {
-      console.error("예상과 다른 응답 데이터 형식: ", response);
-      setLoading(false);
-    }
-  } catch (error) {
-    console.error("레시피 데이터를 가져오는 데 실패했습니다: ", error);
-    setLoading(false);
-  }
-};
-
   
+  const handleFoodCategoryChange = (e) => {
+    const selectedFoodName = e.target.value;
+    setSelectedFoodCategory(selectedFoodName);
+    setRecipes([]); // 기존 데이터를 비우고
+    setPage(1); // 페이지 초기화
+  };
+  
+  const searchMenu = async (pageNumber) => {
+    setLoading(true);
+    try {
+      const params = { page: pageNumber, size: 20, sort: sortOption };
+      const response = menuCategory === "전체"
+        ? await axios.get(process.env.REACT_APP_API_URL + 'menus/search', {
+            params: { ...params, keyword: searchKeyword.trim() },
+            headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+          })
+        : await axios.get(process.env.REACT_APP_API_URL + 'menus/search_by_category', {
+            params: { ...params, menuCategory: handleGetMenuCategory(menuCategory), keyword: searchKeyword.trim() },
+            headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+          });
+  
+      const menuList = response.data.data;
+  
+      // 검색 결과를 상태에 반영
+      setRecipes(menuList); // 검색된 데이터로 상태를 업데이트
+      setLoading(false);
+    } catch (error) {
+      console.error("Failed to fetch recipes: ", error);
+      setError(error);
+      setLoading(false);
+    }
+  };
+  
+  
+  const getFoodName = async() => {
+    try {
+      const response = await axios.get(process.env.REACT_APP_API_URL + 'my-foods', {
+        params: { page: 1, size: 700, sort: "foodName_asc" },
+        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+      });
+      setMainFoodCategory(response.data.data);
+    } catch(error) {
+    }
+  };
 
   const handleSelectCategoryChange = (e) => {
     setMenuCategory(e.target.value);
-    setRecipes([]); // 카테고리 변경 시 기존 데이터 지우기
-    setPage(1); // 페이지 초기화
+    setRecipes([]);
+    setPage(1);
   };
 
   const handleSortChange = (e) => {
@@ -115,12 +125,6 @@ function Recipe() {
     setRecipes([]); // 정렬 변경 시 기존 데이터 지우기
     setPage(1); // 페이지 초기화
   };
-
-  const handleGetFood = (e) => {
-    setMemberFood(e.target.value);
-    setRecipes([]);
-    setPage(1);
-  }
 
   const handleSearchClick = () => {
     if (searchKeyword.trim() === "") {
@@ -160,7 +164,6 @@ function Recipe() {
     }
   };
 
-
   const handleScroll = () => {
     const container = document.getElementById('scrollable-container');
     if (container.scrollTop + container.clientHeight >= container.scrollHeight) {
@@ -186,67 +189,87 @@ function Recipe() {
     };
   }, [loading, hasMore]);
 
-  return (
-    <MainContainer>
-      <Header>
-        <InputGroup>
-          <Label>메인 식재료</Label>
-          <Select onChange={handleGetFood}>
+  useEffect(() => {
+    getFoodName();
+  }, []);
+
+  useEffect(() => {
+    fetchRecipes(1); // 선택된 값에 따라 데이터 로드
+  }, [selectedFoodCategory, menuCategory, sortOption]); 
+
+
+return (
+  <MainContainer>
+    <Header>
+      <InputGroup>
+        <Label>메인 식재료</Label>
+        <Select onChange={handleFoodCategoryChange}>
+          <option value="">전체</option>
+          {mainFoodCategory.map((food, index) => (
+            <option key={food.foodId} value={food.foodId}>
+              {food.foodName}
+            </option>
+          ))}
+        </Select>
+      </InputGroup>
+
+      <FilterSection>
+        <InputGroup2_1thLine>
+          <Label2>메뉴 종류</Label2>
+          <Select value={menuCategory} onChange={handleSelectCategoryChange}>
             <option>전체</option>
-            <option>채소</option>
-            <option>고기</option>
+            <option>밑 반찬</option>
+            <option>국/찌개</option>
+            <option>디저트</option>
+            <option>면</option>
+            <option>밥/죽/떡</option>
+            <option>김치</option>
+            <option>퓨전</option>
+            <option>양념</option>
+            <option>양식</option>
+            <option>기타</option>
           </Select>
-        </InputGroup>
-        <FilterSection>
-          <InputGroup2_1thLine>
-            <Label2>메뉴 종류</Label2>
-            <Select value={menuCategory} onChange={handleSelectCategoryChange}>
-              <option>전체</option>
-              <option>밑 반찬</option>
-              <option>국/찌개</option>
-              <option>디저트</option>
-              <option>면</option>
-              <option>밥/죽/떡</option>
-              <option>김치</option>
-              <option>퓨전</option>
-              <option>양념</option>
-              <option>양식</option>
-              <option>기타</option>
-            </Select>
-          </InputGroup2_1thLine>
-          <InputGroup2_2thLine>
-            <Label2>정렬</Label2>
-            <Select onChange={handleSortChange} value={sortOption}>
-              <option value="menuId_desc">날짜 ▼</option>
-              <option value="menuId_asc">날짜 ▲</option>
-              <option value="menuLikeCount_desc">좋아요 ▼</option>
-              <option value="menuLikeCount_asc">좋아요 ▲</option>
-            </Select>
-          </InputGroup2_2thLine>
-        </FilterSection>
+        </InputGroup2_1thLine>
+        <InputGroup2_2thLine>
+          <Label2>정렬</Label2>
+          <Select onChange={handleSortChange} value={sortOption}>
+            <option value="menuId_desc">날짜 ▼</option>
+            <option value="menuId_asc">날짜 ▲</option>
+            <option value="menuLikeCount_desc">좋아요 ▼</option>
+            <option value="menuLikeCount_asc">좋아요 ▲</option>
+          </Select>
+        </InputGroup2_2thLine>
+      </FilterSection>
 
-        <SearchBar>
-          <TextArea type="text" placeholder="메뉴이름 검색"
-          value={searchKeyword} onChange={(e) => setSearchKeyword(e.target.value)}/>
-          <SearchIcon src={Search_img} alt="search icon" onClick={handleSearchClick}/> 
-        </SearchBar>
-      </Header>
+      <SearchBar>
+        <TextArea
+          type="text"
+          placeholder="메뉴이름 검색"
+          value={searchKeyword}
+          onChange={(e) => setSearchKeyword(e.target.value)}
+        />
+        <SearchIcon src={Search_img} alt="search icon" onClick={handleSearchClick} />
+      </SearchBar>
+    </Header>
 
-      <ScrollableContainer id="scrollable-container">
-        {recipes.map((menu, index) => (
+    <ScrollableContainer id="scrollable-container">
+      {recipes.map((menu, index) => {
+        return (
           <FoodItem key={`${menu.menuId}_${index}`} onClick={() => handleClick(menu.menuId)}>
             <FoodImage src={menu.imageUrl} alt={menu.title} />
             <FoodInfo>
               <FoodName>{menu.menuTitle}</FoodName>
-              <FoodIngredients>좋아요 수  : {menu.likesCount}</FoodIngredients>
-              <FoodIngredients>보유 재료 : </FoodIngredients>
-              <FoodIngredients>미보유 재료 : </FoodIngredients>
+              <FoodIngredients>좋아요 수: {menu.likesCount}</FoodIngredients>
+              <FoodIngredients>보유 재료: </FoodIngredients>
+              <FoodIngredients>미보유 재료: </FoodIngredients>
             </FoodInfo>
           </FoodItem>
-        ))}
-      </ScrollableContainer>
-    </MainContainer>
-  );
+        );
+      })}
+    </ScrollableContainer>
+  </MainContainer>
+);
+
 }
 
 
