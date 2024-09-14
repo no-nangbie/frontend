@@ -7,6 +7,7 @@ function MyPage() {
     const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [nickname, setNickname] = useState('');
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     // 로그아웃 핸들러 함수
     const handleLogout = async () => {
@@ -45,6 +46,34 @@ function MyPage() {
         if (storedNickname) setNickname(storedNickname);
     }, []);
 
+
+      // 냉장고 초기화 함수
+      const initialFoodItems = async () => {
+        try {
+            await axios.delete(`${process.env.REACT_APP_API_URL}my-foods/all`, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+                },
+            });
+            alert('냉장고가 초기화되었습니다.');
+        } catch (error) {
+            console.error('냉장고 초기화 실패:', error.response?.data || error.message);
+            alert('냉장고 초기화 중 오류가 발생했습니다. 다시 시도해주세요.');
+        }
+    };
+    
+    // 모달 확인 버튼 클릭 시 실행
+    const handleConfirm = () => {
+        initialFoodItems();
+        setIsModalOpen(false);
+    };
+
+    // 모달 취소 버튼 클릭 시 실행
+    const handleCancel = () => {
+        setIsModalOpen(false);
+    };
+
+
     return (
         <Container>
             <Content>
@@ -57,10 +86,21 @@ function MyPage() {
                 <ActionButton>선호 음식 변경</ActionButton>
                 <ActionButton>통계</ActionButton>
                 <ActionButton onClick={handleLogout}>로그아웃</ActionButton>
-                <RedButton>냉장고 초기화</RedButton>
+                <RedButton onClick={() => setIsModalOpen(true)}>냉장고 초기화</RedButton>
                 <RedButton>통계 초기화</RedButton>
                 <RedButton>회원 탈퇴</RedButton>
             </Content>
+            {isModalOpen && (
+                <ModalOverlay>
+                    <ModalContent>
+                        <ModalText>냉장고 속 모든 식재료를 삭제하겠습니까?</ModalText>
+                        <ModalButtonContainer>
+                            <ModalButton onClick={handleCancel}>취소</ModalButton>
+                            <ModalButton onClick={handleConfirm}>확인</ModalButton>
+                        </ModalButtonContainer>
+                    </ModalContent>
+                </ModalOverlay>
+            )}
         </Container>
     );
 }
@@ -131,5 +171,51 @@ const RedButton = styled(ActionButton)`
 
     &:hover {
         background-color: #ff7875;
+    }
+`;
+
+// 모달 스타일
+const ModalOverlay = styled.div`
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+`;
+
+const ModalContent = styled.div`
+    background: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    text-align: center;
+`;
+
+const ModalText = styled.p`
+    font-size: 16px;
+    color: black;
+    margin-bottom: 20px;
+`;
+
+const ModalButtonContainer = styled.div`
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+`;
+
+const ModalButton = styled.button`
+    background-color: #2d9cdb;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+
+    &:hover {
+        background-color: #1a7ab8;
     }
 `;
