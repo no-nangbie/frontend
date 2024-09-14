@@ -12,7 +12,7 @@ function Recipe() {
   const [mainFoodCategory, setMainFoodCategory] = useState([]);
   const [selectedFoodCategory, setSelectedFoodCategory] = useState("전체"); 
   const [menuCategory, setMenuCategory] = useState("전체");
-  const [sortOption, setsortOption] = useState("menuId_desc");
+  const [sortOption, setsortOption] = useState("missingFoodsCount_asc");
   const navigate = useNavigate();
   const [searchKeyword, setSearchKeyword] = useState("");
   const [isSearching, setIsSearching] = useState(false);
@@ -38,16 +38,22 @@ function Recipe() {
           });
   
       const menuList = response.data.data;
-  
-      // selectedFoodCategory가 '전체'가 아닌 경우에만 필터링 적용
+      console.warn(menuList);
+
+      // 선택된 카테고리로 필터링
       const filteredMenuList = selectedFoodCategory !== "전체" && selectedFoodCategory.length > 0
-        ? menuList.filter(menu =>
-            menu.foodMenuQuantityList.some(food => food.foodName === selectedFoodCategory)
-          )
-        : menuList;
-  
-      // 상태에 필터링된 메뉴 리스트를 직접 업데이트
-      if (filteredMenuList.length > 0) {
+      ? menuList.filter(menu =>
+          menu.foodMenuQuantityList.some(food => food.foodName === selectedFoodCategory)
+        )
+      : menuList;
+
+
+      // missingFoodsCount 정렬 적용
+        if (sortOption === "missingFoodsCount_desc") {
+          filteredMenuList.sort((a, b) => b.missingFoodsCount - a.missingFoodsCount);
+        } else if (sortOption === "missingFoodsCount_asc") {
+          filteredMenuList.sort((a, b) => a.missingFoodsCount - b.missingFoodsCount);
+        }
         setRecipes(prevRecipes => {
           const uniqueRecipes = [...prevRecipes, ...filteredMenuList].reduce((acc, curr) => {
             if (!acc.some(item => item.menuId === curr.menuId)) {
@@ -55,19 +61,17 @@ function Recipe() {
             }
             return acc;
           }, []);
+    
           return uniqueRecipes;
         });
-      } else {
-        setHasMore(false);
+    
+        setLoading(false);
+      } catch (error) {
+        console.error('Error:', error);
+        setError(error);
+        setLoading(false);
       }
-  
-      setLoading(false);
-    } catch (error) {
-      console.error('Error:', error);
-      setError(error);
-      setLoading(false);
-    }
-  };
+    };
   
   const handleFoodCategoryChange = (e) => {
     const selectedFoodName = e.target.value;
@@ -233,8 +237,7 @@ return (
         <InputGroup2_2thLine>
           <Label2>정렬</Label2>
           <Select onChange={handleSortChange} value={sortOption}>
-            <option value="menuId_desc">날짜 ▼</option>
-            <option value="menuId_asc">날짜 ▲</option>
+            <option value="missingFoodsCount_asc">추천순 ▼</option>
             <option value="menuLikeCount_desc">좋아요 ▼</option>
             <option value="menuLikeCount_asc">좋아요 ▲</option>
           </Select>
