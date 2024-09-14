@@ -85,7 +85,6 @@ function Fridge() {
           },
         });
         console.log("data : ", response.data);
-        console.log("MemberFoodStatus:", response.data.memberFoodStatus);
 
         if (response.data && response.data.data) {
           setFoodItems(response.data.data);
