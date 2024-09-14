@@ -108,10 +108,18 @@ const RecipeDetails = () => {
     return likeCheck === 'T' ? like_fill_icon : like_icon;
   };
 
-  // 좋아요 처리
+  /**
+   * 좋아요 처리 메서드. 
+   * 
+   * @return : 성공하면 queryClient.invalidateQueries를 통해 React Query의 queryKey를 이용하여 Refresh진행!!
+   *          하트가 채워지는 것을 보여주기 위해서 Refresh하는 것
+   *          실패하면은 ERR alert 반환
+   * 
+   * @Author : 신민준
+   */
   const likeMutation = useMutation({
     mutationFn: () => {
-      return axios.post(process.env.REACT_APP_API_URL+`boards/${menuId}/like`,{}, {
+      return axios.post(process.env.REACT_APP_API_URL+`menus/${menuId}/like`,{}, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
         },
@@ -152,13 +160,13 @@ const RecipeDetails = () => {
   // 추후에 menu_1 => menu 이미지 변경
   return (
     <Container>
-      <ImageContainer>
-        <Image src={menu_1 || '/images/default.png'} alt="이미지 없음" /> 
-        <LikeButton onClick={handleLike}>
-          <LikeButtonImage src={handleLikeImg(menu.likeCheck)} alt="Button Icon" />
-        </LikeButton>
-      </ImageContainer>
-      <TextContainer>
+        <ImageContainer>
+          <Image src={menu_1 || '/images/default.png'} alt="이미지 없음" /> 
+          <LikeButton onClick={handleLike}>
+            <LikeButtonImage src={handleLikeImg(menu.likeCheck)} alt="Button Icon" />
+          </LikeButton>
+        </ImageContainer>
+        <TextContainer>
         <Title>[ {menuCategory} ] {menu.menuTitle}</Title>
         <Dividers />
         <Description>{menu.menuDescription}</Description>
@@ -183,17 +191,17 @@ const RecipeDetails = () => {
           </InfoItem>
         </InfoContainer>
         <Ingredients>
-          <Title>재료</Title>
-          <Dividers />
-          <ul>
-            {menu.foodMenuQuantityList.map((ingredient, index) => (
-              <li key={index}>
+        <Title>재료</Title>
+        <Dividers />
+          {menu.foodMenuQuantityList.map((ingredient, index) => (
+            <React.Fragment key={index}>
+              <li>
                 <Span>{ingredient.foodName}</Span>
                 <Span>{ingredient.foodQuantity}</Span>
-                  <Uldividers />
               </li>
-            ))}
-          </ul>
+              {index < menu.foodMenuQuantityList.length - 1 && <Uldividers />} {/* 마지막 항목 뒤에는 Divider가 없음 */}
+            </React.Fragment>
+          ))}
         </Ingredients>
         <ButtonContainer>
           <ActionButton onClick={handleRecipeStep}>레시피 보기</ActionButton>
@@ -218,36 +226,38 @@ const Uldividers = styled.div`
   border: 0;
   height: 1px;
   background-color: #D9D9D9;
-  margin: 0;
+  margin: 0 0;
 `;
 
 const ImageContainer = styled.div`
   width: 100%;
   position: relative;
-  height: 50vh;
   border-radius: 0 0 30px 30px;
 `;
 
 const Image = styled.img`
   width: 100%;
   height: auto;
+  object-fit: cover;
+  max-height: 450px;
   border-radius: 10px;
+  display: block;
 `;
 
 const LikeButton = styled.button`
   position: absolute;
-  bottom: 0px;
-  right: 0px;
-  width: 60px;
-  height: 60px;
-  background-color: white;
+  bottom: 0px; /* 이미지 아래쪽에서 0px 위치 */
+  right: 0px; /* 이미지 오른쪽에서 0px 위치 */
+  width: 50px; /* 버튼 너비 */
+  height: 50px; /* 버튼 높이 */
+  background-color: white; /* 버튼 배경색 */
   border: none;
-  border-radius: 20px 0 0;
+  border-radius: 20px 0 0; /* 모서리를 둥글게 */
   cursor: pointer;
   display: flex;
   align-items: center;
-  justify-content: center;
-  opacity: 0.6;
+  justify-content: center; /* 이미지가 중앙에 오도록 설정 */
+  opacity: 0.6; /* 20% 투명도 */
 `;
 
 const LikeButtonImage = styled.img`
@@ -329,6 +339,7 @@ const Ingredients = styled.ul`
 `;
 
 const Span = styled.span`
+  font-size: 14px;
   margin: 0 30px;
 `;
 

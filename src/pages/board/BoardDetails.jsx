@@ -230,22 +230,24 @@ const Container = styled.div`
   flex-direction: column;
   align-items: center;
   width: 100%;
-  height: 100%; /* Limit height of the scrollable area */
-  overflow-y: auto; /* 세로 스크롤 가능하게 설정 */
+  height: 100%;
+  overflow-y: auto;
   overflow-x: hidden;
 `;
 
 const ImageContainer = styled.div`
   width: 100%;
-  position: relative; /* 자식 요소가 절대 위치를 가질 수 있도록 설정 */
-  height: 50vh; /* 이미지 높이를 뷰포트 높이의 50%로 설정 */
+  position: relative;
   border-radius: 0 0 30px 30px;
 `;
 
 const Image = styled.img`
   width: 100%;
   height: auto;
+  object-fit: cover;
+  max-height: 450px;
   border-radius: 10px;
+  display: block;
 `;
 
 const LikeButton = styled.button`
@@ -346,32 +348,6 @@ const Ingredients = styled.div`
       display: flex;
       justify-content: space-between; /* 재료와 양을 양쪽 끝에 배치 */
     }
-  }
-`;
-
-
-const ButtonContainer = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-bottom: 40px;
-`;
-
-const ActionButton = styled.button`
-  background-color: #2D9CDB;
-  color: #FFFFFF;
-  width: 100%;
-  height: 50px;
-  padding: 10px 40px; /* 버튼이 길어지도록 padding 설정 */
-  border: 2px solid #2D9CDB; /* 파란색 테두리 */
-  border-radius: 10px; /* 둥근 모서리 */
-  cursor: pointer;
-  font-size: 16px;
-  font-weight: bold;
-  text-align: center;
-  
-  &:hover {
-    background-color: #f0f0f0; /* hover 시 배경색 변경 */
   }
 `;
 
