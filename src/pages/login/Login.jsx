@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import axios from 'axios';
+import logo from "../../resources/icon/logo.png";
 
 function Login() {
   // 이메일과 비밀번호를 상태로 관리
@@ -9,6 +10,11 @@ function Login() {
   const [errorMessage, setErrorMessage] = useState('');
 
   const handleLogin = async () => {
+    if (!email || !password) {
+      setErrorMessage('이메일과 비밀번호를 입력해주세요.');
+      return;
+    }
+
     console.log("로그인 버튼이 클릭되었습니다."); // 버튼 클릭 확인을 위한 로그
     try {
       const response = await axios.post('http://localhost:8080/login', {
@@ -49,7 +55,7 @@ function Login() {
       <LoginBox>
         {/* 로고 아이콘 */}
         <Logo>
-          <LogoImg src="/path-to-your-logo.png" alt="logo" />
+          <LogoImg src={logo} alt="logo" />
         </Logo>
 
         {/* 이메일 입력 */}

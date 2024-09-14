@@ -28,7 +28,7 @@ import BoardDetailsPage from './pages/board/BoardDetails';
 import BoardEditPage from './pages/board/BoardEdit';
 
 //menu
-import MenuPage from './pages/menu/Menu';
+import MenuPage from './pages/menu/MyPage';
 
  
 const queryClient = new QueryClient();
