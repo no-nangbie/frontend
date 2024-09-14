@@ -8,6 +8,7 @@ import EGGS_DAIRY_ICON from '../../resources/icon/EGGS_DAIRY.png';
 import SAUCES_ICON from '../../resources/icon/SAUCES.png';
 import OTHERS_ICON from '../../resources/icon/OTHERS.png';
 import Search_img from '../../resources/icon/search_3917754.png'
+import { useNavigate } from 'react-router-dom'; 
 
 
 
@@ -65,6 +66,13 @@ function Fridge() {
   const [sortOption, setSortOption] = useState("expirationDate_asc");
   const [searchKeyword, setSearchKeyword] = useState("");
   const [isSearching, setIsSearching] = useState(false);
+  const navigate = useNavigate();
+
+
+  const handleClick = (memberFoodId) => {
+    navigate(`${memberFoodId}`); // 페이지 이동 처리
+  };
+
 
     const fetchFoodItems = async() => {
       try {
@@ -77,6 +85,7 @@ function Fridge() {
           },
         });
         console.log("data : ", response.data);
+        console.log("MemberFoodStatus:", response.data.memberFoodStatus);
 
         if (response.data && response.data.data) {
           setFoodItems(response.data.data);
@@ -216,7 +225,7 @@ function Fridge() {
           <NoDataMessage> 저장된 식료품이 없습니다</NoDataMessage>
         ) : (
           filteredItems.map((item) => (
-          <FoodItem key={item.id} color={getStatusColor(item.memberFoodStatus)}>
+          <FoodItem key={item.id} color={getStatusColor(item.memberFoodStatus)} onClick={() => handleClick(item.memberFoodId)}>
             <FoodIcon>{getFoodIcon(item.foodCategory)}</FoodIcon>
             <FoodName color={getCategoryColor(item.foodCategory)} memberFoodStatus={item.memberFoodStatus}>{item.foodName}</FoodName>
             {item.memo ? (
