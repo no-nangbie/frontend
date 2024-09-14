@@ -1,42 +1,89 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import styled from 'styled-components';
-import VEGETABLES_FRUITS_ICON  from '../../resources/icon/VEGETABLES_FRUITS.png';
-import MEAT_ICON  from '../../resources/icon/MEAT.png';
+import VEGETABLES_FRUITS_ICON from '../../resources/icon/VEGETABLES_FRUITS.png';
+import MEAT_ICON from '../../resources/icon/MEAT.png';
 import FISH_SEAFOOD_ICON from '../../resources/icon/FISH_SEAFOOD.png';
 import EGGS_DAIRY_ICON from '../../resources/icon/EGGS_DAIRY.png';
 import SAUCES_ICON from '../../resources/icon/SAUCES.png';
 import OTHERS_ICON from '../../resources/icon/OTHERS.png';
-
+import { useParams } from 'react-router-dom';
 
 // Main Component
-function My_foods() {
+function My_foodsUpdate() {
+  const [categories, setCategories] = useState([]); // 카테고리 데이터
   const [filterCategory, setFilterCategory] = useState("VEGETABLES_FRUITS");
   const [foodItems, setFoodItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchKeyword, setSearchKeyword] = useState("");
-  const [filteredItems, setFilteredItems] = useState("");
+  const [filteredItems, setFilteredItems] = useState([]);
   const [memo, setMemo] = useState("");
   const [selectedFoodName, setSelectedFoodName] = useState("");
   const [expirationDate, setExpirationDate] = useState("");
+  const { memberFoodId } = useParams();
   const [foodCategory, setFoodCategory] = useState(filterCategory);
 
+    // 카테고리 데이터 불러오기
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get(process.env.REACT_APP_API_URL + 'categories', {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+          },
+        });
+        setCategories(response.data.data || []);
+      } catch (error) {
+        console.error("카테고리 가져오기 오류: ", error);
+      }
+    };
+    fetchCategories();
+  }, []);    
+
+  // 카테고리별 식료품 이름 가져오기
   const fetchFoodNamesByCategory = async (category) => {
     try {
       const response = await axios.get(process.env.REACT_APP_API_URL + 'foods', {
-        params: { page: 1, size: 700, sort: 'foodName_asc', category }, 
+        params: { page: 1, size: 700, sort: 'foodName_asc', category },
         headers: {
           Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
         },
       });
-      console.log(response.data.data);
-      return response.data.data || []; 
+      return response.data.data || [];
     } catch (error) {
-      console.error("Error fetching food names by category: ", error);
+      console.error("식료품 카테고리 가져오기 오류: ", error);
       return [];
     }
   };
 
+  // 식료품 아이템 가져오기
+  useEffect(() => {
+    const fetchFoodItems = async () => {
+      try {
+        const response = await axios.get(process.env.REACT_APP_API_URL + 'my-foods/' + memberFoodId, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+          },
+        });
+        const foodItem = response.data.data;
+
+        if(foodItem) {
+        setFoodItems(foodItem ? [foodItem] : []);
+        setSelectedFoodName(foodItem?.foodName || "");
+        setExpirationDate(foodItem?.expirationDate || "");
+        setMemo(foodItem?.memo || "");
+        setFilterCategory(foodItem?.foodCategory || "");
+        }
+        setLoading(false);
+      } catch (error) {
+        console.error("식료품 아이템 가져오기 오류: ", error);
+        setLoading(false);
+      }
+    };
+    fetchFoodItems();
+  }, [memberFoodId]);
+
+  // 카테고리가 변경될 때 이름 변경
   useEffect(() => {
     const fetchFoodItems = async () => {
       try {
@@ -53,7 +100,6 @@ function My_foods() {
         setLoading(false);
       }
     };
-  
     fetchFoodItems();
   }, [filterCategory]);
 
@@ -66,25 +112,9 @@ function My_foods() {
     updateFoodNames();
   }, [filterCategory]);
 
-  const getCategoryLabel = (category) => {
-    switch (category) {
-      case "VEGETABLES_FRUITS":
-        return "채소 및 과일";
-      case "MEAT":
-        return "육류";
-      case "FISH_SEAFOOD":
-        return "생선 및 해산물";
-      case "EGGS_DAIRY":
-        return "달걀 및 유제품";
-      case "SAUCES":
-        return "소스류";
-      case "OTHERS":
-        return "기타";
-      default:
-        return "";
-    }
-  };
-  
+
+
+  // 식료품 필터링
   useEffect(() => {
     let result = foodItems;
     if (searchKeyword) {
@@ -92,21 +122,13 @@ function My_foods() {
     }
     setFilteredItems(result);
   }, [searchKeyword, foodItems]);
-  
 
-  const handleCategoryChange = (event) => {
-    setFilterCategory(event.target.value);
-    setFoodCategory(event.target.value);
-  };
-
+  // 식료품 이름 변경
   const handleFoodNameChange = (event) => {
     setSelectedFoodName(event.target.value);
   };
 
-  const handleSearchClick = () => {
-    setSearchKeyword(searchKeyword.trim());
-  };
-
+  // 식료품 저장
   const handleFormSubmit = async () => {
     if (!selectedFoodName && !expirationDate) {
       alert("식료품 이름과 소비기한을 입력해주세요.");
@@ -120,7 +142,7 @@ function My_foods() {
     } 
 
     try {
-      await axios.post(process.env.REACT_APP_API_URL + 'my-foods', {
+      await axios.patch(process.env.REACT_APP_API_URL + 'my-foods/' + memberFoodId, {
         foodName: selectedFoodName, expirationDate, memo, foodCategory: filterCategory, 
       }, {
         headers: {
@@ -133,10 +155,30 @@ function My_foods() {
       setMemo("");
       setFoodCategory(filterCategory);
     } catch (error) {
-      console.error("Error saving food item :", error);
+      console.error("Error saving food item:", error);
       alert("보유 식재료 저장에 실패했습니다.");
     }
-  }
+  };
+
+  
+  const getCategoryLabel = (category) => {
+    switch (category) {
+      case "VEGETABLES_FRUITS":
+        return "채소 및 과일";
+      case "MEAT":
+        return "고기";
+      case "FISH_SEAFOOD":
+        return "생선 및 해산물";
+      case "EGGS_DAIRY":
+        return "계란 및 유제품";
+      case "SAUCES":
+        return "소스";
+      case "OTHERS":
+        return "기타";
+      default:
+        return "선택 안됨";
+    }
+  };
 
   return (
     <MainContainer>
@@ -151,8 +193,8 @@ function My_foods() {
         <FoodIcons>
           <IconButton onClick={() => setFilterCategory("VEGETABLES_FRUITS")}><img src={VEGETABLES_FRUITS_ICON} alt="Vegetables and Fruits" width="40" height="40" /></IconButton>
           <IconButton onClick={() => setFilterCategory("MEAT")}><img src={MEAT_ICON} alt="Meats" width="40" height="40" /></IconButton>
-          <IconButton onClick={() => setFilterCategory("FISH_SEAFOOD")}><img src={FISH_SEAFOOD_ICON} alt="Fishs and Seafoods" width="40" height="40" /></IconButton>
-          <IconButton onClick={() => setFilterCategory("EGGS_DAIRY")}><img src={EGGS_DAIRY_ICON} alt="Egges and Dairy" width="40" height="40" /></IconButton>
+          <IconButton onClick={() => setFilterCategory("FISH_SEAFOOD")}><img src={FISH_SEAFOOD_ICON} alt="Fish and Seafoods" width="40" height="40" /></IconButton>
+          <IconButton onClick={() => setFilterCategory("EGGS_DAIRY")}><img src={EGGS_DAIRY_ICON} alt="Eggs and Dairy" width="40" height="40" /></IconButton>
           <IconButton onClick={() => setFilterCategory("SAUCES")}><img src={SAUCES_ICON} alt="Sauces" width="40" height="40" /></IconButton>
           <IconButton onClick={() => setFilterCategory("OTHERS")}><img src={OTHERS_ICON} alt="Others" width="40" height="40" /></IconButton>
         </FoodIcons>
@@ -161,24 +203,28 @@ function My_foods() {
         <label>식료품 이름</label>
         <select onChange={handleFoodNameChange} value={selectedFoodName}>
           <option value="">선택하세요</option>
-          {foodItems.length > 0 && foodItems.map((item, index) => (
-            <option key={index} value={item.foodName}>{item.foodName}</option>
-          ))}
+          {filteredItems.length > 0 ? (
+            filteredItems.map((item, index) => (
+              <option key={index} value={item.foodName}>{item.foodName}</option>
+            ))
+          ) : (
+            <option value="">데이터가 없습니다</option>
+          )}
         </select>
       </FoodNameDropdown>
       <InputSection>
-        <Label>소비 기한</Label>
-        <InputField type="text" value={expirationDate} 
-        onChange={(e) => setExpirationDate(e.target.value)} placeholder="YYYY-MM-DD" />
-        <Label>메모</Label>
-        <MemoField value={memo} onChange={(e) => setMemo(e.target.value)} placeholder="메모 입력" />
-        <UploadButton onClick={handleFormSubmit}>저장</UploadButton>
+      <Label>소비 기한</Label>
+      <InputField type="text" value={expirationDate} onChange={(e) => setExpirationDate(e.target.value)} placeholder="YYYY-MM-DD" />
+      <Label>메모</Label>
+      <MemoField value={memo} onChange={(e) => setMemo(e.target.value)} placeholder="메모 입력" />
+      <UploadButton onClick={handleFormSubmit}>저장</UploadButton>
       </InputSection>
     </MainContainer>
   );
 }
 
-export default My_foods;
+export default My_foodsUpdate;
+
 // Styled Components
 
 const MainContainer = styled.div`
