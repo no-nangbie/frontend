@@ -8,6 +8,7 @@ import EGGS_DAIRY_ICON from '../../resources/icon/EGGS_DAIRY.png';
 import SAUCES_ICON from '../../resources/icon/SAUCES.png';
 import OTHERS_ICON from '../../resources/icon/OTHERS.png';
 import { useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom'; 
 
 // Main Component
 function My_foodsUpdate() {
@@ -22,6 +23,7 @@ function My_foodsUpdate() {
   const [expirationDate, setExpirationDate] = useState("");
   const { memberFoodId } = useParams();
   const [foodCategory, setFoodCategory] = useState(filterCategory);
+  const navigate = useNavigate();
 
     // 카테고리 데이터 불러오기
   useEffect(() => {
@@ -128,8 +130,19 @@ function My_foodsUpdate() {
     setSelectedFoodName(event.target.value);
   };
 
+  const handleExpirationDateChange = (e) => {
+    const date = new Date(e.target.value);
+    const formattedDate = date.toISOString().split('T')[0]; // YYYY-MM-DD 형식으로 변환
+    setExpirationDate(formattedDate); // "YYYY-MM-DD" 형식으로 설정
+  };
+
+
   // 식료품 저장
   const handleFormSubmit = async () => {
+
+    const formattedExpirationDate = expirationDate.replace(/-/g, '');
+
+
     if (!selectedFoodName && !expirationDate) {
       alert("식료품 이름과 소비기한을 입력해주세요.");
       return;
@@ -143,7 +156,7 @@ function My_foodsUpdate() {
 
     try {
       await axios.patch(process.env.REACT_APP_API_URL + 'my-foods/' + memberFoodId, {
-        foodName: selectedFoodName, expirationDate, memo, foodCategory: filterCategory, 
+        foodName: selectedFoodName, expirationDate: formattedExpirationDate, memo, foodCategory: filterCategory, 
       }, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
@@ -154,6 +167,7 @@ function My_foodsUpdate() {
       setExpirationDate("");
       setMemo("");
       setFoodCategory(filterCategory);
+      navigate(`/fridge`);
     } catch (error) {
       console.error("Error saving food item:", error);
       alert("보유 식재료 저장에 실패했습니다.");
@@ -214,7 +228,7 @@ function My_foodsUpdate() {
       </FoodNameDropdown>
       <InputSection>
       <Label>소비 기한</Label>
-      <InputField type="text" value={expirationDate} onChange={(e) => setExpirationDate(e.target.value)} placeholder="YYYY-MM-DD" />
+      <InputField type="date" value={expirationDate} onChange={handleExpirationDateChange} />
       <Label>메모</Label>
       <MemoField value={memo} onChange={(e) => setMemo(e.target.value)} placeholder="메모 입력" />
       <UploadButton onClick={handleFormSubmit}>저장</UploadButton>

@@ -107,7 +107,16 @@ function My_foods() {
     setSearchKeyword(searchKeyword.trim());
   };
 
+  const handleExpirationDateChange = (e) => {
+    const date = new Date(e.target.value);
+    const formattedDate = date.toISOString().split('T')[0]; // YYYY-MM-DD 형식으로 변환
+    setExpirationDate(formattedDate); // "YYYY-MM-DD" 형식으로 설정
+  };
+
   const handleFormSubmit = async () => {
+     // 백엔드로 보낼 때 "YYYYMMDD" 형식으로 변환
+   const formattedExpirationDate = expirationDate.replace(/-/g, '');
+
     if (!selectedFoodName && !expirationDate) {
       alert("식료품 이름과 소비기한을 입력해주세요.");
       return;
@@ -121,7 +130,7 @@ function My_foods() {
 
     try {
       await axios.post(process.env.REACT_APP_API_URL + 'my-foods', {
-        foodName: selectedFoodName, expirationDate, memo, foodCategory: filterCategory, 
+        foodName: selectedFoodName, expirationDate: formattedExpirationDate, memo, foodCategory: filterCategory, 
       }, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
@@ -137,6 +146,8 @@ function My_foods() {
       alert("보유 식재료 저장에 실패했습니다.");
     }
   }
+
+  const displayExpirationDate = expirationDate.replace(/-/g, '.');
 
   return (
     <MainContainer>
@@ -168,8 +179,8 @@ function My_foods() {
       </FoodNameDropdown>
       <InputSection>
         <Label>소비 기한</Label>
-        <InputField type="text" value={expirationDate} 
-        onChange={(e) => setExpirationDate(e.target.value)} placeholder="YYYY-MM-DD" />
+        <InputField type="date" value={expirationDate} 
+        onChange={handleExpirationDateChange}/>
         <Label>메모</Label>
         <MemoField value={memo} onChange={(e) => setMemo(e.target.value)} placeholder="메모 입력" />
         <UploadButton onClick={handleFormSubmit}>저장</UploadButton>
