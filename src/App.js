@@ -13,6 +13,7 @@ import LogoutButton from './pages/login/LogoutButton';  // 로그아웃 버튼 �
 //Fridge
 import FridgePage from './pages/fridge/Fridge';
 import FridgeAddPage from './pages/fridge/FridgeAdd';
+import FridgeUpdatePage from './pages/fridge/FridgeUpdate';
 import FridgeDeletePage from './pages/fridge/FridgeDelete';
 
 //Recipe
@@ -27,7 +28,7 @@ import BoardDetailsPage from './pages/board/BoardDetails';
 import BoardEditPage from './pages/board/BoardEdit';
 
 //menu
-import MenuPage from './pages/menu/Menu';
+import MenuPage from './pages/menu/MyPage';
 
  
 const queryClient = new QueryClient();
@@ -43,6 +44,7 @@ function App() {
               <Route path="/logout" element={<LogoutButton />} /> {/* 로그아웃 경로 추가 */}
               <Route path="/fridge" element={<FridgePage />} />
               <Route path="/fridge/add" element={<FridgeAddPage />} />
+              <Route path="/fridge/:memberFoodId" element={<FridgeUpdatePage />} />
               <Route path="/fridge/delete" element={<FridgeDeletePage />} />
               <Route path="/recipe" element={<RecipePage />} />
               <Route path="/recipe/details" element={<RecipeDetailsPage />} />

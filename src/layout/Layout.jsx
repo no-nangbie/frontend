@@ -1,7 +1,6 @@
 import React, { useState,useEffect } from 'react';
 import styled from 'styled-components';
 import { useLocation, useNavigate, Outlet } from 'react-router-dom';
-import axios from 'axios';
 import menuPlus from '../resources/icon/menu_plus.png';
 import menuMinus from '../resources/icon/menu_minus.png';
 import boardPlus from '../resources/icon/board_plus.png';
@@ -21,42 +20,6 @@ function Layout() {
   const navigate = useNavigate();
   const [boardData, setBoardData] = useState('');
   const [adminCheck, setAdminCheck] = useState(false);
-
-  /**
-   * 로그아웃 핸들러 메서드
-   * 
-   * @return : 
-   * 
-   * @Author : 양수명
-   */
-  const handleLogout = async () => {
-    try {
-      const accessToken = localStorage.getItem('accessToken');
-
-      if (!accessToken) {
-        alert('로그인 상태가 아닙니다.');
-        navigate('/login');
-        return;
-      }
-
-      await axios.post(`${process.env.REACT_APP_API_URL}auth/logout`, {}, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`
-        }
-      });
-
-      // 로그아웃 성공 시 토큰 및 이메일 삭제
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('email');
-
-      // 로그인 페이지로 리다이렉트
-      navigate('/login');
-    } catch (error) {
-      console.error('로그아웃 실패:', error.response?.data || error.message);
-      alert('로그아웃 중 오류가 발생했습니다. 다시 시도해주세요.');
-    }
-  };
-
   
   /**
    * 자식 컴포넌트로 부터 받아온 정보 저장 메서드
@@ -120,7 +83,7 @@ function Layout() {
     else if (location.pathname.includes('/recipe'))
       return '레시피';
     else if (location.pathname.includes('/menu'))
-      return '메뉴';
+      return '마이페이지';
     else if (location.pathname.includes('/signup'))
       return '회원가입';
     else if (location.pathname.includes('/login'))
@@ -165,7 +128,7 @@ function Layout() {
   const getButtonImage3 = () => {
     switch (location.pathname) {
       case '/fridge':
-        return menuPlus; 
+        return menuPlus;
       case '/recipe':
         return boardPlus;
       case '/board':
@@ -189,6 +152,7 @@ function Layout() {
   const handleButtonClick3 = () => {
     navigate('/fridge/add');
   };
+
   const handleboardClick3 = () => {
     navigate('/board/details/edit');
   };
@@ -219,8 +183,6 @@ function Layout() {
             {(location.pathname === '/board') && (
               <ColoredButton src={getButtonImage3()} onClick={handleboardClick3} />
             )}
-            {/* 로그아웃 버튼 추가 */}
-            <LogoutButton onClick={handleLogout}>로그아웃</LogoutButton>
           </ButtonContainer>
         </Header>
       )}
@@ -307,20 +269,6 @@ const ColoredButton = styled.img`
 
   &:hover {
     opacity: 0.8;
-  }
-`;
-
-const LogoutButton = styled.button`
-  background-color: #2D9CDB;
-  color: white;
-  border: none;
-  padding: 10px;
-  border-radius: 5px;
-  font-size: 12px;
-  cursor: pointer;
-
-  &:hover {
-    background-color: #FF4500;
   }
 `;
 
