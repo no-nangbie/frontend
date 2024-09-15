@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useState,useEffect } from 'react';
 import styled from 'styled-components';
 import { useLocation, useNavigate, Outlet } from 'react-router-dom';
 import axios from 'axios';
@@ -18,9 +18,17 @@ import fridge_on from '../resources/icon/fridge_on.png';
 
 function Layout() {
   const location = useLocation();
-  const navigate = useNavigate(); // useNavigate 훅 사용
-  
-  // 로그아웃 핸들러 함수
+  const navigate = useNavigate();
+  const [boardData, setBoardData] = useState('');
+  const [adminCheck, setAdminCheck] = useState(false);
+
+  /**
+   * 로그아웃 핸들러 메서드
+   * 
+   * @return : 
+   * 
+   * @Author : 양수명
+   */
   const handleLogout = async () => {
     try {
       const accessToken = localStorage.getItem('accessToken');
@@ -49,7 +57,28 @@ function Layout() {
     }
   };
 
-  // useEffect 관련 코드 주석
+  
+  /**
+   * 자식 컴포넌트로 부터 받아온 정보 저장 메서드
+   * 
+   * @return : board에서 작성자와 로그인계정과 동일하다면 true, 아니면 false 저장
+   * 
+   * @Author : 신민준
+   */
+  const handleBoardData = (data) => {
+    setBoardData(data);
+  };
+
+
+  /**
+   * page의 이동 및 navigate 동작 시 무조건 실행되는 useEffect
+   * 
+   * @return : 1. 로그인이 되어 있지 않은 상태(localStorage에 email이 없음)이라면 로그인 페이지로 강제 리다이렉트
+   *              회원가입 창일 경우 리다이렉트를 하지 않음.
+   *           2. 현재 접속해 있는 사용자가 admin 계정인지 확인. -> .env 파일에서 REACT_APP_ADMIN_EMAIL 과 비교
+   * 
+   * @Author : 신민준
+   */
   useEffect(() => {
     const email = localStorage.getItem('email');
     const currentPath = location.pathname;
@@ -58,10 +87,31 @@ function Layout() {
     } else if (email && (currentPath === '/login' || currentPath === '/signup' || currentPath === '/')) {
       navigate('/fridge');
     }
+    if(localStorage.getItem('email') === process.env.REACT_APP_ADMIN_EMAIL)
+      setAdminCheck(true);
+    else
+      setAdminCheck(false);
+    
   }, [location.pathname, navigate]);
 
+
+  /**
+   * layout 노출 컨트롤 필드값
+   * 
+   * @return : login 페이지나 signup 페이지 일 경우 layout노출을 하지않음.
+   * 
+   * @Author : 신민준
+   */
   const hideLayout = location.pathname === '/login' || location.pathname === '/signup';
 
+  
+  /**
+   * layout 상단 제목 설정
+   * 
+   * @return : 현재 위치한 경로에 따라 layout 상단 제목을 설정
+   * 
+   * @Author : 신민준
+   */
   const getHeaderTitle = () => {
     if (location.pathname.includes('/board'))
       return '게시판';
@@ -77,16 +127,27 @@ function Layout() {
       return '로그인';
   };
 
-  const getButtonColor1 = () => {
+  
+  /**
+   * getButtonImage 메서드들
+   * 어떠한 이미지를 제공해 줄 것인지 결정하는 메서드
+   * 
+   * @return : 경로에 맞는 이미지 반환
+   * 
+   * @Author : 신민준
+   */
+  const getButtonImage1 = () => {
     switch (location.pathname) {
       case '/recipe':
         return boardFix; 
-      case '/board':
-        return boardFix; 
+      default:
+        if(location.pathname.includes('/board')){
+          return boardFix;
+        }
     }
   };
   
-  const getButtonColor2 = () => {
+  const getButtonImage2 = () => {
     switch (location.pathname) {
       case '/fridge':
         return menuMinus;
@@ -94,10 +155,14 @@ function Layout() {
         return boardMinus;
       case '/board':
         return boardMinus;
+      default:
+        if(location.pathname.includes('/board')){
+          return boardMinus;
+        }
     }
   };
 
-  const getButtonColor3 = () => {
+  const getButtonImage3 = () => {
     switch (location.pathname) {
       case '/fridge':
         return menuPlus; 
@@ -108,6 +173,15 @@ function Layout() {
     }
   };
 
+
+  /**
+   * handleButtonClick 메서드들
+   * layout 상단 버튼 클릭시 어디로 navigate 시킬지 설정하는 메서드
+   * 
+   * @return : 버튼종류에 따른 navigate
+   * 
+   * @Author : 신민준
+   */
   const handleButtonClick2 = () => {
     navigate('/fridge/delete');
   };
@@ -127,23 +201,23 @@ function Layout() {
           <ButtonContainer>
             
             {/* /fridge 페이지에서는 2번째, 3번째 버튼만 보여야 함 */}
-            {location.pathname === '/board' && (
-              <ColoredButton src={getButtonColor1()} onClick={() => alert('첫 번째 버튼 클릭됨!')} />
+            {(location.pathname.includes('/board/details') && boardData) && (
+              <ColoredButton src={getButtonImage1()} onClick={() => alert('첫 번째 버튼 클릭됨!')} />
             )}
             {(location.pathname === '/fridge') && (
-              <ColoredButton src={getButtonColor2()} onClick={handleButtonClick2} />
+              <ColoredButton src={getButtonImage2()} onClick={handleButtonClick2} />
             )}
-            {(location.pathname === '/board') && (
-              <ColoredButton src={getButtonColor2()} onClick={() => alert('두 번째 버튼 클릭됨!')} />
+            {(location.pathname.includes('/board/details') && boardData) && (
+              <ColoredButton src={getButtonImage2()} onClick={() => alert('두 번째 버튼 클릭됨!')} />
             )}
             {(location.pathname === '/fridge') && (
-              <ColoredButton src={getButtonColor3()} onClick={handleButtonClick3} />
+              <ColoredButton src={getButtonImage3()} onClick={handleButtonClick3} />
             )}
-            {(location.pathname === '/recipe') && (
-              <ColoredButton src={getButtonColor3()} onClick={() => alert('세 번째 버튼 클릭됨!')} />
+            {(location.pathname === '/recipe' && adminCheck) && (
+              <ColoredButton src={getButtonImage3()} onClick={() => alert('세 번째 버튼 클릭됨!')} />
             )}
             {(location.pathname === '/board') && (
-              <ColoredButton src={getButtonColor3()} onClick={handleboardClick3} />
+              <ColoredButton src={getButtonImage3()} onClick={handleboardClick3} />
             )}
             {/* 로그아웃 버튼 추가 */}
             <LogoutButton onClick={handleLogout}>로그아웃</LogoutButton>
@@ -152,7 +226,7 @@ function Layout() {
       )}
 
       <MainContent>
-        <Outlet />
+        <Outlet context={{ handleBoardData }} />
       </MainContent>
 
       {!hideLayout && (
@@ -160,31 +234,31 @@ function Layout() {
           <Nav>
             <NavItem active={location.pathname === '/fridge'} onClick={() => navigate('/fridge')}>
               <Icon
-                src={location.pathname === '/fridge' ? fridge_on : fridge} 
+                src={location.pathname.includes('/fridge') ? fridge_on : fridge} 
                 alt="냉장고"
               />
-              <NavText active={location.pathname === '/fridge' ? 'true' : undefined}>나의 냉장고</NavText>
+              <NavText active={location.pathname.includes('/fridge') ? 'true' : undefined}>나의 냉장고</NavText>
             </NavItem>
             <NavItem active={location.pathname === '/recipe'} onClick={() => navigate('/recipe')}>
               <Icon
-                src={location.pathname === '/recipe' ? recipe_on : recipe}
+                src={location.pathname.includes('/recipe') ? recipe_on : recipe}
                 alt="레시피"
               />
-              <NavText active={location.pathname === '/recipe' ? 'true' : undefined}>레시피</NavText>
+              <NavText active={location.pathname.includes('/recipe') ? 'true' : undefined}>레시피</NavText>
             </NavItem>
             <NavItem active={location.pathname === '/board'} onClick={() => navigate('/board')}>
               <Icon
-                src={location.pathname === '/board' ? board_on : board}
+                src={location.pathname.includes('/board') ? board_on : board}
                 alt="게시판"
               />
-              <NavText active={location.pathname === '/board' ? 'true' : undefined}>게시판</NavText>
+              <NavText active={location.pathname.includes('/board') ? 'true' : undefined}>게시판</NavText>
             </NavItem>
             <NavItem active={location.pathname === '/menu'} onClick={() => navigate('/menu')}>
               <Icon
-                src={location.pathname === '/menu' ? menu_on : menu}
+                src={location.pathname.includes('/menu') ? menu_on : menu}
                 alt="메뉴"
               />
-              <NavText active={location.pathname === '/menu' ? 'true' : undefined}>메뉴</NavText>
+              <NavText active={location.pathname.includes('/menu') ? 'true' : undefined}>메뉴</NavText>
             </NavItem>
           </Nav>
         </Footer>

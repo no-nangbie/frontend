@@ -2,6 +2,7 @@ import styled from 'styled-components';
 import axios from 'axios';
 import React from 'react';
 import { useParams } from 'react-router-dom';
+import { useOutletContext } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ClipLoader } from 'react-spinners';
 
@@ -19,8 +20,16 @@ import difficulty3_icon from '../../resources/icon/difficulty_3.png';
 
 const BoardDetails = () => {
   const { boardId } = useParams();
+  const { handleBoardData } = useOutletContext(); // 부모로부터 받은 함수
   const queryClient = useQueryClient();
 
+  const sendAuthorEmailToParent = (e) =>{
+    if(e === localStorage.getItem('email'))
+      handleBoardData(true);
+    else
+      handleBoardData(false);
+    console.log('authorEmail : '+ e)
+  }
   /**
    * 특정 게시글(BoardId)정보 불러오는 메서드
    * 
@@ -40,6 +49,7 @@ const BoardDetails = () => {
           Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
         },
       });
+      sendAuthorEmailToParent(response.data.data.authorEmail)
       return response.data.data;
     } catch (error) {
       throw error;
