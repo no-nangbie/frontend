@@ -128,6 +128,7 @@ function Signup() {
           </Logo>
 
           <SectionTitle>이메일 & 아이디</SectionTitle>
+          <Dividers />
           <InputGroup>
             <Label>이메일</Label>
             <TextArea
@@ -151,9 +152,8 @@ function Signup() {
             <SmallButton onClick={verifyAuthCode}>인증 확인</SmallButton>
           </ButtonGroup>
 
-          <SectionDivider />
-
           <SectionTitle>비밀번호</SectionTitle>
+          <Dividers />
           <InputGroup>
             <Label>비밀번호</Label>
             <TextArea
@@ -173,9 +173,8 @@ function Signup() {
             />
           </InputGroup>
 
-          <SectionDivider />
-
           <SectionTitle>닉네임</SectionTitle>
+          <Dividers />
           <InputGroup>
             <Label>닉네임</Label>
             <TextArea
@@ -240,7 +239,7 @@ const SignupBox = styled.div`
   border: 2px solid #2d9cdb;
   border-radius: 10px;
   padding: 30px;
-  width: 350px;
+  width: 300px;
   text-align: center;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   margin-top: 5vh;
@@ -251,36 +250,44 @@ const Logo = styled.div`
 `;
 
 const LogoImg = styled.img`
-  width: 120px;
-  height: 70px;
+  width: 80px;
 `;
 
 const SectionTitle = styled.h3`
   text-align: left;
   color: #2d9cdb;
-  font-size: 14px;
+  font-size: 16px;
+  font-weight: bold;
   margin-bottom: 10px;
-  border-bottom: 2px solid #2d9cdb;
   padding-bottom: 5px;
+  margin-left: -20px;
+`;
+
+const Dividers = styled.div`
+  border: 0;
+  height: 2px;
+  background-color: #2D9CDB;
+  margin-left: -30px;
+  margin-top: -10px;
+  margin-bottom: 10px;
 `;
 
 const InputGroup = styled.div`
   display: flex;
   align-items: center;
-  margin-bottom: 10px;
-  border: 2px solid #2d9cdb;
+  margin-bottom: 20px;
+  border: 1px solid #dfdfdf;
   border-radius: 30px;
   background-color: #f5f5f5;
 `;
 
 const Label = styled.div`
   width: 90px;
-  background-color: white;
+  background-color: #F3F3F3;
+  font-size: 13px;
   font-weight: bold;
-  font-size: 14px;
   text-align: center;
   padding: 10px 0;
-  border-right: 2px solid #2d9cdb;
   border-radius: 20px 0 0 20px;
 `;
 
@@ -291,11 +298,6 @@ const TextArea = styled.input`
   font-size: 14px;
   outline: none;
   border-radius: 0 30px 30px 0;
-`;
-
-const SectionDivider = styled.div`
-  border-top: 1px solid #ddd;
-  margin: 20px 0;
 `;
 
 const SignupButton = styled.button`

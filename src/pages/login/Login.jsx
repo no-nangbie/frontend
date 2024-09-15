@@ -143,28 +143,25 @@ const Logo = styled.div`
 
 const LogoImg = styled.img`
   width: 80px;
-  height: 80px;
 `;
 
 const InputGroup = styled.div`
   display: flex;
   align-items: center;
   margin-bottom: 20px;
-  border: 2px solid #2D9CDB;
+  border: 1px solid #dfdfdf;
   border-radius: 30px;
   background-color: #f5f5f5;
 `;
 
 const Label = styled.div`
-  width: 70px;
-  background-color: white;
+  width: 80px;
+  background-color: #F3F3F3;
   font-weight: bold;
   font-size: 14px;
   text-align: center;
   padding: 10px 0;
-  border-right: 2px solid #2D9CDB;
   border-radius: 20px 0 0 20px;
-  border-right: 2px solid #2D9CDB;
 `;
 
 const TextArea = styled.input`

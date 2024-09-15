@@ -23,9 +23,6 @@ const BoardAdd = () => {
 
   /**
    * 이미지 선택 핸들러
-   * 임시저장이라 npm restart하게 되면 기존 이미지.. 다 날라갑니다..!! AWS S3를 연동을 안했기에 어쩔수 없는 상황..
-   * 이로 인해 GET blob:http://localhost:3000/d4ce75f4-39d1-42e1-a35a-41f6c980644f net::ERR_FILE_NOT_FOUND 
-   * 가 계속 Web F12 Console에 뜰꺼에요 참고하세요
    * 
    * @return : 파일을 선택했을 때 URL로 변환해서 이미지 미리보기가능하게 선택된이미지 임시 저장
    * 
@@ -99,7 +96,6 @@ const BoardAdd = () => {
     setServingSize(e.servingSize)
     setMenuCategory(e.menuCategory)
     setDifficulty(handleGetDifficultyReverse(e.difficulty))
-    // setSelectedImage(e.selectedImage)
     setSelectedImageView(e.imageUrl)
   }
   /**
