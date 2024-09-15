@@ -1,8 +1,7 @@
 import styled from 'styled-components';
 import axios from 'axios';
-import React from 'react';
-import { useParams } from 'react-router-dom';
-import { useOutletContext } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { useNavigate, useParams, useOutletContext } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ClipLoader } from 'react-spinners';
 
@@ -20,8 +19,41 @@ import difficulty3_icon from '../../resources/icon/difficulty_3.png';
 
 const BoardDetails = () => {
   const { boardId } = useParams();
+  const navigate = useNavigate();
+  const { actionType,setActionType } = useOutletContext();
   const { handleBoardData } = useOutletContext(); // 부모로부터 받은 함수
   const queryClient = useQueryClient();
+
+
+  const performEditAction = async () => {
+    try {
+      const response = await axios.delete(process.env.REACT_APP_API_URL+`boards/${boardId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+        },
+      });
+      console.log('게시물 삭제 성공:', response.data);
+      navigate('/board');
+    } catch (error) {
+      console.error('게시물 삭제 중 오류 발생:', error);
+    }
+  };
+  
+  const handleClick = (boardId) => {
+    navigate(`/board/edit/${boardId}`); // 페이지 이동 처리
+  };
+
+  useEffect(() => {
+    console.log('리시브 '+actionType)
+    if (actionType === 'delete') {
+      performEditAction(); // axios 요청 실행
+      setActionType(''); // 요청 실행 후 actionType을 빈 문자열로 변경
+    }else if (actionType === 'edit') {
+      setActionType(''); // 요청 실행 후 actionType을 빈 문자열로 변경
+      handleClick(boardId);
+    }
+  }, [actionType]);
+
 
   const sendAuthorEmailToParent = (e) =>{
     if(e === localStorage.getItem('email'))
