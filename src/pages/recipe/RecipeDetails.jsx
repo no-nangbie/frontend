@@ -74,6 +74,7 @@ const RecipeDetails = () => {
           Authorization: `Bearer ${localStorage.getItem('accessToken')}`, // 토큰 사용
         },
       });
+      console.log(response.data.data);
       return response.data.data;
     } catch (error) {
       throw error;

@@ -26,8 +26,8 @@ function Recipe() {
   const fetchRecipes = async (pageNumber) => {
     setLoading(true);
     try {
-      const params = { page: pageNumber, size: 20, sort: sortOption };
-      const response = menuCategory === "전체" 
+      const params = { page: pageNumber, size: 20, sort: sortOption === "likeList" ? "missingFoodsCount_asc" : sortOption };
+      const response = menuCategory === "전체"
         ? await axios.get(process.env.REACT_APP_API_URL + 'menus/all', {
             params,
             headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
@@ -37,48 +37,56 @@ function Recipe() {
             headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
           });
   
-      const menuList = response.data.data;
-      console.warn(menuList);
-
+      let menuList = response.data.data;
+  
+      // "좋아요 목록"이 선택되었을 때, likeCheck가 "T"인 메뉴만 필터링
+      if (sortOption === "likeList") {
+        menuList = menuList.filter(menu => menu.likeCheck === "T");
+      }
+  
       // 선택된 카테고리로 필터링
       const filteredMenuList = selectedFoodCategory !== "전체" && selectedFoodCategory.length > 0
-      ? menuList.filter(menu =>
-          menu.foodMenuQuantityList.some(food => food.foodName === selectedFoodCategory)
-        )
-      : menuList;
-
-
+        ? menuList.filter(menu =>
+            menu.foodMenuQuantityList.some(food => food.foodName === selectedFoodCategory)
+          )
+        : menuList;
+  
       // missingFoodsCount 정렬 적용
-        if (sortOption === "missingFoodsCount_desc") {
-          filteredMenuList.sort((a, b) => b.missingFoodsCount - a.missingFoodsCount);
-        } else if (sortOption === "missingFoodsCount_asc") {
-          filteredMenuList.sort((a, b) => a.missingFoodsCount - b.missingFoodsCount);
-        }
-        setRecipes(prevRecipes => {
-          const uniqueRecipes = [...prevRecipes, ...filteredMenuList].reduce((acc, curr) => {
-            if (!acc.some(item => item.menuId === curr.menuId)) {
-              acc.push(curr);
-            }
-            return acc;
-          }, []);
-    
-          return uniqueRecipes;
-        });
-    
-        setLoading(false);
-      } catch (error) {
-        console.error('Error:', error);
-        setError(error);
-        setLoading(false);
+      if (sortOption === "menuLikeCount_desc") {
+        filteredMenuList.sort((a, b) => b.menuLikeCount - a.menuLikeCount);
+      } else if (sortOption === "menuLikeCount_asc") {
+        filteredMenuList.sort((a, b) => a.menuLikeCount - b.menuLikeCount);
+      } else if (sortOption === "missingFoodsCount_desc") {
+        filteredMenuList.sort((a, b) => b.missingFoodsCount - a.missingFoodsCount);
+      } else if (sortOption === "missingFoodsCount_asc") {
+        filteredMenuList.sort((a, b) => a.missingFoodsCount - b.missingFoodsCount);
       }
+  
+      // 필터링된 메뉴 리스트를 상태에 바로 설정
+      setRecipes(filteredMenuList);
+  
+      setLoading(false);
+    } catch (error) {
+      console.error('Error:', error);
+      setError(error);
+      setLoading(false);
+    }
+  };
+  
+
+
+
+    useEffect(() => {
+    }, [recipes]);
+    
+  
+    const handleFoodCategoryChange = (e) => {
+      const selectedFoodName = e.target.value;
+      setSelectedFoodCategory(selectedFoodName);
+      setRecipes([]); // 기존 데이터를 비우고
+      setPage(1); // 페이지 초기화
     };
   
-  const handleFoodCategoryChange = (e) => {
-    const selectedFoodName = e.target.value;
-    setSelectedFoodCategory(selectedFoodName);
-    setRecipes([]); // 기존 데이터를 비우고
-    setPage(1); // 페이지 초기화
-  };
   
   const searchMenu = async (pageNumber) => {
     setLoading(true);
@@ -124,11 +132,25 @@ function Recipe() {
     setPage(1);
   };
 
-  const handleSortChange = (e) => {
-    setsortOption(e.target.value);
-    setRecipes([]); // 정렬 변경 시 기존 데이터 지우기
+   // 좋아요 목록 클릭 시 정렬 옵션을 "likeList"로 변경
+   const handleSortChange = (e) => {
+    const value = e.target.value;
+    setsortOption(value);
+    setRecipes([]); // 기존 데이터 지우기
     setPage(1); // 페이지 초기화
   };
+  
+  useEffect(() => {
+    if (page === 1) {
+      fetchRecipes(1); // 페이지 1일 때는 데이터를 새로 불러옴
+    }
+  }, [sortOption, menuCategory, selectedFoodCategory]); 
+  
+  useEffect(() => {
+    if (page > 1) {
+      fetchRecipes(page); // 페이지가 증가할 때만 데이터를 추가로 불러옴
+    }
+  }, [page]);
 
   const handleSearchClick = () => {
     if (searchKeyword.trim() === "") {
@@ -240,6 +262,7 @@ return (
             <option value="missingFoodsCount_asc">추천순 ▼</option>
             <option value="menuLikeCount_desc">좋아요 ▼</option>
             <option value="menuLikeCount_asc">좋아요 ▲</option>
+            <option value="likeList">좋아요 목록</option>
           </Select>
         </InputGroup2_2thLine>
       </FilterSection>
@@ -262,7 +285,7 @@ return (
             <FoodImage src={menu.imageUrl} alt={menu.title} />
             <FoodInfo>
               <FoodName>{menu.menuTitle}</FoodName>
-              <FoodIngredients>좋아요 수  : {menu.likesCount}</FoodIngredients>
+              <FoodIngredients>좋아요 수  : {menu.menuLikeCount}</FoodIngredients>
               <FoodIngredients>보유 재료 : {menu.ownedFoods ? menu.ownedFoods : "없음"}</FoodIngredients>
               <FoodIngredients>미보유 재료 : {menu.missingFoods ? menu.missingFoods : "없음"}</FoodIngredients>
             </FoodInfo>
