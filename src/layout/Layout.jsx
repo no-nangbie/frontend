@@ -15,6 +15,7 @@ import menu_on from '../resources/icon/menu_on.png';
 import recipe_on from '../resources/icon/recipe_on.png';
 import fridge_on from '../resources/icon/fridge_on.png';
 
+
 function Layout() {
   const location = useLocation();
   const navigate = useNavigate();
