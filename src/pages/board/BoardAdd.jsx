@@ -1,13 +1,10 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import styled from 'styled-components';
-import {useNavigate, useParams} from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ClipLoader } from 'react-spinners';
+import {useNavigate} from 'react-router-dom';
 
 const BoardAdd = () => {
   // 사용자가 입력한 값을 상태로 관리
-  const { boardId } = useParams();
   const [title, setTitle] = useState('');
   const [boardContent, setBoardContent] = useState('');
   const [foodContent, setFoodContent] = useState('');
@@ -65,62 +62,6 @@ const BoardAdd = () => {
 
 
   /**
-   * 특정 게시글(BoardId)정보 불러오는 메서드
-   * 
-   * @return : 성공하면 해당BoardId의 정보를 가져옴
-   *          실패하면은 error 처리
-   * 
-   * @Author : 신민준
-   */
-  const fetchPost = async () => {
-    console.log('refresh')
-    if (!boardId) {
-      throw new Error('잘못된 게시글 ID 입니다.');
-    }
-    try {
-      const response = await axios.get(process.env.REACT_APP_API_URL+`boards/${boardId}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-        },
-      });
-      downloadData(response.data.data);
-      return response.data.data;
-    } catch (error) {
-      throw error;
-    }
-  };
-
-  const downloadData = (e) => {
-    setTitle(e.title)
-    setBoardContent(e.boardContent)
-    setFoodContent(e.foodContent)
-    setRecipeContent(e.recipeContent)
-    setCookingTime(e.cookingTime)
-    setServingSize(e.servingSize)
-    setMenuCategory(e.menuCategory)
-    setDifficulty(handleGetDifficultyReverse(e.difficulty))
-    // setSelectedImage(e.selectedImage)
-    setSelectedImageView(e.imageUrl)
-  }
-  /**
-   * React Query를 통해 정보 불러올때 예외처리
-   * fetchPost 실행결과로 받은 정보들과 재실행 키(queryKey), 그리고 상태(isLoading/isError/error)관리
-   * 
-   * @Author : 신민준
-   */
-  const {
-    data: post,
-    isLoading,
-    isError,
-    error
-  } = useQuery({
-    queryKey: ['post', boardId],
-    queryFn: fetchPost,
-    enabled: !!boardId,
-    retry: 1
-  });
-  
-  /**
    * 게시판 수정 및 추가 창에서 난이도 그래프를 선택했을 때, axios에 난이도 정보를 보내주기 위한 
    * difficulty.Enum에 맞춰 변환
    * 
@@ -138,30 +79,6 @@ const BoardAdd = () => {
         return 'DIFFICULTY_HARD'; 
     }
   }
-  const handleGetDifficultyReverse = (difficulty) => {
-    switch(difficulty){
-      case 'DIFFICULTY_EASY':
-        return 1; 
-      case 'DIFFICULTY_MEDIUM':
-        return 2; 
-      default:
-        return 3; 
-    }
-  }
-
-  /**
-   * 로딩중일때..
-   * 
-   * @return : 빙글빙글 도는 이미지 
-   * 
-   * @Author : 신민준
-   */
-  if (isLoading) return (
-    <Container>
-      <ClipLoader color="#007bff" loading={isLoading} size={50} />
-    </Container>
-  );
-
 
   /**
    * 선택한 MenuCategory를 axios를 통해 body값에 보낼 수 있는 유효한 명칭으로 보내기 위해
@@ -209,7 +126,6 @@ const BoardAdd = () => {
     const formData = new FormData();
   
     // formData에 텍스트 필드 추가
-    formData.append('boardId', boardId);
     formData.append('title', title);
     formData.append('boardContent', boardContent);
     formData.append('foodContent', foodContent);
@@ -224,7 +140,7 @@ const BoardAdd = () => {
     }
 
     try {
-      const response = await axios.patch(process.env.REACT_APP_API_URL + 'boards/' + boardId, formData, {
+      const response = await axios.post(process.env.REACT_APP_API_URL + 'boards', formData, {
         headers: {
           'Content-Type': 'multipart/form-data', // form-data 형식으로 전송
           Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
@@ -358,7 +274,7 @@ const BoardAdd = () => {
           onChange={(e) => setRecipeContent(e.target.value)} // 입력값 상태로 저장
         />
 
-        <SubmitButton onClick={handleSubmit}>수정하기</SubmitButton> {/* 제출 핸들러 연결 */}
+        <SubmitButton onClick={handleSubmit}>올리기</SubmitButton> {/* 제출 핸들러 연결 */}
       </TextContainer>
     </Container>
   );

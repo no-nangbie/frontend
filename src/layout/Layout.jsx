@@ -20,6 +20,7 @@ function Layout() {
   const navigate = useNavigate();
   const [boardData, setBoardData] = useState('');
   const [adminCheck, setAdminCheck] = useState(false);
+  const [actionType, setActionType] = useState('');
   
   /**
    * 자식 컴포넌트로 부터 받아온 정보 저장 메서드
@@ -32,7 +33,11 @@ function Layout() {
     setBoardData(data);
   };
 
-
+  const handleButtonAction = (action) => {
+    // 부모는 자식에게 action 값을 전달만 함
+    setActionType(action);
+    console.log(`Action 전달됨: ${action}`);
+  };
   /**
    * page의 이동 및 navigate 동작 시 무조건 실행되는 useEffect
    * 
@@ -145,16 +150,16 @@ function Layout() {
    * 
    * @Author : 신민준
    */
-  const handleButtonClick2 = () => {
+  const handleButtonClick1 = () => {
     navigate('/fridge/delete');
   };
 
-  const handleButtonClick3 = () => {
+  const handleButtonClick2 = () => {
     navigate('/fridge/add');
   };
 
-  const handleboardClick3 = () => {
-    navigate('/board/details/edit');
+  const handleButtonClick3 = () => {
+    navigate('/board/add');
   };
 
   return (
@@ -166,29 +171,29 @@ function Layout() {
             
             {/* /fridge 페이지에서는 2번째, 3번째 버튼만 보여야 함 */}
             {(location.pathname.includes('/board/details') && boardData) && (
-              <ColoredButton src={getButtonImage1()} onClick={() => alert('첫 번째 버튼 클릭됨!')} />
+              <ColoredButton src={getButtonImage1()} onClick={() => handleButtonAction('edit')} />
             )}
             {(location.pathname === '/fridge') && (
-              <ColoredButton src={getButtonImage2()} onClick={handleButtonClick2} />
+              <ColoredButton src={getButtonImage2()} onClick={handleButtonClick1} />
             )}
             {(location.pathname.includes('/board/details') && boardData) && (
-              <ColoredButton src={getButtonImage2()} onClick={() => alert('두 번째 버튼 클릭됨!')} />
+              <ColoredButton src={getButtonImage2()} onClick={() => handleButtonAction('delete')} />
             )}
             {(location.pathname === '/fridge') && (
-              <ColoredButton src={getButtonImage3()} onClick={handleButtonClick3} />
+              <ColoredButton src={getButtonImage3()} onClick={handleButtonClick2} />
             )}
             {(location.pathname === '/recipe' && adminCheck) && (
               <ColoredButton src={getButtonImage3()} onClick={() => alert('세 번째 버튼 클릭됨!')} />
             )}
             {(location.pathname === '/board') && (
-              <ColoredButton src={getButtonImage3()} onClick={handleboardClick3} />
+              <ColoredButton src={getButtonImage3()} onClick={handleButtonClick3} />
             )}
           </ButtonContainer>
         </Header>
       )}
 
       <MainContent>
-        <Outlet context={{ handleBoardData }} />
+        <Outlet context={{ actionType, setActionType,handleBoardData }} />
       </MainContent>
 
       {!hideLayout && (

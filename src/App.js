@@ -25,6 +25,7 @@ import RecipeStepPage from './pages/recipe/RecipeStep';
 //board
 import BoardPage from './pages/board/Board';
 import BoardDetailsPage from './pages/board/BoardDetails';
+import BoardAddPage from './pages/board/BoardAdd';
 import BoardEditPage from './pages/board/BoardEdit';
 
 //menu
@@ -54,7 +55,8 @@ function App() {
               {/* <Route path="/recipe/details/step" element={<RecipeStepPage />} /> */}
               <Route path="/board" element={<BoardPage />} />
               <Route path="/board/details/:boardId" element={<BoardDetailsPage />} />
-              <Route path="/board/details/edit" element={<BoardEditPage />} />
+              <Route path="/board/add" element={<BoardAddPage />} />
+              <Route path="/board/edit/:boardId" element={<BoardEditPage />} />
               <Route path="/menu" element={<MenuPage />} />
             </Route>
           </Routes>
