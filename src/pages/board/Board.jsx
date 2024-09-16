@@ -157,6 +157,8 @@ function Board() {
         return "LIKE_DESC";
       case "좋아요 ▲":
         return "LIKE_ASC";
+      case "좋아요 목록":
+        return "LIKE_LIST";
     }
   };
   return (
@@ -186,6 +188,7 @@ function Board() {
                   <option>날짜 ▲</option>
                   <option>좋아요 ▼</option>
                   <option>좋아요 ▲</option>
+                  <option>좋아요 목록</option>
                 </Select>
           </InputGroup2_2thLine>
         </FilterSection>
