@@ -267,7 +267,7 @@ export default RecipeSteps;
 // 스타일 추가
 const NextStepDescription = styled.p`
   margin-top: 30px;  // 여유 공간을 위로 줌
-  font-size: 18px;
+  font-size: 20px;
   font-weight: bold;
   color: rgba(0, 0, 0, 0.441);  // 흐릿한 색상 적용
   text-align: center;
@@ -279,7 +279,7 @@ const NextStepDescription = styled.p`
 // 스타일 추가
 const PreviousStepDescription = styled.p`
   margin-bottom: 30px;  // 여유 공간을 아래로 줌
-  font-size: 18px;
+  font-size: 20px;
   font-weight: bold;
   color: rgba(0, 0, 0, 0.441);  // 흐릿한 색상 적용
   text-align: center;
@@ -290,7 +290,7 @@ const PreviousStepDescription = styled.p`
 
 const StepDescription = styled.p`
   line-height: 1.5;
-  font-size: 25px;
+  font-size: 27px;
   font-weight: bold;
   color: #333;
   padding: 20px;
