@@ -162,7 +162,7 @@ const RecipeDetails = () => {
   return (
     <Container>
         <ImageContainer>
-          <Image src={menu_1 || '/images/default.png'} alt="이미지 없음" /> 
+          <Image src={menu.imageUrl || '/images/default.png'} alt="이미지 없음" /> 
           <LikeButton onClick={handleLike}>
             <LikeButtonImage src={handleLikeImg(menu.likeCheck)} alt="Button Icon" />
           </LikeButton>
