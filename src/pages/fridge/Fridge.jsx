@@ -12,22 +12,24 @@ import { useNavigate } from 'react-router-dom';
 
 
 
-const getFoodIcon = (category) => {
+const getFoodIcon = (category, memberFoodStatus) => {
+  const filterStyle = memberFoodStatus === "Near_Expiry" ? "grayscale(100%)" : "none"; // 'grayscale(100%)'으로 수정
   switch (category) {
     case "VEGETABLES_FRUITS":
-      return <img src={VEGETABLES_FRUITS_ICON} alt="Vegetables and Fruits" width="40" height="40" />; // Example icon for vegetables and fruits
+      return <img src={VEGETABLES_FRUITS_ICON} style={{ filter: filterStyle }} alt="Vegetables and Fruits" width="40" height="40" />;
     case "MEAT":
-      return <img src={MEAT_ICON} alt="Meats" width="40" height="40" />; // Example icon for meat
+      return <img src={MEAT_ICON} style={{ filter: filterStyle }} alt="Meats" width="40" height="40" />;
     case "FISH_SEAFOOD":
-      return  <img src={FISH_SEAFOOD_ICON} alt="Fishs and Seafoods" width="40" height="40" />;
+      return <img src={FISH_SEAFOOD_ICON} style={{ filter: filterStyle }} alt="Fish and Seafoods" width="40" height="40" />;
     case "EGGS_DAIRY":
-      return  <img src={EGGS_DAIRY_ICON} alt="Egges and Dairy" width="40" height="40" />;
+      return <img src={EGGS_DAIRY_ICON} style={{ filter: filterStyle }} alt="Eggs and Dairy" width="40" height="40" />;
     case "SAUCES":
-      return  <img src={SAUCES_ICON} alt="Sauces" width="40" height="40" />;
+      return <img src={SAUCES_ICON} style={{ filter: filterStyle }} alt="Sauces" width="40" height="40" />;
     default:
-      return  <img src={OTHERS_ICON} alt="Others" width="40" height="40" />; // Default icon for unknown categories
+      return <img src={OTHERS_ICON} style={{ filter: filterStyle }} alt="Others" width="40" height="40" />;
   }
 };
+
 
 const getStatusColor = (memberFoodStatus) => {
   switch (memberFoodStatus) {
@@ -225,7 +227,7 @@ function Fridge() {
         ) : (
           filteredItems.map((item) => (
           <FoodItem key={item.id} color={getStatusColor(item.memberFoodStatus)} onClick={() => handleClick(item.memberFoodId)}>
-            <FoodIcon>{getFoodIcon(item.foodCategory)}</FoodIcon>
+            {getFoodIcon(item.foodCategory, item.memberFoodStatus)}
             <FoodName color={getCategoryColor(item.foodCategory)} memberFoodStatus={item.memberFoodStatus}>{item.foodName}</FoodName>
             {item.memo ? (
               <FoodMemo memberFoodStatus={item.memberFoodStatus}>[{item.memo}]</FoodMemo>
@@ -362,6 +364,16 @@ const FoodItem = styled.div`
   &:nth-child(2n) { /* 각 두 번째 아이템에 대해 오른쪽 마진 0 설정 */
     margin-right: 0;
   }
+
+  /* 아이콘을 오른쪽에 위치시키기 위한 스타일 */
+  & img {
+    position: absolute;
+    right: 10px; /* 오른쪽에서 10px 떨어진 위치 */
+    top: 50%; /* 상단에서 중앙 위치 */
+    transform: translateY(-50%); /* 중앙 정렬을 위한 변환 */
+    width: 40px;
+    height: 40px;
+  }
 `;
 
 const ScrollableContainer = styled.div`
@@ -375,7 +387,7 @@ const ScrollableContainer = styled.div`
   border-radius: 8px;
 `;
 
-const FoodIcon = styled.div`
+const FoodIcon = styled.img`
   position: absolute;
   right: 10px; /* 우측에서 10px 떨어진 위치 */
   top: 50%; /* 상단에서 중앙 위치 */
