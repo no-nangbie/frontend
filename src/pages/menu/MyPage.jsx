@@ -8,6 +8,8 @@ function MyPage() {
     const [email, setEmail] = useState('');
     const [nickname, setNickname] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); // 회원 탈퇴 모달 상태 추가
+
 
     // 로그아웃 핸들러 함수
     const handleLogout = async () => {
@@ -35,6 +37,38 @@ function MyPage() {
         } catch (error) {
             console.error('로그아웃 실패:', error.response?.data || error.message);
             alert('로그아웃 중 오류가 발생했습니다. 다시 시도해주세요.');
+        }
+    };
+
+    // 회원탈퇴 핸들러 함수
+    const handleDeleteAccount = async () => {
+        try {
+            const accessToken = localStorage.getItem('accessToken');
+
+            if (!accessToken) {
+                alert('로그인 상태가 아닙니다.');
+                navigate('/login');
+                return;
+            }
+
+            // 회원탈퇴 요청
+            await axios.delete(`${process.env.REACT_APP_API_URL}members`, {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`
+                }
+            });
+
+            // 회원탈퇴 성공 시 로컬 스토리지에서 토큰 및 이메일 삭제
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('email');
+            localStorage.removeItem('nickname');
+
+            alert('회원탈퇴가 완료되었습니다.');
+            navigate('/login'); // 탈퇴 후 로그인 페이지로 이동
+
+        } catch (error) {
+            console.error('회원탈퇴 실패:', error.response?.data || error.message);
+            alert('회원탈퇴 중 오류가 발생했습니다. 다시 시도해주세요.');
         }
     };
 
@@ -73,6 +107,16 @@ function MyPage() {
         setIsModalOpen(false);
     };
 
+    // 회원 탈퇴 확인 모달의 확인 버튼 클릭 시 실행
+    const handleDeleteConfirm = () => {
+        handleDeleteAccount();
+        setIsDeleteModalOpen(false);
+    };
+
+    // 회원 탈퇴 확인 모달 취소 버튼 클릭 시 실행
+    const handleDeleteCancel = () => {
+        setIsDeleteModalOpen(false);
+    };
 
     return (
         <Container>
@@ -88,15 +132,31 @@ function MyPage() {
                 <ActionButton onClick={handleLogout}>로그아웃</ActionButton>
                 <RedButton onClick={() => setIsModalOpen(true)}>냉장고 초기화</RedButton>
                 <RedButton>통계 초기화</RedButton>
-                <RedButton>회원 탈퇴</RedButton>
+                <RedButton onClick={() => setIsDeleteModalOpen(true)}>회원 탈퇴</RedButton>
             </Content>
             {isModalOpen && (
                 <ModalOverlay>
                     <ModalContent>
                         <ModalText>냉장고 속 모든 식재료를 삭제하겠습니까?</ModalText>
                         <ModalButtonContainer>
-                            <ModalButton onClick={handleCancel}>취소</ModalButton>
                             <ModalButton onClick={handleConfirm}>확인</ModalButton>
+                            <ModalButton onClick={handleCancel}>취소</ModalButton>
+                        </ModalButtonContainer>
+                    </ModalContent>
+                </ModalOverlay>
+            )}
+
+            {/* 회원 탈퇴 확인 모달 */}
+            {isDeleteModalOpen && (
+                <ModalOverlay>
+                    <ModalContent>
+                        <ModalText>
+                            회원 탈퇴를 진행하겠습니까?<br />
+                            회원 탈퇴 시 모든 정보가 삭제됩니다.
+                        </ModalText>
+                        <ModalButtonContainer>
+                            <ModalButton onClick={handleDeleteConfirm}>확인</ModalButton>
+                            <ModalButton onClick={handleDeleteCancel}>취소</ModalButton>
                         </ModalButtonContainer>
                     </ModalContent>
                 </ModalOverlay>
@@ -115,19 +175,19 @@ const Container = styled.div`
   background-color: #f2f2f2;
 `;
 
-const Header = styled.header`
-  background-color: #2d9cdb;
-  height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-`;
-
-const Heading = styled.h1`
-    font-size: 24px;
-    margin: 0;
-`;
+// const Header = styled.header`
+//   background-color: #2d9cdb;
+//   height: 50px;
+//   display: flex;
+//   align-items: center;
+//   justify-content: center;
+//   color: white;
+// `;
+//
+// const Heading = styled.h1`
+//     font-size: 24px;
+//     margin: 0;
+// `;
 
 const Content = styled.div`
     flex: 1;
