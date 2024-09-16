@@ -224,9 +224,9 @@ function Layout() {
             <NavItem active={location.pathname === '/menu'} onClick={() => navigate('/menu')}>
               <Icon
                 src={location.pathname.includes('/menu') ? menu_on : menu}
-                alt="메뉴"
+                alt="마이페이지"
               />
-              <NavText active={location.pathname.includes('/menu') ? 'true' : undefined}>메뉴</NavText>
+              <NavText active={location.pathname.includes('/menu') ? 'true' : undefined}>마이페이지</NavText>
             </NavItem>
           </Nav>
         </Footer>
