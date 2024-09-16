@@ -26,8 +26,8 @@ function Recipe() {
   const fetchRecipes = async (pageNumber) => {
     setLoading(true);
     try {
-      const params = { page: pageNumber, size: 20, sort: sortOption === "likeList" ? "missingFoodsCount_asc" : sortOption };
-      const response = menuCategory === "전체"
+      const params = { page: pageNumber, size: 20, sort: sortOption === "likeList" ? "missingFoodsCount_asc" : sortOption};
+      const response = menuCategory === "전체" 
         ? await axios.get(process.env.REACT_APP_API_URL + 'menus/all', {
             params,
             headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
@@ -38,26 +38,47 @@ function Recipe() {
           });
   
       let menuList = response.data.data;
-  
-      // "좋아요 목록"이 선택되었을 때, likeCheck가 "T"인 메뉴만 필터링
-      if (sortOption === "likeList") {
+      console.warn(menuList);
+
+       // "좋아요 목록"이 선택되었을 때, likeCheck가 T인 메뉴만 필터링
+       console.log("Before filter:", menuList);
+       if (sortOption === "likeList") {
         menuList = menuList.filter(menu => menu.likeCheck === "T");
       }
-  
+      console.log("After filter:", menuList);
+
+
       // 선택된 카테고리로 필터링
       const filteredMenuList = selectedFoodCategory !== "전체" && selectedFoodCategory.length > 0
-        ? menuList.filter(menu =>
-            menu.foodMenuQuantityList.some(food => food.foodName === selectedFoodCategory)
-          )
-        : menuList;
+      ? menuList.filter(menu =>
+          menu.foodMenuQuantityList.some(food => food.foodName === selectedFoodCategory)
+        )
+      : menuList;
 
-  
-      // 새로운 페이지의 데이터를 기존 데이터에 추가
-      setRecipes((prevRecipes) => [...prevRecipes, ...filteredMenuList]);
-  
-      // 더 이상 가져올 데이터가 없으면 hasMore를 false로 설정
-      setHasMore(filteredMenuList.length > 0);
-  
+
+      // missingFoodsCount 정렬 적용
+      if (sortOption === "menuLikeCount_desc") {
+        filteredMenuList.sort((a, b) => b.menuLikeCount - a.menuLikeCount);
+      } else if (sortOption === "menuLikeCount_asc") {
+        filteredMenuList.sort((a, b) => a.menuLikeCount - b.menuLikeCount);
+      } else if (sortOption === "missingFoodsCount_desc") {
+        filteredMenuList.sort((a, b) => b.missingFoodsCount - a.missingFoodsCount);
+      } else if (sortOption === "missingFoodsCount_asc") {
+        filteredMenuList.sort((a, b) => a.missingFoodsCount - b.missingFoodsCount);
+      }
+
+
+      setRecipes(prevRecipes => {
+        const uniqueRecipes = [...prevRecipes, ...filteredMenuList].reduce((acc, curr) => {
+          if (!acc.some(item => item.menuId === curr.menuId)) {
+            acc.push(curr);
+          }
+          return acc;
+        }, []);
+
+        return uniqueRecipes;
+      });
+
       setLoading(false);
     } catch (error) {
       console.error('Error:', error);
@@ -65,8 +86,10 @@ function Recipe() {
       setLoading(false);
     }
   };
-  
+
+
     useEffect(() => {
+      console.log('Updated Recipes:', recipes);
     }, [recipes]);
     
   
@@ -81,7 +104,7 @@ function Recipe() {
   const searchMenu = async (pageNumber) => {
     setLoading(true);
     try {
-      const params = { page: pageNumber, size: 500, sort: sortOption };
+      const params = { page: pageNumber, size: 700, sort: sortOption };
       const response = menuCategory === "전체"
         ? await axios.get(process.env.REACT_APP_API_URL + 'menus/search', {
             params: { ...params, keyword: searchKeyword.trim() },
@@ -97,6 +120,11 @@ function Recipe() {
       // 검색 결과를 상태에 반영
       setRecipes(menuList); // 검색된 데이터로 상태를 업데이트
       setLoading(false);
+      if (menuList.length === 0) {
+        // 만약 새로 가져온 음식 목록이 비어 있으면,
+        // 즉, 더 이상 새로운 음식이 없으면,
+        setHasMore(false); // 더 이상 음식이 없다는 것을 알려줍니다.
+      }
     } catch (error) {
       console.error("Failed to fetch recipes: ", error);
       setError(error);
@@ -116,10 +144,6 @@ function Recipe() {
     }
   };
 
-  useEffect(() => {
-    getFoodName();
-  }, []);
-
   const handleSelectCategoryChange = (e) => {
     setMenuCategory(e.target.value);
     setRecipes([]);
@@ -127,20 +151,19 @@ function Recipe() {
   };
 
    // 좋아요 목록 클릭 시 정렬 옵션을 "likeList"로 변경
-   const handleSortChange = (e) => {
+  const handleSortChange = (e) => {
     const value = e.target.value;
     setsortOption(value);
-    setRecipes([]); // 기존 데이터 지우기
+    setRecipes([]); // 정렬 변경 시 기존 데이터 지우기
     setPage(1); // 페이지 초기화
+    fetchRecipes(1);
   };
-  
 
   const handleSearchClick = () => {
     if (searchKeyword.trim() === "") {
       setsortOption("menuId_desc")
     }
     setIsSearching(true);
-    setSearchKeyword("");
     setRecipes([]); // 검색 시 기존 데이터 지우기
     setPage(1); // 페이지 초기화
     searchMenu(1);
@@ -173,29 +196,44 @@ function Recipe() {
     }
   };
 
+  const handleScroll = () => {
+    const container = document.getElementById('scrollable-container');
+    if (container.scrollTop + container.clientHeight >= container.scrollHeight) {
+      if (!loading && hasMore) {
+        setPage(prevPage => {
+          const newPage = prevPage + 1;
+          if (searchKeyword.trim()) {
+            searchMenu(newPage); 
+          } else {
+            fetchRecipes(newPage);
+          }
+          return newPage;
+        });
+      }
+    }
+  };
+
   useEffect(() => {
     fetchRecipes(page);
   }, [sortOption, menuCategory, page]);
 
   useEffect(() => {
     const container = document.getElementById('scrollable-container');
-    const handleScroll = () => {
-      if (container.scrollTop + container.clientHeight >= container.scrollHeight) {
-        if (!loading && hasMore) {  // 로딩 중이 아니고 더 불러올 데이터가 있을 때만
-          setPage(prevPage => prevPage + 1);  // 페이지를 증가시키고
-        }
-      }
-    };
-  
     container.addEventListener('scroll', handleScroll);
     return () => {
-      container.removeEventListener('scroll', handleScroll); // 이벤트 리스너 해제
+      container.removeEventListener('scroll', handleScroll);
     };
   }, [loading, hasMore]);
-  
+
   useEffect(() => {
-  }, [page]);
-  
+    getFoodName();
+  }, []);
+
+  useEffect(() => {
+    fetchRecipes(1); // 선택된 값에 따라 데이터 로드
+  }, [selectedFoodCategory, menuCategory, sortOption]); 
+
+
 return (
   <MainContainer>
     <Header>
