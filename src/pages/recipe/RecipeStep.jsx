@@ -15,6 +15,7 @@ const RecipeSteps = () => {
   const [steps, setSteps] = useState([]);
   const [ingredients, setIngredients] = useState([]);
   const [recognition, setRecognition] = useState(null);
+  const [menuImage, setMenuImage] = useState([]);
   const [transcript, setTranscript] = useState(''); // 인식된 텍스트 상태
 
 
@@ -23,19 +24,20 @@ const RecipeSteps = () => {
    const size = 100;  // 충분히 큰 값을 설정하여 모든 재료를 가져옴
    const sort = 'foodName_asc';  // 정렬 기준
    
-  // 메뉴 데이터를 가져오는 함수
-  useEffect(() => {
+   // 메뉴 데이터를 가져오는 함수
+   useEffect(() => {
     const fetchRecipeData = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/menus/${menuId}`, {  // 백틱(``)을 사용하여 템플릿 리터럴 적용
+        const response = await axios.get(`http://localhost:8080/menus/${menuId}`, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('accessToken')}`,  // 백틱(``)을 사용하여 문자열 템플릿 적용
+            Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
           },
         });
-    
+
         const menuData = response.data.data;
         setSteps(menuData.recipes);
         setIngredients(menuData.foodMenuQuantityList);
+        setMenuImage(menuData.imageUrl);
       } catch (error) {
         console.error('Error fetching recipe data:', error);
       }
@@ -44,13 +46,12 @@ const RecipeSteps = () => {
     fetchRecipeData();
   }, [menuId]);
 
-
   // MemberFood 데이터를 가져오는 함수
   useEffect(() => {
     const fetchMemberFoods = async () => {
       try {
         const response = await axios.get(`http://localhost:8080/my-foods`, {
-          params: { page, size, sort },  // page, size, sort를 추가
+          params: { page, size, sort },
           headers: {
             Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
           },
@@ -64,15 +65,14 @@ const RecipeSteps = () => {
     };
 
     fetchMemberFoods();
-  }, [page, size, sort]);  // page, size, sort를 의존성에 추가
+  }, [page, size, sort]);
 
-  
-// Web Speech API 초기화
+  // Web Speech API 초기화 및 currentStep 변경 감지
   useEffect(() => {
     if ('webkitSpeechRecognition' in window) {
       const recognitionInstance = new window.webkitSpeechRecognition();
-      recognitionInstance.lang = "ko-KR";
-      recognitionInstance.continuous = true; 
+      recognitionInstance.lang = 'ko-KR';
+      recognitionInstance.continuous = true;
       recognitionInstance.interimResults = false; // 최종 결과만 처리
 
       recognitionInstance.onresult = (event) => {
@@ -83,15 +83,29 @@ const RecipeSteps = () => {
         console.log('Recognized text:', transcriptText);
 
         const cleanedTranscript = transcriptText.trim().replace(/[.,\s]/g, '');
-        
+
         // "다음"이라는 단어를 인식하면 페이지 넘김
         if (cleanedTranscript.includes('다음')) {
-          handleNext();
+          setCurrentStep((prevStep) => {
+            // 마지막 단계이면 더 이상 넘어가지 않도록 함
+            if (prevStep < steps.length) {
+              return prevStep + 1;
+            }
+            console.log('마지막 단계입니다.');
+            return prevStep;
+          });
         }
 
         // "이전"이라는 단어를 인식하면 이전 페이지로 이동
         if (cleanedTranscript.includes('이전')) {
-          handlePrev();
+          setCurrentStep((prevStep) => {
+            // 첫 번째 단계이면 더 이상 뒤로 가지 않도록 함
+            if (prevStep > 0) {
+              return prevStep - 1;
+            }
+            console.log('첫 번째 단계입니다.');
+            return prevStep;
+          });
         }
       };
 
@@ -102,17 +116,17 @@ const RecipeSteps = () => {
       recognitionInstance.onend = () => {
         setTimeout(() => {
           if (micActive) {
-            console.log("음성 인식 재시작됨");
+            console.log('음성 인식 재시작됨');
             recognitionInstance.start();
           } else {
-            console.log("음성 인식 종료됨");
+            console.log('음성 인식 종료됨');
           }
         }, 100); // 딜레이를 주어 상태 업데이트가 반영되도록 함
       };
 
       setRecognition(recognitionInstance);
     }
-  }, [micActive]); // micActive 상태에 따라 음성 인식 제어
+  }, [micActive, steps]); // micActive와 steps 의존성 추가
 
   const handleNext = () => {
     if (currentStep < steps.length) {
@@ -129,22 +143,21 @@ const RecipeSteps = () => {
 
   // 마이크 상태를 토글하여 음성 인식 시작/종료 제어
   const toggleMic = () => {
-    console.log("Mic active before toggle:", micActive);
+    console.log('Mic active before toggle:', micActive);
 
     if (!micActive && recognition) {
       recognition.start(); // 마이크 활성화 시 음성 인식 시작
-      console.log("음성 인식 시작됨");
+      console.log('음성 인식 시작됨');
     } else if (micActive && recognition) {
       recognition.stop(); // 마이크 비활성화 시 음성 인식 종료
-      console.log("음성 인식 강제 종료됨");
+      console.log('음성 인식 강제 종료됨');
     }
-    
+
     setMicActive((prevState) => {
-      console.log("Toggling mic active:", !prevState); // 상태가 변경되는 부분 확인
+      console.log('Toggling mic active:', !prevState); // 상태가 변경되는 부분 확인
       return !prevState;
     });
   };
-
 
   const handleIngredientCheck = (ingredientName) => {
     setSelectedIngredients((prevSelected) =>
@@ -157,7 +170,7 @@ const RecipeSteps = () => {
   const handleFinishCooking = async () => {
     try {
       const response = await axios.get(`http://localhost:8080/my-foods`, {
-        params: { page, size, sort },  // page, size, sort를 추가
+        params: { page, size, sort },
         headers: {
           Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
         },
@@ -167,12 +180,12 @@ const RecipeSteps = () => {
 
       // 사용자가 선택한 재료의 foodName과 일치하는 MemberFood ID 찾기
       const memberFoodIdsToDelete = memberFoods
-        .filter(memberFood =>
-          selectedIngredients.includes(memberFood.foodName))  // foodName 비교
-        .map(memberFood => memberFood.memberFoodId);  // memberFoodId 추출
+        .filter((memberFood) =>
+          selectedIngredients.includes(memberFood.foodName)
+        )
+        .map((memberFood) => memberFood.memberFoodId);
 
       if (memberFoodIdsToDelete.length > 0) {
-        // 선택된 MemberFood들을 삭제
         await axios.delete(`http://localhost:8080/my-foods`, {
           data: memberFoodIdsToDelete,
           headers: {
@@ -181,11 +194,9 @@ const RecipeSteps = () => {
         });
       }
 
-      // 성공 시 /recipe 페이지로 이동
       navigate('/recipe');
     } catch (error) {
       console.error('Error removing ingredients from MemberFood:', error);
-      // 오류 발생 시에도 /recipe 페이지로 이동
       navigate('/recipe');
     }
   };
@@ -209,7 +220,7 @@ const RecipeSteps = () => {
 
       {currentStep < steps.length ? (
         <RecipeSection>
-          <BackgroundImage src={menu_1} alt="레시피 이미지" />
+          <BackgroundImage src={menuImage} alt="레시피 이미지" />
           <StepDescription>{steps[currentStep]}</StepDescription>
           <MicButton onClick={toggleMic}>
             <img src={micActive ? micro_2 : micro_1} alt="mic" />
@@ -319,7 +330,7 @@ const BackgroundImage = styled.div`
   left: 0;
   width: 100%;
   height: 90%;
-  background-image: url(${menu_1});
+  background-image: url(${props => props.src});
   background-size: cover;
   background-position: center;
   opacity: 0.15;
