@@ -50,17 +50,7 @@ function Recipe() {
             menu.foodMenuQuantityList.some(food => food.foodName === selectedFoodCategory)
           )
         : menuList;
-  
-      // missingFoodsCount 정렬 적용
-      if (sortOption === "menuLikeCount_desc") {
-        filteredMenuList.sort((a, b) => b.menuLikeCount - a.menuLikeCount);
-      } else if (sortOption === "menuLikeCount_asc") {
-        filteredMenuList.sort((a, b) => a.menuLikeCount - b.menuLikeCount);
-      } else if (sortOption === "missingFoodsCount_desc") {
-        filteredMenuList.sort((a, b) => b.missingFoodsCount - a.missingFoodsCount);
-      } else if (sortOption === "missingFoodsCount_asc") {
-        filteredMenuList.sort((a, b) => a.missingFoodsCount - b.missingFoodsCount);
-      }
+
   
       // 새로운 페이지의 데이터를 기존 데이터에 추가
       setRecipes((prevRecipes) => [...prevRecipes, ...filteredMenuList]);
@@ -91,7 +81,7 @@ function Recipe() {
   const searchMenu = async (pageNumber) => {
     setLoading(true);
     try {
-      const params = { page: pageNumber, size: 20, sort: sortOption };
+      const params = { page: pageNumber, size: 500, sort: sortOption };
       const response = menuCategory === "전체"
         ? await axios.get(process.env.REACT_APP_API_URL + 'menus/search', {
             params: { ...params, keyword: searchKeyword.trim() },
@@ -183,19 +173,6 @@ function Recipe() {
     }
   };
 
-  // const handleScroll = () => {
-  //   const container = document.getElementById('scrollable-container');
-  //   if (container.scrollTop + container.clientHeight >= container.scrollHeight) {
-  //     if (!loading && hasMore) {
-  //       setPage(prevPage => {
-  //         const newPage = prevPage + 1;
-  //         fetchRecipes(newPage);
-  //         return newPage;
-  //       });
-  //     }
-  //   }
-  // };
-
   useEffect(() => {
     fetchRecipes(page);
   }, [sortOption, menuCategory, page]);
@@ -217,21 +194,8 @@ function Recipe() {
   }, [loading, hasMore]);
   
   useEffect(() => {
-    if (!loading && hasMore) {  // 로딩 중이 아니고 더 불러올 데이터가 있을 때만
-      fetchRecipes(page);  // 페이지가 변경될 때만 데이터를 요청
-    }
   }, [page]);
   
-
-  // useEffect(() => {
-  //   getFoodName();
-  // }, []);
-
-  // useEffect(() => {
-  //   fetchRecipes(1); // 선택된 값에 따라 데이터 로드
-  // }, [selectedFoodCategory, menuCategory, sortOption]); 
-
-
 return (
   <MainContainer>
     <Header>
