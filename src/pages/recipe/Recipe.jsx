@@ -62,8 +62,11 @@ function Recipe() {
         filteredMenuList.sort((a, b) => a.missingFoodsCount - b.missingFoodsCount);
       }
   
-      // 필터링된 메뉴 리스트를 상태에 바로 설정
-      setRecipes(filteredMenuList);
+      // 새로운 페이지의 데이터를 기존 데이터에 추가
+      setRecipes((prevRecipes) => [...prevRecipes, ...filteredMenuList]);
+  
+      // 더 이상 가져올 데이터가 없으면 hasMore를 false로 설정
+      setHasMore(filteredMenuList.length > 0);
   
       setLoading(false);
     } catch (error) {
@@ -73,9 +76,6 @@ function Recipe() {
     }
   };
   
-
-
-
     useEffect(() => {
     }, [recipes]);
     
@@ -126,6 +126,10 @@ function Recipe() {
     }
   };
 
+  useEffect(() => {
+    getFoodName();
+  }, []);
+
   const handleSelectCategoryChange = (e) => {
     setMenuCategory(e.target.value);
     setRecipes([]);
@@ -140,17 +144,6 @@ function Recipe() {
     setPage(1); // 페이지 초기화
   };
   
-  useEffect(() => {
-    if (page === 1) {
-      fetchRecipes(1); // 페이지 1일 때는 데이터를 새로 불러옴
-    }
-  }, [sortOption, menuCategory, selectedFoodCategory]); 
-  
-  useEffect(() => {
-    if (page > 1) {
-      fetchRecipes(page); // 페이지가 증가할 때만 데이터를 추가로 불러옴
-    }
-  }, [page]);
 
   const handleSearchClick = () => {
     if (searchKeyword.trim() === "") {
@@ -190,18 +183,18 @@ function Recipe() {
     }
   };
 
-  const handleScroll = () => {
-    const container = document.getElementById('scrollable-container');
-    if (container.scrollTop + container.clientHeight >= container.scrollHeight) {
-      if (!loading && hasMore) {
-        setPage(prevPage => {
-          const newPage = prevPage + 1;
-          fetchRecipes(newPage);
-          return newPage;
-        });
-      }
-    }
-  };
+  // const handleScroll = () => {
+  //   const container = document.getElementById('scrollable-container');
+  //   if (container.scrollTop + container.clientHeight >= container.scrollHeight) {
+  //     if (!loading && hasMore) {
+  //       setPage(prevPage => {
+  //         const newPage = prevPage + 1;
+  //         fetchRecipes(newPage);
+  //         return newPage;
+  //       });
+  //     }
+  //   }
+  // };
 
   useEffect(() => {
     fetchRecipes(page);
@@ -209,19 +202,34 @@ function Recipe() {
 
   useEffect(() => {
     const container = document.getElementById('scrollable-container');
+    const handleScroll = () => {
+      if (container.scrollTop + container.clientHeight >= container.scrollHeight) {
+        if (!loading && hasMore) {  // 로딩 중이 아니고 더 불러올 데이터가 있을 때만
+          setPage(prevPage => prevPage + 1);  // 페이지를 증가시키고
+        }
+      }
+    };
+  
     container.addEventListener('scroll', handleScroll);
     return () => {
-      container.removeEventListener('scroll', handleScroll);
+      container.removeEventListener('scroll', handleScroll); // 이벤트 리스너 해제
     };
   }, [loading, hasMore]);
-
+  
   useEffect(() => {
-    getFoodName();
-  }, []);
+    if (!loading && hasMore) {  // 로딩 중이 아니고 더 불러올 데이터가 있을 때만
+      fetchRecipes(page);  // 페이지가 변경될 때만 데이터를 요청
+    }
+  }, [page]);
+  
 
-  useEffect(() => {
-    fetchRecipes(1); // 선택된 값에 따라 데이터 로드
-  }, [selectedFoodCategory, menuCategory, sortOption]); 
+  // useEffect(() => {
+  //   getFoodName();
+  // }, []);
+
+  // useEffect(() => {
+  //   fetchRecipes(1); // 선택된 값에 따라 데이터 로드
+  // }, [selectedFoodCategory, menuCategory, sortOption]); 
 
 
 return (
