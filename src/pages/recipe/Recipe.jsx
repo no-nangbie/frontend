@@ -81,7 +81,7 @@ function Recipe() {
   const searchMenu = async (pageNumber) => {
     setLoading(true);
     try {
-      const params = { page: pageNumber, size: 700, sort: sortOption };
+      const params = { page: pageNumber, size: 500, sort: sortOption };
       const response = menuCategory === "전체"
         ? await axios.get(process.env.REACT_APP_API_URL + 'menus/search', {
             params: { ...params, keyword: searchKeyword.trim() },
@@ -173,7 +173,6 @@ function Recipe() {
     }
   };
 
-
   useEffect(() => {
     fetchRecipes(page);
   }, [sortOption, menuCategory, page]);
@@ -197,16 +196,6 @@ function Recipe() {
   useEffect(() => {
   }, [page]);
   
-
-  // useEffect(() => {
-  //   getFoodName();
-  // }, []);
-
-  // useEffect(() => {
-  //   fetchRecipes(1); // 선택된 값에 따라 데이터 로드
-  // }, [selectedFoodCategory, menuCategory, sortOption]); 
-
-
 return (
   <MainContainer>
     <Header>

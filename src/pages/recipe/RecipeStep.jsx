@@ -221,7 +221,19 @@ const RecipeSteps = () => {
       {currentStep < steps.length ? (
         <RecipeSection>
           <BackgroundImage src={menuImage} alt="레시피 이미지" />
+           {/* 이전 단계 설명을 흐릿하게 표시 */}
+           {currentStep > 0 && (
+            <PreviousStepDescription>{steps[currentStep - 1]}</PreviousStepDescription>
+          )}
+          
+          {/* 현재 단계 설명 */}
           <StepDescription>{steps[currentStep]}</StepDescription>
+
+          {/* 다음 단계 설명을 흐릿하게 표시 */}
+          {currentStep + 1 < steps.length && (
+            <NextStepDescription>{steps[currentStep + 1]}</NextStepDescription>
+          )}
+
           <MicButton onClick={toggleMic}>
             <img src={micActive ? micro_2 : micro_1} alt="mic" />
           </MicButton>
@@ -252,7 +264,42 @@ const RecipeSteps = () => {
 
 export default RecipeSteps;
 
+// 스타일 추가
+const NextStepDescription = styled.p`
+  margin-top: 30px;  // 여유 공간을 위로 줌
+  font-size: 18px;
+  font-weight: bold;
+  color: rgba(0, 0, 0, 0.441);  // 흐릿한 색상 적용
+  text-align: center;
+  position: absolute;
+  bottom: 300px;  // 현재 단계 아래에 위치하도록 조정
+  width: 100%;
+`;
 
+// 스타일 추가
+const PreviousStepDescription = styled.p`
+  margin-bottom: 30px;  // 여유 공간을 아래로 줌
+  font-size: 18px;
+  font-weight: bold;
+  color: rgba(0, 0, 0, 0.441);  // 흐릿한 색상 적용
+  text-align: center;
+  position: absolute;
+  top: 150px;  // 현재 단계 위에 위치하도록 조정
+  width: 100%;
+`;
+
+const StepDescription = styled.p`
+  line-height: 1.5;
+  font-size: 25px;
+  font-weight: bold;
+  color: #333;
+  padding: 20px;
+  background-color: rgba(250, 205, 205, 0.021);
+  border-radius: 10px;
+  position: relative;
+  z-index: 2;  // 앞에 보이게 하기 위해 z-index 추가
+  margin-bottom: 160px;  // 여유 공간을 아래로 줌
+`;
 // styled-components
 const Container = styled.div`
   position: relative;
@@ -334,18 +381,6 @@ const BackgroundImage = styled.div`
   background-size: cover;
   background-position: center;
   opacity: 0.15;
-`;
-
-const StepDescription = styled.p`
-  line-height: 1.5;
-  font-size: 25px;
-  font-weight: bold;
-  color: #333;
-  padding: 20px;
-  position: relative;
-  background-color: rgba(250, 205, 205, 0.021);
-  border-radius: 10px;
-  margin-top: -150px;
 `;
 
 const FinalStepSection = styled.div`
