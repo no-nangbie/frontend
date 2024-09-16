@@ -26,21 +26,22 @@ function My_foodsUpdate() {
   const navigate = useNavigate();
 
     // 카테고리 데이터 불러오기
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await axios.get(process.env.REACT_APP_API_URL + 'categories', {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-          },
-        });
-        setCategories(response.data.data || []);
-      } catch (error) {
-        console.error("카테고리 가져오기 오류: ", error);
-      }
-    };
-    fetchCategories();
-  }, []);    
+  // useEffect(() => {
+  //   const fetchCategories = async () => {
+  //     try {
+  //       const response = await axios.get(process.env.REACT_APP_API_URL + 'categories', {
+  //         headers: {
+  //           Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+  //         },
+  //       });
+  //       setCategories(response.data.data || []);
+  //     } catch (error) {
+  //       console.error("카테고리 가져오기 오류: ", error);
+  //     }
+  //   };
+  //   fetchCategories();
+  // }, []);    
+
 
   // 카테고리별 식료품 이름 가져오기
   const fetchFoodNamesByCategory = async (category) => {
@@ -60,30 +61,36 @@ function My_foodsUpdate() {
 
   // 식료품 아이템 가져오기
   useEffect(() => {
-    const fetchFoodItems = async () => {
-      try {
-        const response = await axios.get(process.env.REACT_APP_API_URL + 'my-foods/' + memberFoodId, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-          },
-        });
-        const foodItem = response.data.data;
-
-        if(foodItem) {
-        setFoodItems(foodItem ? [foodItem] : []);
-        setSelectedFoodName(foodItem?.foodName || "");
-        setExpirationDate(foodItem?.expirationDate || "");
-        setMemo(foodItem?.memo || "");
-        setFilterCategory(foodItem?.foodCategory || "");
+      const fetchFoodItems = async () => {
+        try {
+          const response = await axios.get(process.env.REACT_APP_API_URL + 'my-foods/' + memberFoodId, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+            },
+          });
+          const foodItem = response.data.data;
+    
+          if (foodItem) {
+            // expirationDate를 YYYYMMDD 형식에서 YYYY-MM-DD 형식으로 변환
+            const formattedExpirationDate = foodItem.expirationDate
+              ? `${foodItem.expirationDate.slice(0, 4)}-${foodItem.expirationDate.slice(4, 6)}-${foodItem.expirationDate.slice(6, 8)}`
+              : "";
+    
+            setFoodItems(foodItem ? [foodItem] : []);
+            setSelectedFoodName(foodItem?.foodName || "");
+            setExpirationDate(formattedExpirationDate);
+            setMemo(foodItem?.memo || "");
+            setFilterCategory(foodItem?.foodCategory || "");
+          }
+          setLoading(false);
+        } catch (error) {
+          console.error("식료품 아이템 가져오기 오류: ", error);
+          setLoading(false);
         }
-        setLoading(false);
-      } catch (error) {
-        console.error("식료품 아이템 가져오기 오류: ", error);
-        setLoading(false);
-      }
-    };
-    fetchFoodItems();
-  }, [memberFoodId]);
+      };
+      fetchFoodItems();
+    }, [memberFoodId]);
+    
 
   // 카테고리가 변경될 때 이름 변경
   useEffect(() => {
