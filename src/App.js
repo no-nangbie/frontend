@@ -29,7 +29,8 @@ import BoardAddPage from './pages/board/BoardAdd';
 import BoardEditPage from './pages/board/BoardEdit';
 
 //menu
-import MenuPage from './pages/menu/MyPage';
+import ChangePassword from "./pages/menu/ChangePassword";
+import MyPage from "./pages/menu/MyPage";
 
  
 const queryClient = new QueryClient();
@@ -57,7 +58,8 @@ function App() {
               <Route path="/board/details/:boardId" element={<BoardDetailsPage />} />
               <Route path="/board/add" element={<BoardAddPage />} />
               <Route path="/board/edit/:boardId" element={<BoardEditPage />} />
-              <Route path="/menu" element={<MenuPage />} />
+              <Route path="/menu" element={<MyPage />} />
+              <Route path="/menu/change-password" element={<ChangePassword />} />
             </Route>
           </Routes>
       </Router>

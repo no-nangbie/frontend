@@ -118,6 +118,12 @@ function MyPage() {
         setIsDeleteModalOpen(false);
     };
 
+    // 비밀번호 변경 페이지로 이동하는 함수
+    const handlePasswordChange = () => {
+        console.log("Password change clicked");  // 이 로그가 출력되는지 확인합니다.
+        navigate('/menu/change-password');  // 비밀번호 변경 페이지로 이동
+    };
+
     return (
         <Container>
             <Content>
@@ -126,7 +132,7 @@ function MyPage() {
                     <InfoText>{nickname}</InfoText>
                 </InfoCard>
                 <ActionButton>닉네임 변경</ActionButton>
-                <ActionButton>비밀번호 변경</ActionButton>
+                <ActionButton onClick={handlePasswordChange}>비밀번호 변경</ActionButton>  {/* 버튼 수정 */}
                 <ActionButton>선호 음식 변경</ActionButton>
                 <ActionButton>통계</ActionButton>
                 <ActionButton onClick={handleLogout}>로그아웃</ActionButton>
