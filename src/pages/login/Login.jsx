@@ -43,6 +43,13 @@ function Login() {
       setErrorMessage('로그인 실패: 이메일이나 비밀번호를 확인해주세요.');
     }
   };
+
+  // 키보드에서 "Enter" 키가 눌렸을 때 로그인 함수 호출
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleLogin(); // 엔터키를 눌렀을 때 로그인 함수 실행
+    }
+  };
   
 
   return (
@@ -67,6 +74,7 @@ function Login() {
             placeholder="이메일을 입력하세요"
             value={email}
             onChange={(e) => setEmail(e.target.value)} // 이메일 입력 시 상태 업데이트
+            onKeyPress={handleKeyPress} // Enter 키 입력 감지
           />
         </InputGroup>
 
@@ -78,6 +86,7 @@ function Login() {
             placeholder="비밀번호를 입력하세요"
             value={password}
             onChange={(e) => setPassword(e.target.value)} // 비밀번호 입력 시 상태 업데이트
+            onKeyPress={handleKeyPress} // Enter 키 입력 감지
           />
         </InputGroup>
 
