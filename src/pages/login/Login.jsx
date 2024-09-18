@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import axios from 'axios';
-import logo from "../../resources/icon/logo.png";
+import logo from "../../resources/icon/logo.png"; 
+import '../../App.css';
 
 function Login() {
   // 이메일과 비밀번호를 상태로 관리
