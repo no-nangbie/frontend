@@ -284,6 +284,7 @@ const MainContent = styled.main`
   height: 100vh;
   background-color: #f0f0f0;
   overflow: hidden;
+  font-family:'Pretendard', sans-serif;
 `;
 
 const Footer = styled.footer`
