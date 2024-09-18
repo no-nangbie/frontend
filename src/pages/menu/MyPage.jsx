@@ -96,6 +96,18 @@ function MyPage() {
         }
     };
     
+    // 로그아웃 핸들러 함수
+    const handleStatistics = async () => {
+        const accessToken = localStorage.getItem('accessToken');
+
+        if (!accessToken) {
+            alert('로그인 상태가 아닙니다.');
+            navigate('/login');
+            return;
+        }
+        navigate('/menu/statistics/1');
+    }
+
     // 모달 확인 버튼 클릭 시 실행
     const handleConfirm = () => {
         initialFoodItems();
@@ -134,7 +146,7 @@ function MyPage() {
                 <ActionButton>닉네임 변경</ActionButton>
                 <ActionButton onClick={handlePasswordChange}>비밀번호 변경</ActionButton>  {/* 버튼 수정 */}
                 <ActionButton>선호 음식 변경</ActionButton>
-                <ActionButton>통계</ActionButton>
+                <ActionButton onClick={handleStatistics}>통계</ActionButton>
                 <ActionButton onClick={handleLogout}>로그아웃</ActionButton>
                 <RedButton onClick={() => setIsModalOpen(true)}>냉장고 초기화</RedButton>
                 <RedButton>통계 초기화</RedButton>
