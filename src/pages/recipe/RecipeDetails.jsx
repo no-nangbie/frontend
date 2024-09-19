@@ -368,7 +368,7 @@ const Ingredients = styled.ul`
 
 const Span = styled.span`
   font-size: 14px;
-  margin: 0 30px;
+  margin: 5px 30px;
 `;
 
 const ButtonContainer = styled.div`
