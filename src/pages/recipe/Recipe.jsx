@@ -104,19 +104,19 @@ function Recipe() {
   const searchMenu = async (pageNumber) => {
     setLoading(true);
     try {
-      const params = { page: pageNumber, size: 700, sort: sortOption };
+      const params = { page: pageNumber, size: 700, sort: sortOption, keyword: searchKeyword.trim() }; // keyword 추가
       const response = menuCategory === "전체"
-        ? await axios.get(process.env.REACT_APP_API_URL + 'menus/search', {
-            params: { ...params, keyword: searchKeyword.trim() },
+          ? await axios.get(process.env.REACT_APP_API_URL + 'menus/search', {
+            params,
             headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
           })
-        : await axios.get(process.env.REACT_APP_API_URL + 'menus/search_by_category', {
-            params: { ...params, menuCategory: handleGetMenuCategory(menuCategory), keyword: searchKeyword.trim() },
+          : await axios.get(process.env.REACT_APP_API_URL + 'menus/search_by_category', {
+            params: { ...params, menuCategory: handleGetMenuCategory(menuCategory) },
             headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
           });
   
       const menuList = response.data.data;
-  
+
       // 검색 결과를 상태에 반영
       setRecipes(menuList); // 검색된 데이터로 상태를 업데이트
       setLoading(false);
@@ -161,12 +161,19 @@ function Recipe() {
 
   const handleSearchClick = () => {
     if (searchKeyword.trim() === "") {
-      setsortOption("menuId_desc")
+      alert('검색어를 입력해주세요.'); // 빈 검색어 경고 추가
+      return;
     }
     setIsSearching(true);
-    setRecipes([]); // 검색 시 기존 데이터 지우기
+    setRecipes([]); // 검색 시 기존 데이터 초기화
     setPage(1); // 페이지 초기화
-    searchMenu(1);
+    searchMenu(1); // 검색 함수 실행
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleSearchClick(); // 엔터키를 누르면 handleSearchClick 호출
+    }
   };
 
   const handleGetMenuCategory = (menuCategory) => {
@@ -283,6 +290,7 @@ return (
           placeholder="메뉴이름 검색"
           value={searchKeyword}
           onChange={(e) => setSearchKeyword(e.target.value)}
+          onKeyPress={handleKeyPress} // Enter 키 입력 감지
         />
         <SearchIcon src={Search_img} alt="search icon" onClick={handleSearchClick} />
       </SearchBar>

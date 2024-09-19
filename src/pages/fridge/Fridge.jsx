@@ -180,6 +180,12 @@ const handleSearchClick = () => {
   searchFoods(true);
 };
 
+  // 키보드에서 "Enter" 키가 눌렸을 때 로그인 함수 호출
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleSearchClick(); // 엔터키를 눌렀을 때 로그인 함수 실행
+    }
+  };
   const handleCategoryChange = (event) => {
     setFilterCategory(event.target.value);
   };
@@ -245,6 +251,7 @@ const handleSearchClick = () => {
             placeholder="검색"
             value={searchKeyword}
             onChange={(e) => setSearchKeyword(e.target.value)}
+            onKeyPress={handleKeyPress} // Enter 키 입력 감지
           />
           <SearchIcon src={Search_img} onClick={handleSearchClick} alt="search icon" />
         </SearchBar>
