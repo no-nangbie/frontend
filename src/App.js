@@ -33,6 +33,7 @@ import ChangePassword from "./pages/menu/ChangePassword";
 import FridgeStatistics from "./pages/menu/FridgeStatistics";
 import MyPage from "./pages/menu/MyPage";
 import ChangeNickname from "./pages/menu/ChangeNickname";
+import RecipeStatistics from "./pages/menu/RecipeStatistics";
 
  
 const queryClient = new QueryClient();
@@ -64,6 +65,7 @@ function App() {
               <Route path="/menu/change-password" element={<ChangePassword />} />
               <Route path="/menu/change-nickname" element={<ChangeNickname />} />
               <Route path="/menu/statistics/1" element={<FridgeStatistics />} />
+              <Route path="/menu/statistics/2" element={<RecipeStatistics />} />
             </Route>
           </Routes>
       </Router>
