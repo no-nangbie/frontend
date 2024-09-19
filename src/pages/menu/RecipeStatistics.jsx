@@ -1,9 +1,11 @@
+// RecipeStatistics.js
 import React from 'react';
 import styled from 'styled-components';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 import axios from 'axios';
 import { useQuery, QueryClient, QueryClientProvider } from 'react-query';
 import { useNavigate } from 'react-router-dom';
+import NumberCounter from '../../component/NumberCounter'; // NumberCounter 컴포넌트 임포트
 
 // React Query 클라이언트 생성
 const queryClient = new QueryClient();
@@ -42,6 +44,7 @@ const RecipeStatistics = () => {
   if (isError) {
     return <Error>에러 발생: {error.message}</Error>;
   }
+
   const ChangeTextToKorean = (e) => {
     switch(e){
       case "menuCategorySide":
@@ -78,9 +81,10 @@ const RecipeStatistics = () => {
         return "2시간~4시간"
       case "menuCookTime4HoursOver":
         return "4시간 이상"
+      default:
+        return e;
     }
   }
-
 
   // API 응답 데이터 중 "menuCategory..." 필드만 추출하여 파이 차트 데이터로 변환
   const menuCategoryData = Object.entries(fetchData)
@@ -96,53 +100,57 @@ const RecipeStatistics = () => {
 
   // API 응답 데이터 중 "menuDifficulty..." 필드만 추출하여 파이 차트 데이터로 변환
   const menuDifficultyData = Object.entries(fetchData)
-  .filter(([key, value]) => key.startsWith('menuDifficulty') && value >= 0)
-  .map(([key, value]) => {
-    // 키를 사람이 읽기 쉬운 형식으로 변환 (예: menuCategorySoup -> Soup)
+    .filter(([key, value]) => key.startsWith('menuDifficulty') && value >= 0)
+    .map(([key, value]) => {
+      // 키를 사람이 읽기 쉬운 형식으로 변환 (예: menuDifficultyEasy -> Easy)
       const name = ChangeTextToKorean(key)
-    // 대소문자 변환 및 공백 추가 (예: menuCategoryNoodle -> Noodle)
-    const formattedName = name.replace(/([A-Z])/g, ' $1').trim();
-    return { name: formattedName, value };
-  })
-  .sort((a, b) => b.value - a.value); // value가 큰 순서대로 정렬
+      // 대소문자 변환 및 공백 추가
+      const formattedName = name.replace(/([A-Z])/g, ' $1').trim();
+      return { name: formattedName, value };
+    })
+    .sort((a, b) => b.value - a.value); // value가 큰 순서대로 정렬
 
   // API 응답 데이터 중 "menuCookTime..." 필드만 추출하여 파이 차트 데이터로 변환
   const menuCookTimeData = Object.entries(fetchData)
-  .filter(([key, value]) => key.startsWith('menuCookTime') && value >= 0)
-  .map(([key, value]) => {
-    // 키를 사람이 읽기 쉬운 형식으로 변환 (예: menuCategorySoup -> Soup)
+    .filter(([key, value]) => key.startsWith('menuCookTime') && value >= 0)
+    .map(([key, value]) => {
+      // 키를 사람이 읽기 쉬운 형식으로 변환 (예: menuCookTime0To1Hours -> 0~1 Hours)
       const name = ChangeTextToKorean(key)
-    // 대소문자 변환 및 공백 추가 (예: menuCategoryNoodle -> Noodle)
-    const formattedName = name.replace(/([A-Z])/g, ' $1').trim();
-    return { name: formattedName, value };
-  })
-  .sort((a, b) => b.value - a.value); // value가 큰 순서대로 정렬
+      // 대소문자 변환 및 공백 추가
+      const formattedName = name.replace(/([A-Z])/g, ' $1').trim();
+      return { name: formattedName, value };
+    })
+    .sort((a, b) => b.value - a.value); // value가 큰 순서대로 정렬
 
   // 상위 3개의 menuCategory만 추출
   const topThreePieData = menuCategoryData.slice(0, 3);
 
+  // 총 요리 횟수 계산 (예: 모든 카테고리의 합)
+  const totalCookingCount = menuCategoryData.reduce((acc, curr) => acc + curr.value, 0);
+
   return (
     <Container>
-    <Header>
-      <ActionButtons>
-        <ActionButton isFirst onClick={() => navigate('/menu/statistics/1')}>
-          냉장고 통계
-        </ActionButton>
-        <ActionButton onClick={() => navigate('/menu/statistics/2')}>
-          요리 통계
-        </ActionButton>
-      </ActionButtons>
-    </Header>
+      <Header>
+        <ActionButtons>
+          <ActionButton isFirst onClick={() => navigate('/menu/statistics/1')}>
+            냉장고 통계
+          </ActionButton>
+          <ActionButton onClick={() => navigate('/menu/statistics/2')}>
+            요리 통계
+          </ActionButton>
+        </ActionButtons>
+      </Header>
 
-        <ResponsiveContainer width="100%" height={250}>
+      <ChartContainer>
+        <ResponsiveContainer width="100%" height={300}>
           <PieChart>
             <Tooltip />
             <Pie
               data={menuCategoryData} // 전체 데이터를 파이 차트에 사용
               cx="50%"
               cy="50%"
-              innerRadius={60}
-              outerRadius={100}
+              innerRadius={100} // innerRadius 증가
+              outerRadius={140} // outerRadius 증가
               paddingAngle={5}
               dataKey="value"
             >
@@ -152,56 +160,64 @@ const RecipeStatistics = () => {
             </Pie>
           </PieChart>
         </ResponsiveContainer>
-        
-        <CategoryGrid>
-          <SectionTitle>통계</SectionTitle>
-          <Dividers />
-          <AdditionalInfo>
-            <LeftLabel>가장 많이 요리한 Category</LeftLabel>
-          </AdditionalInfo>
-        </CategoryGrid>
-        
-        <InfoContainer>
-          {topThreePieData.map((item, index) => (
-            <InfoCard key={index}>
-              <ColorBox color={COLORS[index % COLORS.length]} />
-              <Label>{index+1}등 : {item.name}</Label>
-              <Count>{item.value}개</Count>
-            </InfoCard>
-          ))}
-        </InfoContainer>
-
-        <CategoryGrid>
+        {/* 중앙에 오버레이된 텍스트 및 카운터 */}
+        <OverlayText>
+          <div>총 요리 횟수</div>
+          <CounterText>
+            <NumberCounter end={fetchData.menuCookCount} duration={1000} />
+          </CounterText>
+        </OverlayText>
+      </ChartContainer>
+      
+      <CategoryGrid>
+        <SectionTitle>통계</SectionTitle>
+        <Dividers />
         <AdditionalInfo>
-            <LeftLabel>이용한 레시피 난이도 통계</LeftLabel>
-          </AdditionalInfo>
-        </CategoryGrid>
+          <LeftLabel>가장 많이 요리한 Category</LeftLabel>
+        </AdditionalInfo>
+      </CategoryGrid>
+      
+      <InfoContainer>
+        {topThreePieData.map((item, index) => (
+          <InfoCard key={index}>
+            <ColorBox color={COLORS[index % COLORS.length]} />
+            <LabelText>{index+1}등 : {item.name}</LabelText>
+            <Count>{item.value}개</Count>
+          </InfoCard>
+        ))}
+      </InfoContainer>
 
-        <InfoContainer>
-          {menuDifficultyData.map((item, index) => (
-            <InfoCard key={index}>
-              <Label>{index+1}등 : {item.name}</Label>
-              <Count>{item.value}회</Count>
-            </InfoCard>
-          ))}
-        </InfoContainer>
-
-        <CategoryGrid>
+      <CategoryGrid>
         <AdditionalInfo>
-            <LeftLabel>이용한 레시피 조리시간 통계</LeftLabel>
-          </AdditionalInfo>
-        </CategoryGrid>
+          <LeftLabel>이용한 레시피 난이도 통계</LeftLabel>
+        </AdditionalInfo>
+      </CategoryGrid>
 
-        <InfoContainer>
-          {menuCookTimeData.map((item, index) => (
-            <InfoCard key={index}>
-              <Label>{index+1}등 : {item.name}</Label>
-              <Count>{item.value}회</Count>
-            </InfoCard>
-          ))}
-        </InfoContainer>
+      <InfoContainer>
+        {menuDifficultyData.map((item, index) => (
+          <InfoCard key={index}>
+            <ColorBox color={COLORS[index % COLORS.length]} />
+            <LabelText>{index+1}등 : {item.name}</LabelText>
+            <Count>{item.value}회</Count>
+          </InfoCard>
+        ))}
+      </InfoContainer>
 
+      <CategoryGrid>
+        <AdditionalInfo>
+          <LeftLabel>이용한 레시피 조리시간 통계</LeftLabel>
+        </AdditionalInfo>
+      </CategoryGrid>
 
+      <InfoContainer>
+        {menuCookTimeData.map((item, index) => (
+          <InfoCard key={index}>
+            <ColorBox color={COLORS[index % COLORS.length]} />
+            <LabelText>{index+1}등 : {item.name}</LabelText>
+            <Count>{item.value}회</Count>
+          </InfoCard>
+        ))}
+      </InfoContainer>
     </Container>
   );
 };
@@ -269,6 +285,29 @@ const ActionButton = styled.button`
     margin-right: 0;
   }
 `;
+
+const ChartContainer = styled.div`
+  position: relative; /* 절대 위치의 오버레이를 위해 relative 설정 */
+  width: 100%;
+  max-width: 600px;
+  margin-top: 20px;
+`;
+
+const OverlayText = styled.div`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+`;
+
+const CounterText = styled.div`
+  font-size: 24px; /* 숫자의 글씨 크기 증가 */
+  color: #4db0ff;
+  font-weight: bold;
+  margin-top: 5px;
+`;
+
 const CategoryGrid = styled.div`
   display: flex;
   flex-direction: column;
@@ -302,30 +341,6 @@ const LeftLabel = styled.div`
   color: ${(props) => props.color || '#00a3ff'};
 `;
 
-const CenterCount = styled.div`
-  font-weight: bold;
-  text-align: center;
-  font-size: 16px;
-  color: ${(props) => props.color || '#00a3ff'};
-`;
-
-const RightLabel = styled.div`
-  font-weight: bold;
-  text-align: right;
-  font-size: 16px;
-  color: ${(props) => props.color || '#00a3ff'};
-`;
-
-// 수정된 AdditionalInfo와 Label 컴포넌트
-const AdditionalInfo = styled.div`
-  display: grid;
-  // grid-template-columns: 2fr 1fr 1fr; /* 첫 번째 열을 두 배 넓게 설정 */
-  align-items: center;
-  width: 100%;
-  margin-bottom: 10px;
-  gap: 10px; /* 요소 간 간격 조정 */
-`;
-
 const InfoContainer = styled.div`
   width: 80%;
   display: flex;
@@ -351,7 +366,8 @@ const ColorBox = styled.div`
   margin-right: 12px;
 `;
 
-const Label = styled.span`
+// Label을 LabelText로 이름 변경하여 충돌 방지
+const LabelText = styled.span`
   flex-grow: 1;
   font-size: 16px;
   color: #333;
@@ -378,4 +394,14 @@ const Error = styled.div`
   font-size: 18px;
   text-align: center;
   margin-top: 20px;
+`;
+
+// AdditionalInfo 컴포넌트에 대한 스타일은 동일하게 유지
+const AdditionalInfo = styled.div`
+  display: grid;
+  /* grid-template-columns: 2fr 1fr 1fr; */ /* 첫 번째 열을 두 배 넓게 설정 */
+  align-items: center;
+  width: 100%;
+  margin-bottom: 10px;
+  gap: 10px; /* 요소 간 간격 조정 */
 `;

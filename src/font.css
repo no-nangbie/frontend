@@ -1,5 +1,5 @@
 h1,h2,h3,h4,h5,h6 { font-family: 'Pretendard', sans-serif;}
-button,select,input,Label,InfoCard { font-family: 'Pretendard', sans-serif; }
+button,select,input,Label,text { font-family: 'Pretendard', sans-serif; }
 
 /*프리텐다드 폰트*/
 @font-face {
