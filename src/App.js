@@ -34,13 +34,16 @@ import FridgeStatistics from "./pages/menu/FridgeStatistics";
 import MyPage from "./pages/menu/MyPage";
 import ChangeNickname from "./pages/menu/ChangeNickname";
 import RecipeStatistics from "./pages/menu/RecipeStatistics";
-
  
+// Global Styles
+import GlobalStyle from './GlobalStyle'; // 글로벌 스타일 불러오기
+
 const queryClient = new QueryClient();
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
+      <GlobalStyle /> {/* 글로벌 스타일 적용 */}
       <Router>
           <Routes>
             <Route path="/" element={<Layout />}>
