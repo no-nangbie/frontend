@@ -9,10 +9,11 @@ function MyPage() {
     const [nickname, setNickname] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); // 회원 탈퇴 모달 상태 추가
+    const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false); // 로그아웃 모달 상태 추가
 
 
     // 로그아웃 핸들러 함수
-    const handleLogout = async () => {
+    const handleLogoutConfirm = async () => {
         try {
             const accessToken = localStorage.getItem('accessToken');
 
@@ -38,6 +39,17 @@ function MyPage() {
             console.error('로그아웃 실패:', error.response?.data || error.message);
             alert('로그아웃 중 오류가 발생했습니다. 다시 시도해주세요.');
         }
+        setIsLogoutModalOpen(false); // 모달 달기
+    };
+
+    // 로그아웃 모달 취소 버튼 클릭 시 실행
+    const handleLogoutCancel = () => {
+        setIsLogoutModalOpen(false);
+    };
+
+    // 로그아웃 버튼 클릭 시 로그아웃 모달을 표시하는 함수
+    const handleLogout = () => {
+        setIsLogoutModalOpen(true);
     };
 
     // 회원탈퇴 핸들러 함수
@@ -105,7 +117,7 @@ function MyPage() {
         };
     
         fetchProfile();
-    }, []); // 의존성 배열에서 accessToken을 제거
+    }, [navigate]); // 의존성 배열에서 accessToken을 제거
     
 
       // 냉장고 초기화 함수
@@ -208,6 +220,21 @@ function MyPage() {
                         <ModalButtonContainer>
                             <ModalButton onClick={handleDeleteConfirm}>확인</ModalButton>
                             <ModalButton onClick={handleDeleteCancel}>취소</ModalButton>
+                        </ModalButtonContainer>
+                    </ModalContent>
+                </ModalOverlay>
+            )}
+
+            {/* 로그아웃 확인 모달 */}
+            {isLogoutModalOpen && (
+                <ModalOverlay>
+                    <ModalContent>
+                        <ModalText>
+                            로그아웃 하시겠습니까?
+                        </ModalText>
+                        <ModalButtonContainer>
+                            <ModalButton onClick={handleLogoutConfirm}>확인</ModalButton>
+                            <ModalButton onClick={handleLogoutCancel}>취소</ModalButton>
                         </ModalButtonContainer>
                     </ModalContent>
                 </ModalOverlay>
