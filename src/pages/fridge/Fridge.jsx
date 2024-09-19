@@ -102,13 +102,16 @@ function Fridge() {
     };
 
     const searchFoods = async() => {
-      try {
-        let response;
 
-        if(searchKeyword.trim() === "") {
+      if(searchKeyword.trim() === "") {
           setSortOption("expirationDate_asc");
+          fetchFoodItems();
+          return;
         }
 
+      try {
+        let response;
+        
         if(filterCategory === "전체") {
           response = await axios.get(process.env.REACT_APP_API_URL + 'my-foods/search', {
             params: {
@@ -189,8 +192,9 @@ const handleSearchClick = () => {
   };
   
   const filteredItems = isSearching
-    ? searchResults.filter((item) => item.foodCategory === filterCategory || filterCategory === "전체")
-    : foodItems.filter((item) => item.foodCategory === filterCategory || filterCategory === "전체");
+  ? searchResults.filter((item) => item.foodCategory === filterCategory || filterCategory === "전체")
+  : foodItems.filter((item) => item.foodCategory === filterCategory || filterCategory === "전체");
+
 
   const formatDate = (dateString) => {
     
