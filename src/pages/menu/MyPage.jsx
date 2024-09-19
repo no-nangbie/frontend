@@ -73,13 +73,40 @@ function MyPage() {
     };
 
     // 유저 정보 가져오기
+    // useEffect(() => {
+    //     const storedEmail = localStorage.getItem('email');
+    //     const storedNickname = localStorage.getItem('nickname');
+    //     if (storedEmail) setEmail(storedEmail);
+    //     if (storedNickname) setNickname(storedNickname);
+    // }, []);
     useEffect(() => {
-        const storedEmail = localStorage.getItem('email');
-        const storedNickname = localStorage.getItem('nickname');
-        if (storedEmail) setEmail(storedEmail);
-        if (storedNickname) setNickname(storedNickname);
-    }, []);
-
+        const fetchProfile = async () => {
+            try {
+                const accessToken = localStorage.getItem('accessToken'); // accessToken을 여기서 가져옴
+    
+                if (!accessToken) {
+                    alert('로그인 상태가 아닙니다.');
+                    navigate('/login');
+                    return;
+                }
+    
+                const response = await axios.get(process.env.REACT_APP_API_URL + 'info', {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                });
+                const data = response.data.data;
+                console.warn(data);
+                setNickname(data.nickname);
+                setEmail(data.email);
+            } catch (error) {
+                console.error('프로필 정보를 불러오는 중 오류가 발생했습니다:', error.message);
+            }
+        };
+    
+        fetchProfile();
+    }, []); // 의존성 배열에서 accessToken을 제거
+    
 
       // 냉장고 초기화 함수
       const initialFoodItems = async () => {
@@ -140,8 +167,8 @@ function MyPage() {
         <Container>
             <Content>
                 <InfoCard>
-                    <InfoText>{email}</InfoText>
-                    <InfoText>{nickname}</InfoText>
+                    <InfoText>이메일 : {email}</InfoText>
+                    <InfoText>닉네임 : {nickname}</InfoText>
                 </InfoCard>
                 <ActionButton>닉네임 변경</ActionButton>
                 <ActionButton onClick={handlePasswordChange}>비밀번호 변경</ActionButton>  {/* 버튼 수정 */}
@@ -223,9 +250,9 @@ const InfoCard = styled.div`
 `;
 
 const InfoText = styled.p`
-    font-size: 16px;
+    font-size: 18px;
     color: black;
-    margin: 0;
+    margin: 10px;
 `;
 
 const ActionButton = styled.button`
