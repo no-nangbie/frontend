@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import axios from 'axios';
-import React from 'react';
+import React, { useState, useEffect} from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ClipLoader } from 'react-spinners';
@@ -24,6 +24,7 @@ const RecipeDetails = () => {
   const navigate = useNavigate(); // useNavigate 훅을 사용하여 navigate 변수 선언
   const { menuId } = useParams(); // 메뉴 ID를 URL에서 가져옴
   const queryClient = useQueryClient();
+  const [userFoodInventory, setUserFoodInventory] = useState([]); // 사용자의 보유 식재료 상태 관리
 
   const categoryMap = {
     'MENU_CATEGORY_SIDE': '밑 반찬',
@@ -63,13 +64,37 @@ const RecipeDetails = () => {
     }
   };
 
+  // 보유 식재료 이름 가져오기
+  const getFoodName = async() => {
+    try {
+      const response = await axios.get(process.env.REACT_APP_API_URL + 'my-foods', {
+        params: { page: 1, size: 700, sort: "foodName_asc" },
+        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+      });
+      const foodList = response.data.data.map(food => food.foodName); // 보유한 식재료 이름만 추출
+      setUserFoodInventory(foodList); // 상태에 저장
+    } catch(error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    getFoodName();
+  }, []);
+
+  // 보유 식재료인지 확인
+  const isOwnedIngredient = (ingredientName) => {
+    return userFoodInventory.includes(ingredientName);
+  };
+
+
   // 메뉴 데이터를 불러오는 함수
   const fetchMenu = async () => {
     if (!menuId) {
       throw new Error('잘못된 메뉴 ID 입니다.');
     }
     try {
-      const response = await axios.get(`http://localhost:8080/menus/${menuId}`, {
+      const response = await axios.get(process.env.REACT_APP_API_URL+ `/menus/${menuId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('accessToken')}`, // 토큰 사용
         },
@@ -158,6 +183,7 @@ const RecipeDetails = () => {
   // 난이도 이미지
   const difficultyImage = getDifficultyImage(menu.difficulty);
 
+
   // 추후에 menu_1 => menu 이미지 변경
   return (
     <Container>
@@ -197,7 +223,8 @@ const RecipeDetails = () => {
           {menu.foodMenuQuantityList.map((ingredient, index) => (
             <React.Fragment key={index}>
               <li>
-                <Span>{ingredient.foodName}</Span>
+                <Span style={{ color: isOwnedIngredient(ingredient.foodName) ? 'black' : 'red' }}>
+                  {ingredient.foodName}</Span>
                 <Span>{ingredient.foodQuantity}</Span>
               </li>
               {index < menu.foodMenuQuantityList.length - 1 && <Uldividers />} {/* 마지막 항목 뒤에는 Divider가 없음 */}
@@ -341,7 +368,7 @@ const Ingredients = styled.ul`
 
 const Span = styled.span`
   font-size: 14px;
-  margin: 0 30px;
+  margin: 5px 30px;
 `;
 
 const ButtonContainer = styled.div`

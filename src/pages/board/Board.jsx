@@ -10,7 +10,10 @@ function Board() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [menuCategory, setMenuCategory] = useState("전체");
+  const [searchKeyword, setSearchKeyword] = useState("");
   const [sort, setSort] = useState("날짜 ▼");
+  const [page, setPage] = useState(1); // 현재 페이지
+  const [hasMore, setHasMore] = useState(true); // 더 많은 데이터가 있는지 여부
 
   const navigate = useNavigate();
   const memberEmail = localStorage.getItem('email') || '';
@@ -24,7 +27,7 @@ function Board() {
    */
   useEffect(() => {
     if (memberEmail) {
-      fetchBoards(handleGetMenuCategory(menuCategory),handleGetSort(sort));
+      fetchBoards(handleGetMenuCategory(menuCategory),handleGetSort(sort),page);
     } else {
       console.error('memberEmail이 설정되지 않았습니다.');
     }
@@ -37,7 +40,7 @@ function Board() {
    * @Author : 신민준
    */
   const handleSearchClick = () => {
-    fetchBoards(handleGetMenuCategory(menuCategory), handleGetSort(sort));
+    fetchBoards(handleGetMenuCategory(menuCategory), handleGetSort(sort),page);
   };
 
 
@@ -61,26 +64,51 @@ function Board() {
    * 
    * @Author : 신민준
    */
-  const fetchBoards = async (type,sort) => {
+  const fetchBoards = async (type,sort,pageNumber) => {
     setLoading(true);
     try {
       const response = await axios.get(process.env.REACT_APP_API_URL+'boards', {
-        params: { type, sort, page: 1, size: 20 },
+        params: { type, sort, page: pageNumber, size: 20, keyword: searchKeyword.trim() },
         headers: {
           Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
         },
       });
-      setBoards(response.data.data);
+      setBoards(prevBoards => {
+        const combinedBoards = [...prevBoards, ...response.data.data];
+        const uniqueBoards = combinedBoards.reduce((acc, curr) => {
+          if (!acc.find(board => board.boardId === curr.boardId)) {
+            acc.push(curr);
+          }
+          return acc;
+        }, []);
+        return uniqueBoards;
+      });
       setLoading(false);
+      if (response.data.data.length === 0) {
+        // 만약 새로 가져온 음식 목록이 비어 있으면,
+        // 즉, 더 이상 새로운 음식이 없으면,
+        setHasMore(false); // 더 이상 음식이 없다는 것을 알려줍니다.
+      }
     } catch (error) {
+      console.error("Failed to fetch boards: ", error);
       setError(error);
       setLoading(false);
     }
   };
 
 
+  
+  useEffect(() => {
+    const container = document.getElementById('scrollable-container');
+    container.addEventListener('scroll', handleScroll);
+    return () => {
+      container.removeEventListener('scroll', handleScroll);
+    };
+  }, [loading, hasMore]);
+
+
   /**
-   * 선택한 MenuCategory 저장 메서드
+   * 선택한 MenuCategory 저장하고 새롭게 페이지 불러오기
    * 
    * @return : 선택한 MenuCategory 저장
    * 
@@ -88,6 +116,8 @@ function Board() {
    */
   const handleSelectCategoryChange = (e) => {
     setMenuCategory(e.target.value); // 사용자가 선택한 값을 상태에 저장
+    setBoards([]); // 기존 데이터를 비우고
+    setPage(1); // 페이지 초기화
   };
 
 
@@ -100,6 +130,8 @@ function Board() {
    */
   const handleSelectSortChange = (e) => {
     setSort(e.target.value); // 사용자가 선택한 값을 상태에 저장
+    setBoards([]); // 기존 데이터를 비우고
+    setPage(1); // 페이지 초기화
   };
 
 
@@ -138,7 +170,21 @@ function Board() {
     }
   };
 
-  
+  const handleScroll = () => {
+    console.log("auto Scroll")
+    const container = document.getElementById('scrollable-container');
+    if (container.scrollTop + container.clientHeight >= container.scrollHeight) {
+      console.log("auto Scroll2")
+      if (!loading && hasMore) {
+        setPage(prevPage => {
+          const newPage = prevPage + 1;
+            fetchBoards(handleGetMenuCategory(menuCategory),handleGetSort(sort),newPage); 
+          return newPage;
+        });
+      }
+    }
+  };
+
   /**
    * 선택한 Sort를 axios를 통해 body값에 보낼 수 있는 유효한 명칭으로 보내기 위해
    * 변환해주는 메서드
@@ -193,12 +239,17 @@ function Board() {
           </InputGroup2_2thLine>
         </FilterSection>
         <SearchBar>
-          <TextArea type="text" placeholder="메뉴이름 검색" />
+        <TextArea
+          type="text"
+          placeholder="메뉴이름 검색"
+          value={searchKeyword}
+          onChange={(e) => setSearchKeyword(e.target.value)}
+        />
           <SearchIcon src={Search_img} alt="search icon" onClick={handleSearchClick}/> 
         </SearchBar>
       </Header>
 
-      <ScrollableContainer>
+      <ScrollableContainer id="scrollable-container">
       {boards.map((board) => (
         <FoodItem key={board.boardId} onClick={() => handleClick(board.boardId)}>
           <FoodImage src={board.imageUrl} alt={board.title} />

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import styled from 'styled-components';
 import VEGETABLES_FRUITS_ICON from '../../resources/icon/VEGETABLES_FRUITS.png';
@@ -12,35 +12,17 @@ import { useNavigate } from 'react-router-dom';
 
 // Main Component
 function My_foodsUpdate() {
-  const [categories, setCategories] = useState([]); // 카테고리 데이터
   const [filterCategory, setFilterCategory] = useState("VEGETABLES_FRUITS");
   const [foodItems, setFoodItems] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [filteredItems, setFilteredItems] = useState([]);
   const [memo, setMemo] = useState("");
   const [selectedFoodName, setSelectedFoodName] = useState("");
   const [expirationDate, setExpirationDate] = useState("");
   const { memberFoodId } = useParams();
-  const [foodCategory, setFoodCategory] = useState(filterCategory);
   const navigate = useNavigate();
-
-    // 카테고리 데이터 불러오기
-  // useEffect(() => {
-  //   const fetchCategories = async () => {
-  //     try {
-  //       const response = await axios.get(process.env.REACT_APP_API_URL + 'categories', {
-  //         headers: {
-  //           Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-  //         },
-  //       });
-  //       setCategories(response.data.data || []);
-  //     } catch (error) {
-  //       console.error("카테고리 가져오기 오류: ", error);
-  //     }
-  //   };
-  //   fetchCategories();
-  // }, []);    
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
 
   // 카테고리별 식료품 이름 가져오기
@@ -82,10 +64,8 @@ function My_foodsUpdate() {
             setMemo(foodItem?.memo || "");
             setFilterCategory(foodItem?.foodCategory || "");
           }
-          setLoading(false);
         } catch (error) {
           console.error("식료품 아이템 가져오기 오류: ", error);
-          setLoading(false);
         }
       };
       fetchFoodItems();
@@ -97,30 +77,18 @@ function My_foodsUpdate() {
     const fetchFoodItems = async () => {
       try {
         const response = await axios.get(process.env.REACT_APP_API_URL + 'foods', {
-          params: { page: 1, size: 700, sort: 'foodName_desc', category: filterCategory },
+          params: { page: 1, size: 700, sort: 'foodName_asc', category: filterCategory },
           headers: {
             Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
           },
         });
         setFoodItems(response.data.data || []);
-        setLoading(false);
       } catch (error) {
         console.error("Error fetching food items: ", error);
-        setLoading(false);
       }
     };
     fetchFoodItems();
   }, [filterCategory]);
-
-  useEffect(() => {
-    const updateFoodNames = async () => {
-        const names = await fetchFoodNamesByCategory(filterCategory);
-        setFoodItems(names); 
-    };
-
-    updateFoodNames();
-  }, [filterCategory]);
-
 
 
   // 식료품 필터링
@@ -132,10 +100,6 @@ function My_foodsUpdate() {
     setFilteredItems(result);
   }, [searchKeyword, foodItems]);
 
-  // 식료품 이름 변경
-  const handleFoodNameChange = (event) => {
-    setSelectedFoodName(event.target.value);
-  };
 
   const handleExpirationDateChange = (e) => {
     const date = new Date(e.target.value);
@@ -173,7 +137,7 @@ function My_foodsUpdate() {
       setSelectedFoodName("");
       setExpirationDate("");
       setMemo("");
-      setFoodCategory(filterCategory);
+      setFilterCategory(filterCategory);
       navigate(`/fridge`);
     } catch (error) {
       console.error("Error saving food item:", error);
@@ -201,6 +165,39 @@ function My_foodsUpdate() {
     }
   };
 
+  const handleFoodNameClick = () => {
+    setIsDropdownOpen(prevState => !prevState); // 드롭다운 토글
+  };  
+
+  const handleFoodNameChange = (event) => {
+    setSelectedFoodName(event.target.value);
+    setIsDropdownOpen(false); // 아이템 선택 후 드롭다운 닫기
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false); // 드롭다운 외부 클릭 시 닫기
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const handleIconClick = (category) => {
+    setFilterCategory(category); // 카테고리를 상태로 설정
+    setFoodItems([]); // 아이템 초기화
+    setFilteredItems([]); // 필터된 아이템 초기
+    setSelectedFoodName(""); // 식료품 이름 초기화 ("선택하세요"로 표시됨)
+  
+    // 카테고리가 같은 경우에도 데이터를 다시 불러오도록 fetchFoodNamesByCategory 실행
+    fetchFoodNamesByCategory(category).then((names) => {
+      setFoodItems(names);
+    });
+  };
   return (
     <MainContainer>
       <Header>
@@ -212,26 +209,29 @@ function My_foodsUpdate() {
       <FilterSection>
         <label>식료품 카테고리 - {getCategoryLabel(filterCategory)} </label>
         <FoodIcons>
-          <IconButton onClick={() => setFilterCategory("VEGETABLES_FRUITS")}><img src={VEGETABLES_FRUITS_ICON} alt="Vegetables and Fruits" width="40" height="40" /></IconButton>
-          <IconButton onClick={() => setFilterCategory("MEAT")}><img src={MEAT_ICON} alt="Meats" width="40" height="40" /></IconButton>
-          <IconButton onClick={() => setFilterCategory("FISH_SEAFOOD")}><img src={FISH_SEAFOOD_ICON} alt="Fish and Seafoods" width="40" height="40" /></IconButton>
-          <IconButton onClick={() => setFilterCategory("EGGS_DAIRY")}><img src={EGGS_DAIRY_ICON} alt="Eggs and Dairy" width="40" height="40" /></IconButton>
-          <IconButton onClick={() => setFilterCategory("SAUCES")}><img src={SAUCES_ICON} alt="Sauces" width="40" height="40" /></IconButton>
-          <IconButton onClick={() => setFilterCategory("OTHERS")}><img src={OTHERS_ICON} alt="Others" width="40" height="40" /></IconButton>
+          <IconButton onClick={() => handleIconClick("VEGETABLES_FRUITS")}><img src={VEGETABLES_FRUITS_ICON} alt="Vegetables and Fruits" width="40" height="40" /></IconButton>
+          <IconButton onClick={() => handleIconClick("MEAT")}><img src={MEAT_ICON} alt="Meats" width="40" height="40" /></IconButton>
+          <IconButton onClick={() => handleIconClick("FISH_SEAFOOD")}><img src={FISH_SEAFOOD_ICON} alt="Fish and Seafoods" width="40" height="40" /></IconButton>
+          <IconButton onClick={() => handleIconClick("EGGS_DAIRY")}><img src={EGGS_DAIRY_ICON} alt="Eggs and Dairy" width="40" height="40" /></IconButton>
+          <IconButton onClick={() => handleIconClick("SAUCES")}><img src={SAUCES_ICON} alt="Sauces" width="40" height="40" /></IconButton>
+          <IconButton onClick={() => handleIconClick("OTHERS")}><img src={OTHERS_ICON} alt="Others" width="40" height="40" /></IconButton>
         </FoodIcons>
       </FilterSection>
       <FoodNameDropdown>
-        <label>식료품 이름</label>
-        <select onChange={handleFoodNameChange} value={selectedFoodName}>
-          <option value="">선택하세요</option>
-          {filteredItems.length > 0 ? (
-            filteredItems.map((item, index) => (
-              <option key={index} value={item.foodName}>{item.foodName}</option>
-            ))
-          ) : (
-            <option value="">데이터가 없습니다</option>
-          )}
-        </select>
+        <Label>식료품 이름</Label>
+        <DropdownButton onClick={handleFoodNameClick}>
+          {selectedFoodName || "식료품 이름 선택"}
+        </DropdownButton>
+        {isDropdownOpen && (
+          <DropdownMenu ref={dropdownRef}>
+            <select size="20" onChange={handleFoodNameChange} value={selectedFoodName}>
+              <option value="">선택하세요</option>
+              {filteredItems.map((item, index) => (
+                <option key={index} value={item.foodName}>{item.foodName}</option>
+              ))}
+            </select>
+          </DropdownMenu>
+        )}
       </FoodNameDropdown>
       <InputSection>
       <Label>소비 기한</Label>
@@ -331,27 +331,6 @@ const IconButton = styled.button`
   margin: 0 5px;
 `;
 
-const FoodNameDropdown = styled.div`
-  display: flex;
-  flex-direction: column;
-  width: 70%;
-  margin-bottom: 20px;
-
-  label {
-    font-weight: bold;
-    margin-bottom: 5px;
-  }
-
-  select {
-    padding: 10px;
-    border-radius: 5px;
-    border: 2px solid #2D9CDB;
-    width: 100%; /* 너비를 100%로 설정 */
-    height: 40px; /* 드롭다운 높이 설정 */
-    box-sizing: border-box; /* 패딩과 테두리를 포함하여 전체 너비 및 높이 계산 */
-  }
-`;  
-
 const InputSection = styled.div`
   width: 70%;
   margin-top: 10px;
@@ -404,4 +383,59 @@ const UploadButton = styled.button`
 const Label = styled.label`
   font-weight: bold;
   margin-bottom: 5px;
+`;
+
+
+const DropdownMenu = styled.div`
+  position: absolute;
+  width: 100%; /* 부모 요소의 너비를 차지하도록 설정 */
+  max-width: 500px; /* 최대 너비 설정 */
+  border-radius: 5px;
+  background-color: #ffffff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  top: 100%; /* DropdownButton 바로 아래에 위치하도록 설정 */
+  left: 0; /* 부모 요소에 대해 좌측 정렬 */
+  display: flex;
+  flex-direction: column;
+
+  select {
+    padding: 5px; /* 옵션 간격 줄이기 */
+    border-radius: 5px;
+    width: 100%;
+    box-sizing: border-box;
+    max-height: 300px; /* 셀렉트 박스의 최대 높이를 제한 */
+    overflow-y: auto;  /* 스크롤을 가능하게 설정 */
+    font-size: 15px; /* 글자 크기 조정 (조금만 키우기) */
+    line-height: 1.2; /* 줄 간격을 조정하여 글자 간격 줄이기 */
+    margin: 0; /* margin이 있을 경우 간격 조정 */
+  }
+
+  /* 옵션 요소에 대한 스타일 추가 */
+  select option {
+    padding: 5px; /* 옵션 주위에 여백 추가 */
+    line-height: 1.2; /* 줄 간격을 조정하여 글자 간격 줄이기 */
+    margin: 0; /* margin이 있을 경우 간격 조정 */
+    font-size: 15px; /* 글자 크기 조정 (조금만 키우기) */
+    padding-left: 10px; /* 왼쪽 여백 추가 */
+  }
+`;
+
+const DropdownButton = styled.button`
+  width: 100%;
+  padding: 10px;
+  border: 2px solid #2D9CDB;
+  border-radius: 5px;
+  background-color: #ffffff;
+  text-align: left;
+  cursor: pointer;
+  box-sizing: border-box;
+`;
+
+const FoodNameDropdown = styled.div`
+  position: relative; /* DropdownMenu의 절대 위치를 부모 요소에 상대적으로 설정 */
+  display: flex;
+  flex-direction: column;
+  width: 70%;
+  margin-bottom: 20px;
 `;

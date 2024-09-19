@@ -28,7 +28,7 @@ const RecipeSteps = () => {
    useEffect(() => {
     const fetchRecipeData = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/menus/${menuId}`, {
+        const response = await axios.get(process.env.REACT_APP_API_URL+`menus/${menuId}`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
           },
@@ -50,7 +50,7 @@ const RecipeSteps = () => {
   useEffect(() => {
     const fetchMemberFoods = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/my-foods`, {
+        const response = await axios.get(process.env.REACT_APP_API_URL+'my-foods', {
           params: { page, size, sort },
           headers: {
             Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
@@ -169,7 +169,12 @@ const RecipeSteps = () => {
 
   const handleFinishCooking = async () => {
     try {
-      const response = await axios.get(`http://localhost:8080/my-foods`, {
+        await axios.patch(process.env.REACT_APP_API_URL + 'statistics/'+menuId,{}, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+        },
+      });
+      const response = await axios.get(process.env.REACT_APP_API_URL + 'my-foods', {
         params: { page, size, sort },
         headers: {
           Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
@@ -186,7 +191,7 @@ const RecipeSteps = () => {
         .map((memberFood) => memberFood.memberFoodId);
 
       if (memberFoodIdsToDelete.length > 0) {
-        await axios.delete(`http://localhost:8080/my-foods`, {
+        await axios.delete(process.env.REACT_APP_API_URL + 'my-foods', {
           data: memberFoodIdsToDelete,
           headers: {
             Authorization: `Bearer ${localStorage.getItem('accessToken')}`,

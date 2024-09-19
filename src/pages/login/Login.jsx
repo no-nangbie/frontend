@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import axios from 'axios';
-import logo from "../../resources/icon/logo.png";
+import logo from "../../resources/icon/logo.png"; 
+import '../../App.css';
 
 function Login() {
   // 이메일과 비밀번호를 상태로 관리
@@ -17,7 +18,7 @@ function Login() {
 
     console.log("로그인 버튼이 클릭되었습니다."); // 버튼 클릭 확인을 위한 로그
     try {
-      const response = await axios.post('http://localhost:8080/login', {
+      const response = await axios.post(process.env.REACT_APP_API_URL+'login', {
         email: email,
         password: password,
       }, {
@@ -40,6 +41,13 @@ function Login() {
     } catch (error) {
       console.error("로그인 실패: ", error);
       setErrorMessage('로그인 실패: 이메일이나 비밀번호를 확인해주세요.');
+    }
+  };
+
+  // 키보드에서 "Enter" 키가 눌렸을 때 로그인 함수 호출
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleLogin(); // 엔터키를 눌렀을 때 로그인 함수 실행
     }
   };
   
@@ -66,6 +74,7 @@ function Login() {
             placeholder="이메일을 입력하세요"
             value={email}
             onChange={(e) => setEmail(e.target.value)} // 이메일 입력 시 상태 업데이트
+            onKeyPress={handleKeyPress} // Enter 키 입력 감지
           />
         </InputGroup>
 
@@ -77,6 +86,7 @@ function Login() {
             placeholder="비밀번호를 입력하세요"
             value={password}
             onChange={(e) => setPassword(e.target.value)} // 비밀번호 입력 시 상태 업데이트
+            onKeyPress={handleKeyPress} // Enter 키 입력 감지
           />
         </InputGroup>
 
