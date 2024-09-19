@@ -32,6 +32,7 @@ import BoardEditPage from './pages/board/BoardEdit';
 import ChangePassword from "./pages/menu/ChangePassword";
 import FridgeStatistics from "./pages/menu/FridgeStatistics";
 import MyPage from "./pages/menu/MyPage";
+import ChangeNickname from "./pages/menu/ChangeNickname";
 
  
 const queryClient = new QueryClient();
@@ -61,6 +62,7 @@ function App() {
               <Route path="/board/edit/:boardId" element={<BoardEditPage />} />
               <Route path="/menu" element={<MyPage />} />
               <Route path="/menu/change-password" element={<ChangePassword />} />
+              <Route path="/menu/change-nickname" element={<ChangeNickname />} />
               <Route path="/menu/statistics/1" element={<FridgeStatistics />} />
             </Route>
           </Routes>

@@ -53,6 +53,13 @@ function ChangePassword() {
         }
     };
 
+    // 키보드에서 "Enter" 키가 눌렸을 때 로그인 함수 호출
+    const handleKeyPress = (e) => {
+        if (e.key === 'Enter') {
+            handleChangePassword(); // 엔터키를 눌렀을 때 로그인 함수 실행
+        }
+    };
+
     return (
         <Container>
             <Form>
@@ -63,6 +70,7 @@ function ChangePassword() {
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
                     placeholder="비밀번호"
+                    onKeyPress={handleKeyPress} // Enter 키 입력 감지
                 />
                 <Label>변경할 비밀번호</Label>
                 <Input
@@ -70,6 +78,7 @@ function ChangePassword() {
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     placeholder="새 비밀번호"
+                    onKeyPress={handleKeyPress} // Enter 키 입력 감지
                 />
                 <Label>비밀번호 확인</Label>
                 <Input
@@ -77,6 +86,7 @@ function ChangePassword() {
                     value={confirmNewPassword}
                     onChange={(e) => setConfirmNewPassword(e.target.value)}
                     placeholder="비밀번호 확인"
+                    onKeyPress={handleKeyPress} // Enter 키 입력 감지
                 />
                 <SubmitButton onClick={handleChangePassword}>변경하기</SubmitButton>
             </Form>
@@ -91,9 +101,10 @@ const Container = styled.div`
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding-top: 20px;
+    justify-content: center;
+    padding-top: 0px;
     background-color: #f2f2f2;
-    height: 100vh;
+    height: 85vh;
 `;
 const Form = styled.div`
     display: flex;
@@ -103,7 +114,7 @@ const Form = styled.div`
     padding: 40px;
     border-radius: 10px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    width: 90%;
+    width: 70%;
     max-width: 400px;
 `;
 
