@@ -12,39 +12,17 @@ import { useNavigate } from 'react-router-dom';
 
 // Main Component
 function My_foodsUpdate() {
-  const [categories, setCategories] = useState([]); // 카테고리 데이터
   const [filterCategory, setFilterCategory] = useState("VEGETABLES_FRUITS");
   const [foodItems, setFoodItems] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [filteredItems, setFilteredItems] = useState([]);
   const [memo, setMemo] = useState("");
   const [selectedFoodName, setSelectedFoodName] = useState("");
   const [expirationDate, setExpirationDate] = useState("");
   const { memberFoodId } = useParams();
-  const [foodCategory, setFoodCategory] = useState(filterCategory);
   const navigate = useNavigate();
-  const [currentPage, setCurrentPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true); // 더 불러올 데이터가 있는지 확인
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const dropdownRef = useRef(null); // 드롭다운 참조
-
-    // 카테고리 데이터 불러오기
-  // useEffect(() => {
-  //   const fetchCategories = async () => {
-  //     try {
-  //       const response = await axios.get(process.env.REACT_APP_API_URL + 'categories', {
-  //         headers: {
-  //           Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-  //         },
-  //       });
-  //       setCategories(response.data.data || []);
-  //     } catch (error) {
-  //       console.error("카테고리 가져오기 오류: ", error);
-  //     }
-  //   };
-  //   fetchCategories();
-  // }, []);    
+  const dropdownRef = useRef(null);
 
 
   // 카테고리별 식료품 이름 가져오기
@@ -86,10 +64,8 @@ function My_foodsUpdate() {
             setMemo(foodItem?.memo || "");
             setFilterCategory(foodItem?.foodCategory || "");
           }
-          setLoading(false);
         } catch (error) {
           console.error("식료품 아이템 가져오기 오류: ", error);
-          setLoading(false);
         }
       };
       fetchFoodItems();
@@ -107,24 +83,12 @@ function My_foodsUpdate() {
           },
         });
         setFoodItems(response.data.data || []);
-        setLoading(false);
       } catch (error) {
         console.error("Error fetching food items: ", error);
-        setLoading(false);
       }
     };
     fetchFoodItems();
   }, [filterCategory]);
-
-  useEffect(() => {
-    const updateFoodNames = async () => {
-        const names = await fetchFoodNamesByCategory(filterCategory);
-        setFoodItems(names); 
-    };
-
-    updateFoodNames();
-  }, [filterCategory]);
-
 
 
   // 식료품 필터링
@@ -173,7 +137,7 @@ function My_foodsUpdate() {
       setSelectedFoodName("");
       setExpirationDate("");
       setMemo("");
-      setFoodCategory(filterCategory);
+      setFilterCategory(filterCategory);
       navigate(`/fridge`);
     } catch (error) {
       console.error("Error saving food item:", error);
@@ -223,23 +187,16 @@ function My_foodsUpdate() {
     };
   }, []);
 
-  const handleCategoryChange = (event) => {
-    const newCategory = event.target.value;
-    setFilterCategory(newCategory);
-    setCurrentPage(1); // 카테고리 변경 시 페이지 초기화
-    setFoodItems([]); // 아이템 초기화
-    setFilteredItems([]); // 필터된 아이템 초기화
-    setHasMore(true); // 더 불러올 데이터가 있을 수 있으므로 초기화
-    setSelectedFoodName(""); // 식료품 이름 초기화 ("선택하세요"로 표시됨)
-  };
-
   const handleIconClick = (category) => {
-    setFilterCategory(category);
-    setCurrentPage(1); // 카테고리 변경 시 페이지 초기화
+    setFilterCategory(category); // 카테고리를 상태로 설정
     setFoodItems([]); // 아이템 초기화
-    setFilteredItems([]); // 필터된 아이템 초기화
-    setHasMore(true); // 더 불러올 데이터가 있을 수 있으므로 초기화
+    setFilteredItems([]); // 필터된 아이템 초기
     setSelectedFoodName(""); // 식료품 이름 초기화 ("선택하세요"로 표시됨)
+  
+    // 카테고리가 같은 경우에도 데이터를 다시 불러오도록 fetchFoodNamesByCategory 실행
+    fetchFoodNamesByCategory(category).then((names) => {
+      setFoodItems(names);
+    });
   };
   return (
     <MainContainer>

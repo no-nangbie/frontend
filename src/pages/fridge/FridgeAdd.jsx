@@ -14,18 +14,12 @@ import { useNavigate } from 'react-router-dom';
 function My_foods() {
   const [filterCategory, setFilterCategory] = useState("VEGETABLES_FRUITS");
   const [foodItems, setFoodItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [searchKeyword, setSearchKeyword] = useState("");
-  const [filteredItems, setFilteredItems] = useState("");
+  const [filteredItems, setFilteredItems] = useState([]);
   const [memo, setMemo] = useState("");
-  const [selectedFoodName, setSelectedFoodName] = useState(""); // 선택한 식료품 이름 상태
+  const [selectedFoodName, setSelectedFoodName] = useState("");
   const [expirationDate, setExpirationDate] = useState("");
-  const [foodCategory, setFoodCategory] = useState(filterCategory);
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
-  const [hasMore, setHasMore] = useState(true); // 더 불러올 데이터가 있는지 확인
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const dropdownRef = useRef(null); // 드롭다운 참조
+  const dropdownRef = useRef(null);
   const navigate = useNavigate();
 
   const fetchFoodItems = async (category) => {
@@ -42,19 +36,6 @@ function My_foods() {
       return [];
     }
   };
-
-  useEffect(() => {
-    const updateFoodItems = async () => {
-      setLoading(true); // 요청 시작 시 로딩 상태
-      const items = await fetchFoodItems(filterCategory);
-      setFoodItems(items); 
-      setFilteredItems(items); // 초기 필터링
-      setLoading(false); // 요청 완료 후 로딩 상태 해제
-    };
-
-    updateFoodItems();
-  }, [filterCategory]);
-
 
   const getCategoryLabel = (category) => {
     switch (category) {
@@ -75,46 +56,32 @@ function My_foods() {
     }
   };
 
- useEffect(() => {
-    const result = foodItems.filter(item => 
-      item.foodName.toLowerCase().includes(searchKeyword.toLowerCase())
-    );
-    setFilteredItems(result);
-  }, [searchKeyword, foodItems]);
-
-  const handleCategoryChange = (event) => {
-    const newCategory = event.target.value;
-    setFilterCategory(newCategory);
-    setCurrentPage(1); // 카테고리 변경 시 페이지 초기화
-    setFoodItems([]); // 아이템 초기화
-    setFilteredItems([]); // 필터된 아이템 초기화
-    setHasMore(true); // 더 불러올 데이터가 있을 수 있으므로 초기화
-    setSelectedFoodName(""); // 식료품 이름 초기화 ("선택하세요"로 표시됨)
-  };
 
   const handleIconClick = (category) => {
+    // 항상 데이터를 불러오도록 수정
     setFilterCategory(category);
-    setCurrentPage(1); // 카테고리 변경 시 페이지 초기화
-    setFoodItems([]); // 아이템 초기화
-    setFilteredItems([]); // 필터된 아이템 초기화
-    setHasMore(true); // 더 불러올 데이터가 있을 수 있으므로 초기화
     setSelectedFoodName(""); // 식료품 이름 초기화 ("선택하세요"로 표시됨)
+  
+    const updateFoodItems = async () => {
+      const items = await fetchFoodItems(category);
+      setFoodItems(items); 
+      setFilteredItems(items); // 초기 필터링
+    };
+  
+    updateFoodItems(); // 같은 카테고리여도 데이터를 새로 불러옴
   };
   
+  // useEffect는 filterCategory가 변경될 때만 호출됩니다.
+  useEffect(() => {
+    const updateFoodItems = async () => {
+      const items = await fetchFoodItems(filterCategory);
+      setFoodItems(items); 
+      setFilteredItems(items); // 초기 필터링
+    };
   
-   const handleScroll = () => {
-    if (dropdownRef.current) {
-      const { scrollTop, scrollHeight, clientHeight } = dropdownRef.current;
-      if (scrollTop + clientHeight >= scrollHeight && hasMore && !loading) {
-        setCurrentPage(prevPage => prevPage + 1);
-      }
-    }
-  };
-
-  const handleSearchClick = () => {
-    setSearchKeyword(searchKeyword.trim());
-  };
-
+    updateFoodItems(); 
+  }, [filterCategory]);
+  
   const handleFoodNameClick = () => {
     setIsDropdownOpen(prevState => !prevState); // 드롭다운 토글
   };  
@@ -169,15 +136,12 @@ function My_foods() {
       setSelectedFoodName("");
       setExpirationDate("");
       setMemo("");
-      setFoodCategory(filterCategory);
       navigate(`/fridge`);
     } catch (error) {
       console.error("식료품 저장 오류:", error.response ? error.response.data : error.message);
     alert("보유 식재료 저장에 실패했습니다.");
     }
   };
-
-  const displayExpirationDate = expirationDate.replace(/-/g, '.');
 
   return (
     <MainContainer>
