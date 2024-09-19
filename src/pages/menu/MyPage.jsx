@@ -157,6 +157,12 @@ function MyPage() {
         setIsDeleteModalOpen(false);
     };
 
+    // 닉네임 변경 페이지로 이동하는 함수
+    const handleNicknameChange = () => {
+        console.log("Nickname change clicked");  // 이 로그가 출력되는지 확인합니다.
+        navigate('/menu/change-nickname');  // 닉네임 변경 페이지로 이동
+    };
+
     // 비밀번호 변경 페이지로 이동하는 함수
     const handlePasswordChange = () => {
         console.log("Password change clicked");  // 이 로그가 출력되는지 확인합니다.
@@ -170,7 +176,7 @@ function MyPage() {
                     <InfoText>이메일 : {email}</InfoText>
                     <InfoText>닉네임 : {nickname}</InfoText>
                 </InfoCard>
-                <ActionButton>닉네임 변경</ActionButton>
+                <ActionButton onClick={handleNicknameChange}>닉네임 변경</ActionButton>  {/* 닉네임 변경 페이지로 이동 */}
                 <ActionButton onClick={handlePasswordChange}>비밀번호 변경</ActionButton>  {/* 버튼 수정 */}
                 <ActionButton>선호 음식 변경</ActionButton>
                 <ActionButton onClick={handleStatistics}>통계</ActionButton>
