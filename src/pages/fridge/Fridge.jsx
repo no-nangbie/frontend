@@ -106,6 +106,7 @@ function Fridge() {
       if(searchKeyword.trim() === "") {
          // setSortOption("expirationDate_asc");
           fetchFoodItems();
+          setIsSearching(false);
           return;
         }
 
@@ -288,8 +289,6 @@ const handleSearchClick = () => {
 }
 
 export default Fridge;
-
-// Styled Components
 
 // Styled Components
 

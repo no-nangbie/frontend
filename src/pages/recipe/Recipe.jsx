@@ -160,15 +160,21 @@ function Recipe() {
   };
 
   const handleSearchClick = () => {
-    if (searchKeyword.trim() === "") {
-      alert('검색어를 입력해주세요.'); // 빈 검색어 경고 추가
-      return;
-    }
-    setIsSearching(true);
-    setRecipes([]); // 검색 시 기존 데이터 초기화
+    const trimmedKeyword = searchKeyword.trim();
+    setRecipes([]); // 검색할 때마다 기존 데이터를 리셋
     setPage(1); // 페이지 초기화
-    searchMenu(1); // 검색 함수 실행
+  
+    if (trimmedKeyword === "") {
+      // 검색어가 빈칸일 때, 전체 레시피 조회
+      setIsSearching(false);
+      fetchRecipes(1); // 1페이지부터 전체 레시피 조회
+    } else {
+      // 검색어가 있을 때, 검색 실행
+      setIsSearching(true);
+      searchMenu(1); // 검색 함수 실행
+    }
   };
+  
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
