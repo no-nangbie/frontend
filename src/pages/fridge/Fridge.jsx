@@ -68,6 +68,7 @@ function Fridge() {
   const [sortOption, setSortOption] = useState("expirationDate_asc");
   const [searchKeyword, setSearchKeyword] = useState("");
   const [isSearching, setIsSearching] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
   const navigate = useNavigate();
 
 
@@ -130,30 +131,54 @@ function Fridge() {
       });
     }
 
-      if (response !== undefined) {
-        setFoodItems(response.data.data);
-      } else {
-        console.error("예상과 다른 응답 데이터 형식 : ", response.data);
-      }
-      setLoading(false);
-      } catch (error) {
-        console.error("검색된 식재료 데이터를 가져오는데 실패했습니다." , error);
-        setLoading(false);
-      }
-    };
-
- useEffect(() => {
-    fetchFoodItems();
-  }, [sortOption]);
-
-  const handleSearchClick = () => {
-    if (searchKeyword.trim() === "") {
-      setSortOption("expirationDate_asc")
+    if (response.data && response.data.data) {
+      setSearchResults(response.data.data); // 검색 결과 저장
+      setIsSearching(true);
+    } else {
+      console.error("예상과 다른 응답 데이터 형식:", response.data);
     }
-    setIsSearching(true);
-    searchFoods();
-    setSearchKeyword("");
+    setLoading(false);
+  } catch (error) {
+    console.error("검색된 식재료 데이터를 가져오는데 실패했습니다.", error);
+    setLoading(false);
   }
+};
+
+useEffect(() => {
+  if (isSearching) {
+    // 검색 결과 정렬 후 상태 업데이트
+    const sortedSearchResults = [...searchResults].sort((a, b) => {
+      return sortItems(a, b, sortOption);
+    });
+    setSearchResults(sortedSearchResults);
+  } else {
+    // 검색 중이 아닐 때도 정렬을 적용
+    fetchFoodItems();
+  }
+}, [sortOption, isSearching]); // searchResults를 의존성 배열에서 제거
+
+
+
+const sortItems = (a, b, option) => {
+  const parseDate = (dateString) => {
+    return new Date(`${dateString.substring(0, 4)}-${dateString.substring(4, 6)}-${dateString.substring(6, 8)}`);
+  };
+
+  if (option === "expirationDate_asc") {
+    return parseDate(a.expirationDate) - parseDate(b.expirationDate);
+  } else if (option === "expirationDate_desc") {
+    return parseDate(b.expirationDate) - parseDate(a.expirationDate);
+  } else if (option === "memberFoodId_asc") {
+    return a.memberFoodId - b.memberFoodId;
+  } else if (option === "memberFoodId_desc") {
+    return b.memberFoodId - a.memberFoodId;
+  }
+};
+
+
+const handleSearchClick = () => {
+  searchFoods(true);
+};
 
   const handleCategoryChange = (event) => {
     setFilterCategory(event.target.value);
@@ -163,7 +188,9 @@ function Fridge() {
     setSortOption(event.target.value);
   };
   
-  const filteredItems = filterCategory === '전체'? foodItems : foodItems.filter(item => item.foodCategory === filterCategory);
+  const filteredItems = isSearching
+    ? searchResults.filter((item) => item.foodCategory === filterCategory || filterCategory === "전체")
+    : foodItems.filter((item) => item.foodCategory === filterCategory || filterCategory === "전체");
 
   const formatDate = (dateString) => {
     
@@ -204,18 +231,22 @@ function Fridge() {
           </InputGroupLine>
           <InputGroupLine>
             <Label>정렬</Label>
-            <Select onChange={handleSortChange} value={sortOption}>
-              <option value="expirationDate_asc">소비기한 빠른 순</option>
-              <option value="expirationDate_desc">소비기한 느린 순</option>
-              <option value="memberFoodId_desc">최근 추가 순</option>
-              <option value="memberFoodId_asc">과거 등록 순</option>
-            </Select>
+            <Select onChange={(e) => setSortOption(e.target.value)} value={sortOption}>
+            <option value="expirationDate_asc">소비기한 빠른 순</option>
+            <option value="expirationDate_desc">소비기한 느린 순</option>
+            <option value="memberFoodId_desc">최근 추가 순</option>
+            <option value="memberFoodId_asc">과거 등록 순</option>
+          </Select>
           </InputGroupLine>
         {/* </FilterSection> */}
         <SearchBar>
-          <TextArea type="text" placeholder="검색" 
-          value={searchKeyword} onChange={(e) => setSearchKeyword(e.target.value)}/>
-          <SearchIcon src={Search_img} onClick={handleSearchClick} alt="search icon"></SearchIcon>
+          <TextArea
+            type="text"
+            placeholder="검색"
+            value={searchKeyword}
+            onChange={(e) => setSearchKeyword(e.target.value)}
+          />
+          <SearchIcon src={Search_img} onClick={handleSearchClick} alt="search icon" />
         </SearchBar>
       </Header>
 
@@ -223,18 +254,22 @@ function Fridge() {
         {loading ? (
           <div>로딩중</div>
         ) : filteredItems.length === 0 ? (
-          <NoDataMessage> 저장된 식료품이 없습니다</NoDataMessage>
+          <NoDataMessage>{isSearching ? "검색된 식료품이 없습니다" : "저장된 식료품이 없습니다"}</NoDataMessage>
         ) : (
           filteredItems.map((item) => (
-          <FoodItem key={item.id} color={getStatusColor(item.memberFoodStatus)} onClick={() => handleClick(item.memberFoodId)}>
-            {getFoodIcon(item.foodCategory, item.memberFoodStatus)}
-            <FoodName color={getCategoryColor(item.foodCategory)} memberFoodStatus={item.memberFoodStatus}>{item.foodName}</FoodName>
-            {item.memo ? (
-              <FoodMemo memberFoodStatus={item.memberFoodStatus}>[{item.memo}]</FoodMemo>
-            ) : null}
-            <FoodDate memberFoodStatus={item.memberFoodStatus}>{formatDate(item.expirationDate)}</FoodDate>
-          </FoodItem>
-        ))
+            <FoodItem
+              key={item.id}
+              color={getStatusColor(item.memberFoodStatus)}
+              onClick={() => handleClick(item.memberFoodId)}
+            >
+              {getFoodIcon(item.foodCategory, item.memberFoodStatus)}
+              <FoodName color={getCategoryColor(item.foodCategory)} memberFoodStatus={item.memberFoodStatus}>
+                {item.foodName}
+              </FoodName>
+              {item.memo && <FoodMemo memberFoodStatus={item.memberFoodStatus}>[{item.memo}]</FoodMemo>}
+              <FoodDate memberFoodStatus={item.memberFoodStatus}>{formatDate(item.expirationDate)}</FoodDate>
+            </FoodItem>
+          ))
         )}
       </ScrollableContainer>
     </MainContainer>
