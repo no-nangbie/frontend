@@ -104,14 +104,14 @@ function Fridge() {
     const searchFoods = async() => {
 
       if(searchKeyword.trim() === "") {
-          setSortOption("expirationDate_asc");
+         // setSortOption("expirationDate_asc");
           fetchFoodItems();
           return;
         }
 
       try {
         let response;
-        
+
         if(filterCategory === "전체") {
           response = await axios.get(process.env.REACT_APP_API_URL + 'my-foods/search', {
             params: {
