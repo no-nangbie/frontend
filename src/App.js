@@ -21,6 +21,7 @@ import RecipePage from './pages/recipe/Recipe';
 import RecipeDetailsPage from './pages/recipe/RecipeDetails';
 import RecipeEditPage from './pages/recipe/RecipeEdit';
 import RecipeStepPage from './pages/recipe/RecipeStep';
+import RecommendedRecipe from './pages/recipe/RecommendedRecipe';
 
 //board
 import BoardPage from './pages/board/Board';
@@ -64,6 +65,7 @@ function App() {
               <Route path="/recipe/details/:menuId" element={<RecipeDetailsPage />} />
               <Route path="/recipe/details/edit" element={<RecipeEditPage />} />
               <Route path="/recipe/details/:menuId/step" element={<RecipeStepPage />} />
+              <Route path="/recipe/recommended-recipe" element={<RecommendedRecipe />} />
               {/* <Route path="/recipe/details/step" element={<RecipeStepPage />} /> */}
               <Route path="/board" element={<BoardPage />} />
               <Route path="/board/details/:boardId" element={<BoardDetailsPage />} />
