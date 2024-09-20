@@ -33,7 +33,9 @@ import ChangePassword from "./pages/menu/ChangePassword";
 import FridgeStatistics from "./pages/menu/FridgeStatistics";
 import MyPage from "./pages/menu/MyPage";
 import ChangeNickname from "./pages/menu/ChangeNickname";
-
+import AllergyFoods from "./pages/menu/AllergyFoods";
+import AllergyFoodsAdd from "./pages/menu/AllergyFoodsAdd";
+import AllergyFoodsDelete from "./pages/menu/AllergyFoodsDelete";
  
 const queryClient = new QueryClient();
 
@@ -64,6 +66,9 @@ function App() {
               <Route path="/menu/change-password" element={<ChangePassword />} />
               <Route path="/menu/change-nickname" element={<ChangeNickname />} />
               <Route path="/menu/statistics/1" element={<FridgeStatistics />} />
+              <Route path="/menu/allergy-foods" element={<AllergyFoods/>} /> 
+              <Route path="/menu/allergy-foods/add" element={<AllergyFoodsAdd/>} /> 
+              <Route path="/menu/allergy-foods/delete" element={<AllergyFoodsDelete/>} /> 
             </Route>
           </Routes>
       </Router>

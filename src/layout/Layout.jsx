@@ -14,6 +14,8 @@ import board_on from '../resources/icon/board_on.png';
 import menu_on from '../resources/icon/menu_on.png';
 import recipe_on from '../resources/icon/recipe_on.png';
 import fridge_on from '../resources/icon/fridge_on.png';
+import allergyPlus from '../resources/icon/allergy_plus.png';
+import allergyMinus from '../resources/icon/allergy_minus.png';
 
 
 function Layout() {
@@ -124,6 +126,8 @@ function Layout() {
         return boardMinus;
       case '/board':
         return boardMinus;
+      case '/menu/allergy-foods':
+        return allergyMinus;
       default:
         if(location.pathname.includes('/board')){
           return boardMinus;
@@ -139,8 +143,11 @@ function Layout() {
         return boardPlus;
       case '/board':
         return boardPlus;
+        case '/menu/allergy-foods':
+        return allergyPlus;
     }
   };
+
 
 
   /**
@@ -161,6 +168,14 @@ function Layout() {
 
   const handleButtonClick3 = () => {
     navigate('/board/add');
+  };
+
+  const handleButtonClick4 = () => {
+    navigate('/menu/allergy-foods/add');
+  };
+
+  const handleButtonClick5 = () => {
+    navigate('/menu/allergy-foods/delete');
   };
 
   return (
@@ -188,6 +203,12 @@ function Layout() {
             )}
             {(location.pathname === '/board') && (
               <ColoredButton src={getButtonImage3()} onClick={handleButtonClick3} />
+            )}
+             {(location.pathname === '/menu/allergy-foods') && (
+              <ColoredButton src={getButtonImage2()} onClick={handleButtonClick5} icon="allergyMinus"  />
+            )}
+            {(location.pathname === '/menu/allergy-foods') && (
+              <ColoredButton src={getButtonImage3()} onClick={handleButtonClick4} icon="allergyPlus" />
             )}
           </ButtonContainer>
         </Header>
@@ -267,7 +288,7 @@ const ButtonContainer = styled.div`
 `;
 
 const ColoredButton = styled.img`
-  width: 42px;
+  width: ${(props) => (props.icon === 'allergyPlus' ? '34px' : (props.icon === 'allergyMinus' ? '30px' : '42px'))}; // 마이너스 아이콘 크기 설정
   height: 31.5px;
   border: none;
   border-radius: 5px;
