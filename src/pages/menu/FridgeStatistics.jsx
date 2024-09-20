@@ -67,7 +67,7 @@ const FridgeStatistics = () => {
   const offset = totalLength * (1 - animatedScore / 100);
 
   // 계산된 값들
-  const adjustedInputItems = inputItems * 0.25 > 20 ? 20 : inputItems * 0.25;
+  const adjustedInputItems = inputItems * 0.25 > 20 ? 20 : Math.floor(inputItems * 0.25);
   const adjustedOutputItems = outputItems > 80 ? 80 : outputItems;
   const adjustedExpiredItems = expiredItems > 0 ? Math.round((expiredItems / outputItems) * adjustedOutputItems) : 0;
 
