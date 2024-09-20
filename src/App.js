@@ -33,7 +33,12 @@ import ChangePassword from "./pages/menu/ChangePassword";
 import FridgeStatistics from "./pages/menu/FridgeStatistics";
 import MyPage from "./pages/menu/MyPage";
 import ChangeNickname from "./pages/menu/ChangeNickname";
+import AllergyFoods from "./pages/menu/AllergyFoods";
+import AllergyFoodsAdd from "./pages/menu/AllergyFoodsAdd";
+import AllergyFoodsDelete from "./pages/menu/AllergyFoodsDelete";
+
 import RecipeStatistics from "./pages/menu/RecipeStatistics";
+
  
 // Global Styles
 import GlobalStyle from './GlobalStyle'; // 글로벌 스타일 불러오기
@@ -68,7 +73,12 @@ function App() {
               <Route path="/menu/change-password" element={<ChangePassword />} />
               <Route path="/menu/change-nickname" element={<ChangeNickname />} />
               <Route path="/menu/statistics/1" element={<FridgeStatistics />} />
+              <Route path="/menu/allergy-foods" element={<AllergyFoods/>} /> 
+              <Route path="/menu/allergy-foods/add" element={<AllergyFoodsAdd/>} /> 
+              <Route path="/menu/allergy-foods/delete" element={<AllergyFoodsDelete/>} /> 
+
               <Route path="/menu/statistics/2" element={<RecipeStatistics />} />
+
             </Route>
           </Routes>
       </Router>

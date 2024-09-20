@@ -181,6 +181,11 @@ function MyPage() {
         navigate('/menu/change-password');  // 비밀번호 변경 페이지로 이동
     };
 
+    // 알레르기 음식으로 이동
+    const handleAllergy = () => {
+        navigate(`/menu/allergy-foods`); 
+    }
+
     return (
         <Container>
             <Content>
@@ -191,6 +196,7 @@ function MyPage() {
                 <ActionButton onClick={handleNicknameChange}>닉네임 변경</ActionButton>  {/* 닉네임 변경 페이지로 이동 */}
                 <ActionButton onClick={handlePasswordChange}>비밀번호 변경</ActionButton>  {/* 버튼 수정 */}
                 <ActionButton>선호 음식 변경</ActionButton>
+                <ActionButton onClick={handleAllergy}>알레르기 음식</ActionButton>
                 <ActionButton onClick={handleStatistics}>통계</ActionButton>
                 <ActionButton onClick={handleLogout}>로그아웃</ActionButton>
                 <RedButton onClick={() => setIsModalOpen(true)}>냉장고 초기화</RedButton>

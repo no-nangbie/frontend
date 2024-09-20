@@ -7,21 +7,23 @@ import FISH_SEAFOOD_ICON from '../../resources/icon/FISH_SEAFOOD.png';
 import EGGS_DAIRY_ICON from '../../resources/icon/EGGS_DAIRY.png';
 import SAUCES_ICON from '../../resources/icon/SAUCES.png';
 import OTHERS_ICON from '../../resources/icon/OTHERS.png';
+import { useNavigate } from 'react-router-dom'; 
 
-const getFoodIcon = (category) => {
+const getFoodIcon = (category, memberFoodStatus) => {
+  const filterStyle = memberFoodStatus === "Near_Expiry" ? "grayscale(100%)" : "none"; // 'grayscale(100%)'으로 수정
   switch (category) {
     case "VEGETABLES_FRUITS":
-      return <img src={VEGETABLES_FRUITS_ICON} alt="Vegetables and Fruits" width="40" height="40" />; // Example icon for vegetables and fruits
+      return <img src={VEGETABLES_FRUITS_ICON} style={{ filter: filterStyle }} alt="Vegetables and Fruits" width="40" height="40" />;
     case "MEAT":
-      return <img src={MEAT_ICON} alt="Meats" width="40" height="40" />; // Example icon for meat
+      return <img src={MEAT_ICON} style={{ filter: filterStyle }} alt="Meats" width="40" height="40" />;
     case "FISH_SEAFOOD":
-      return  <img src={FISH_SEAFOOD_ICON} alt="Fishs and Seafoods" width="40" height="40" />;
+      return <img src={FISH_SEAFOOD_ICON} style={{ filter: filterStyle }} alt="Fish and Seafoods" width="40" height="40" />;
     case "EGGS_DAIRY":
-      return  <img src={EGGS_DAIRY_ICON} alt="Egges and Dairy" width="40" height="40" />;
+      return <img src={EGGS_DAIRY_ICON} style={{ filter: filterStyle }} alt="Eggs and Dairy" width="40" height="40" />;
     case "SAUCES":
-      return  <img src={SAUCES_ICON} alt="Sauces" width="40" height="40" />;
+      return <img src={SAUCES_ICON} style={{ filter: filterStyle }} alt="Sauces" width="40" height="40" />;
     default:
-      return  <img src={OTHERS_ICON} alt="Others" width="40" height="40" />; // Default icon for unknown categories
+      return <img src={OTHERS_ICON} style={{ filter: filterStyle }} alt="Others" width="40" height="40" />;
   }
 };
 
@@ -61,6 +63,8 @@ function FridgeDelete() {
   const [loading, setLoading] = useState(true);
   const [sortOption, setSortOption] = useState("expirationDate_asc");
   const [selectedItems, setSelectedItems] = useState([]);
+  const navigate = useNavigate();
+
 
   const fetchFoodItems = async() => {
     try {
@@ -127,6 +131,7 @@ function FridgeDelete() {
       setFoodItems(prevItems => prevItems.filter(item => !selectedItems.includes(item.memberFoodId)));
       setSelectedItems([]); // Clear selected items
       alert('선택한 식재료가 삭제되었습니다.');
+      navigate(`/fridge`);
     } catch (error) {
       console.error("식재료 삭제 중 오류 발생", error);
       alert('식재료 삭제에 실패했습니다.');
@@ -191,7 +196,7 @@ function FridgeDelete() {
             isSelected={selectedItems.includes(item.memberFoodId)}
             onClick={handleItemClick(item.memberFoodId)}
             >
-              <FoodIcon>{getFoodIcon(item.foodCategory)}</FoodIcon>
+              {getFoodIcon(item.foodCategory, item.memberFoodStatus)}
               <FoodName color={getCategoryColor(item.foodCategory)} memberFoodStatus={item.memberFoodStatus}>{item.foodName}</FoodName>
               {item.memo ? (
                 <FoodMemo memberFoodStatus={item.memberFoodStatus}>[{item.memo}]</FoodMemo>
@@ -322,6 +327,15 @@ const FoodItem = styled.div`
 
   &:nth-child(2n) { /* 각 두 번째 아이템에 대해 오른쪽 마진 0 설정 */
     margin-right: 0;
+  }
+
+    & img {
+    position: absolute;
+    right: 10px; /* 오른쪽에서 10px 떨어진 위치 */
+    top: 50%; /* 상단에서 중앙 위치 */
+    transform: translateY(-50%); /* 중앙 정렬을 위한 변환 */
+    width: 40px;
+    height: 40px;
   }
 `;
 
