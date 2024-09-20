@@ -196,7 +196,6 @@ const RecipeStatistics = () => {
       <InfoContainer>
         {menuDifficultyData.map((item, index) => (
           <InfoCard key={index}>
-            <ColorBox color={COLORS[index % COLORS.length]} />
             <LabelText>{index+1}등 : {item.name}</LabelText>
             <Count>{item.value}회</Count>
           </InfoCard>
@@ -212,7 +211,6 @@ const RecipeStatistics = () => {
       <InfoContainer>
         {menuCookTimeData.map((item, index) => (
           <InfoCard key={index}>
-            <ColorBox color={COLORS[index % COLORS.length]} />
             <LabelText>{index+1}등 : {item.name}</LabelText>
             <Count>{item.value}회</Count>
           </InfoCard>
