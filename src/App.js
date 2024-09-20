@@ -36,12 +36,19 @@ import ChangeNickname from "./pages/menu/ChangeNickname";
 import AllergyFoods from "./pages/menu/AllergyFoods";
 import AllergyFoodsAdd from "./pages/menu/AllergyFoodsAdd";
 import AllergyFoodsDelete from "./pages/menu/AllergyFoodsDelete";
+
+import RecipeStatistics from "./pages/menu/RecipeStatistics";
+
  
+// Global Styles
+import GlobalStyle from './GlobalStyle'; // 글로벌 스타일 불러오기
+
 const queryClient = new QueryClient();
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
+      <GlobalStyle /> {/* 글로벌 스타일 적용 */}
       <Router>
           <Routes>
             <Route path="/" element={<Layout />}>
@@ -69,6 +76,9 @@ function App() {
               <Route path="/menu/allergy-foods" element={<AllergyFoods/>} /> 
               <Route path="/menu/allergy-foods/add" element={<AllergyFoodsAdd/>} /> 
               <Route path="/menu/allergy-foods/delete" element={<AllergyFoodsDelete/>} /> 
+
+              <Route path="/menu/statistics/2" element={<RecipeStatistics />} />
+
             </Route>
           </Routes>
       </Router>
