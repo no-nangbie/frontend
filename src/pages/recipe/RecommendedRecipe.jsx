@@ -19,11 +19,73 @@ function Recipe() {
   const [page, setPage] = useState(1); // 현재 페이지
   const [hasMore, setHasMore] = useState(true); // 더 많은 데이터가 있는지 여부
   const [isModalOpen, setIsModalOpen] = useState(true); // 처음에 모달이 열려 있도록 설정
+  const [isSecondModalOpen, setIsSecondModalOpen] = useState(false); // 두번째 모달
+  const [recentFoods, setRecentFoods] = useState(Array(3).fill("")); // 최근 먹었던 음식 리스트
+  const [fetchData, setFetchData] = useState(null);
 
-  const Modal = ({ onClose }) => {
+ // 데이터를 가져오는 함수 정의
+ const fetchStatistics = async () => {
+  const response = await axios.get(`${process.env.REACT_APP_API_URL}statistics`, {
+    params: { page: 'recipe' },
+    headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+  });
+  return response.data.data; // 데이터를 반환
+};
+
+useEffect(() => {
+  const getData = async () => {
+    const data = await fetchStatistics();
+    setFetchData(data); // fetchData 상태에 저장
+  };
+  getData();
+}, []);
+
+
+const ChangeTextToKorean = (e) => {
+  switch(e){
+    case "menuCategorySide":
+      return "밑 반찬"
+    case "menuCategorySoup":
+      return "국/찌개"
+    case "menuCategoryDessert":
+      return "디저트"
+    case "menuCategoryNoodle":
+      return "면"
+    case "menuCategoryRice":
+      return "밥/죽/떡"
+    case "menuCategoryKimchi":
+      return "김치"
+    case "menuCategoryFusion":
+      return "퓨전"
+    case "menuCategorySeasoning":
+      return "양념"
+    case "menuCategoryWestern":
+      return "양식"
+    case "menuCategoryEtc":
+      return "기타"
+    default:
+      return e;
+  }
+}
+
+// API 응답 데이터 중 "menuCategory..." 필드만 추출하여 파이 차트 데이터로 변환
+const menuCategoryData = fetchData
+  ? Object.entries(fetchData)
+      .filter(([key, value]) => key.startsWith('menuCategory') && value > 0)
+      .map(([key, value]) => {
+        const name = ChangeTextToKorean(key);
+        return { name, value };
+      })
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 3) // 상위 3개 카테고리
+  : []; // fetchData가 없을 경우 빈 배열 반환
+
+
+
+  const Modal = ({ onClose, isSecondModal }) => {
     const [inputValues, setInputValues] = useState(Array(3).fill("")); // 3개의 입력값 상태 관리
     const [radioValues, setRadioValues] = useState(Array(3).fill("포함")); // 3개의 라디오 버튼 상태 관리
-  
+
     const handleInputChange = (index, value) => {
       const newInputValues = [...inputValues];
       newInputValues[index] = value;
@@ -35,10 +97,23 @@ function Recipe() {
       newRadioValues[index] = value;
       setRadioValues(newRadioValues);
     };
-  
+    
+    const handleConfirm = () => {
+      if (isSecondModal) {
+        // 두 번째 모달의 확인 버튼 클릭 시 로직 추가
+        onClose();
+      } else {
+        setRecentFoods(inputValues); // 입력된 값을 recentFoods에 저장
+        setIsModalOpen(false);
+        setIsSecondModalOpen(true);
+      }
+    };
+
     return (
       <ModalOverlay>
         <ModalContent>
+           {!isSecondModal ? (
+            <>
           <ModalText>
             최근 먹었던 음식을 입력해주세요
           </ModalText>
@@ -81,8 +156,49 @@ function Recipe() {
               </RadioContainer>
             </InputContainer>
           ))}
+          </>
+          ) : (
+            <>
+         <ModalText>
+            자주 요리하는 레시피 카테고리입니다. 
+          </ModalText>
+            <ModalText2>
+            (미포함을 선택할 시 추천에서 제외됩니다.)
+          </ModalText2>
+          {menuCategoryData.map((item, index) => (
+            <InputContainer key={index}>
+              <span2 style={{ height: '40px' }}>{item.name}</span2>
+              <RadioContainer>
+                <div>
+                  <input
+                    type="checkbox"
+                    checked={radioValues[index] === "포함"}
+                    onChange={() => handleRadioChange(index, "포함")}
+                    id={`second-switch-include-${index}`}
+                  />
+                  <label className="switch" htmlFor={`second-switch-include-${index}`}>
+                    <span className="slider"></span>
+                  </label>
+                  <span>포함</span>
+
+                  <input
+                    type="checkbox"
+                    checked={radioValues[index] === "미포함"}
+                    onChange={() => handleRadioChange(index, "미포함")}
+                    id={`second-switch-exclude-${index}`}
+                  />
+                  <label className="switch" htmlFor={`second-switch-exclude-${index}`}>
+                    <span className="slider"></span>
+                  </label>
+                  <span>미포함</span>
+                </div>
+              </RadioContainer>
+            </InputContainer>
+          ))}
+        </>
+      )}
           <ModalButtonContainer>
-            <ModalButton>확인</ModalButton>
+            <ModalButton onClick={handleConfirm}>확인</ModalButton>
             <ModalButton onClick={onClose}>취소</ModalButton>
           </ModalButtonContainer>
         </ModalContent>
@@ -90,13 +206,17 @@ function Recipe() {
     );
   };
   
-  const handleClick = (menuId) => {
-    navigate(`details/${menuId}`); // 페이지 이동 처리
-  };
-
-  const handleCloseModal = () => {
+  const handleCloseFirstModal = () => {
     setIsModalOpen(false);
   };
+
+  const handleCloseSecondModal = () => {
+    setIsSecondModalOpen(false);
+  };
+
+  const handleClick = (menuId) => {
+    navigate(`/recipe/details/${menuId}`); 
+};
 
   const fetchRecipes = async (pageNumber, reset = false) => {
     if (reset) {
@@ -300,7 +420,8 @@ const handleFoodCategoryChange = (e) => {
 
 return (
   <MainContainer>
-    {isModalOpen && <Modal onClose={handleCloseModal} />}
+     {isModalOpen && <Modal onClose={handleCloseFirstModal} isSecondModal={false} />}
+     {isSecondModalOpen && <Modal onClose={handleCloseSecondModal} isSecondModal={true} />}
     <Header>
       <InputGroup>
         <Label>메인 식재료</Label>
@@ -634,6 +755,20 @@ const InputContainer = styled.div`
     border: 1px solid #ccc; // 경계선 추가
     border-radius: 5px; // 둥근 모서리
     padding: 5px; // 내부 여백 추가
+  }
+    span2 {
+    display: block; // 블록 요소로 변경
+    background-color: #f5f5f5; // 배경색 지정
+    border: 1px solid #ccc; // 경계선 추가
+    border-radius: 5px; // 둥근 모서리
+    padding: 5px; // 내부 여백 추가
+    width: 177px; // 너비를 고정
+    height: 40px; // 높이 설정
+    line-height: 40px; // 수직 중앙 정렬 (높이에 맞춰 조정)
+    font-weight: bold; // 굵은 글씨
+    font-size: 15px; // 굵은 글씨
+    text-align: center; // 텍스트 중앙 정렬
+   
   }
 `;
 
