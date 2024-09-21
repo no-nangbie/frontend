@@ -15,7 +15,7 @@ function Signup() {
 
   const requestAuthCode = async () => {
     try {
-      await axios.post(process.env.REACT_APP_API_URL+ 'auth-code', { email });
+      await axios.post('http://localhost:8080/auth-code', { email }, { timeout: 5000 });
       alert('인증 코드가 이메일로 전송되었습니다.');
     } catch (error) {
       setErrorMessage('인증 코드 요청 실패: 이메일을 확인해주세요.');

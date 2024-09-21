@@ -1,52 +1,105 @@
+// FridgeStatistics.js
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { useQuery, QueryClient, QueryClientProvider } from 'react-query';
 import styled from 'styled-components';
-import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
+import NumberCounter from '../../component/NumberCounter'; // NumberCounter 컴포넌트 임포트
+
+const queryClient = new QueryClient();
 
 const FridgeStatistics = () => {
-  const score = 100; // 점수 값 (0 ~ 100)
+  const navigate = useNavigate();
+  const { data, isLoading, isError, error } = useQuery('fridgeStatistics', fetchStatistics, {
+    staleTime: 0,
+    cacheTime: 300000,
+    refetchOnWindowFocus: false,
+    refetchOnMount: true,
+    refetchOnReconnect: false,
+  });
+
+  const [animatedScore, setAnimatedScore] = useState(0);
+
+  useEffect(() => {
+    if (data && typeof data.foodManagerScore === 'number') {
+      let start = 0;
+      const end = data.foodManagerScore;
+      const duration = 1000;
+      const startTime = performance.now();
+
+      const animate = (currentTime) => {
+        const elapsed = currentTime - startTime;
+        if (elapsed < duration) {
+          const progress = elapsed / duration;
+          const currentScore = Math.round(progress * end);
+          setAnimatedScore(currentScore);
+          requestAnimationFrame(animate);
+        } else {
+          setAnimatedScore(end);
+        }
+      };
+
+      requestAnimationFrame(animate);
+    }
+  }, [data]);
+
+  if (isLoading) {
+    return <Loading>로딩 중...</Loading>;
+  }
+
+  if (isError) {
+    return <Error>에러 발생: {error.message}</Error>;
+  }
+
+  const score = data.foodManagerScore;
+  const expiredItems = data.expireFoodCount;
+  const inputItems = data.inputFoodCount;
+  const outputItems = data.outputFoodCount;
 
   const radius = 90;
   const strokeWidth = 20;
   const centerX = 100;
   const centerY = 120;
 
-  // 아치형 경로 생성 (각도를 조절하여 아치를 더 아래로 확장)
   const pathData = getArcPath(centerX, centerY, radius);
+  const totalLength = calculateArcLength(radius, -220, 40);
+  const offset = totalLength * (1 - animatedScore / 100);
 
-  // 경로의 전체 길이
-  const totalLength = calculateArcLength(radius, -230, 40);
-
-  // 점수에 따른 strokeDashoffset 계산
-  const offset = totalLength * (1 - score / 100);
+  // 계산된 값들
+  const adjustedInputItems = inputItems * 0.25 > 20 ? 20 : Math.floor(inputItems * 0.25);
+  const adjustedOutputItems = outputItems > 80 ? 80 : outputItems;
+  const adjustedExpiredItems = expiredItems > 0 ? Math.round((expiredItems / outputItems) * adjustedOutputItems) : 0;
 
   return (
     <MainContainer>
-      {/* Search Section */}
       <Header>
         <ActionButtons>
-          <ActionButton isFirst>냉장고 통계</ActionButton>
-          <ActionButton>요리 통계</ActionButton>
+          <ActionButton isFirst onClick={() => navigate('/menu/statistics/1')}>
+            냉장고 통계
+          </ActionButton>
+          <ActionButton onClick={() => navigate('/menu/statistics/2')}>
+            요리 통계
+          </ActionButton>
         </ActionButtons>
       </Header>
 
-      {/* Score Section */}
       <ScoreContainer>
         <div style={{ position: 'relative' }}>
           <CircularProgressBar width={200} height={200} viewBox="0 0 200 200">
             <defs>
-              <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <linearGradient id="gradient" x1="0%" y1="0%" x2="100%">
                 <stop offset="0%" stopColor="#00b4db" />
                 <stop offset="100%" stopColor="#8a2be2" />
               </linearGradient>
             </defs>
-            {/* 배경 아치 */}
             <path
               d={pathData}
               stroke="#e6e6e6"
               strokeWidth={strokeWidth}
               fill="none"
             />
-            {/* 프로그레스 바 */}
-            <path
+            <AnimatedPath
               d={pathData}
               stroke="url(#gradient)"
               strokeWidth={strokeWidth}
@@ -54,7 +107,6 @@ const FridgeStatistics = () => {
               fill="none"
               strokeDasharray={totalLength}
               strokeDashoffset={offset}
-              style={{ transition: 'stroke-dashoffset 0.6s ease' }}
             />
           </CircularProgressBar>
           <div
@@ -66,7 +118,7 @@ const FridgeStatistics = () => {
               textAlign: 'center',
             }}
           >
-            <ScoreText>{score}점</ScoreText>
+            <ScoreText>{animatedScore}점</ScoreText>
             <ScoreLabel>관리점수</ScoreLabel>
           </div>
         </div>
@@ -74,42 +126,43 @@ const FridgeStatistics = () => {
 
       {/* Category Section */}
       <CategoryGrid>
-        <CategoryItem>
-          거처간 식료품
-          <SmallText>12개</SmallText>
-        </CategoryItem>
-        <CategoryItem>
-          만료된 식료품
-          <SmallText>5개</SmallText>
-        </CategoryItem>
-        <CategoryItem />
-        <CategoryItem />
+        <SectionTitle>통계</SectionTitle>
+        <Dividers />
+        <AdditionalInfo>
+          <LeftLabel>추가된 총 식료품 개수</LeftLabel>
+          <CenterCount><NumberCounter end={inputItems} suffix="개" /></CenterCount>
+          <RightLabel>+ <NumberCounter end={adjustedInputItems}/></RightLabel>
+        </AdditionalInfo>
+        <AdditionalInfo>
+          <LeftLabel>사용된 총 식료품 개수</LeftLabel>
+          <CenterCount><NumberCounter end={outputItems} suffix="개" /></CenterCount>
+          <RightLabel>+ <NumberCounter end={adjustedOutputItems}/></RightLabel>
+        </AdditionalInfo>
+        <AdditionalInfo>
+          <LeftLabel color="red">만료된 총 식료품 개수</LeftLabel>
+          <CenterCount color="red"><NumberCounter end={expiredItems} suffix="개" /></CenterCount>
+          <RightLabel color="red">
+            - <NumberCounter end={adjustedExpiredItems} />
+          </RightLabel>
+        </AdditionalInfo>
       </CategoryGrid>
     </MainContainer>
   );
 };
 
-export default FridgeStatistics;
-
 // 아치형 경로 생성 함수 (각도를 조절)
 const getArcPath = (cx, cy, r) => {
-  // 시작 각도와 종료 각도 (단위: 도)
   const startAngle = -220;
   const endAngle = 40;
 
-  // 각도를 라디안으로 변환
   const start = (Math.PI / 180) * startAngle;
   const end = (Math.PI / 180) * endAngle;
 
-  // 시작점 계산
   const x1 = cx + r * Math.cos(start);
   const y1 = cy + r * Math.sin(start);
-
-  // 종료점 계산
   const x2 = cx + r * Math.cos(end);
   const y2 = cy + r * Math.sin(end);
 
-  // 큰 호(large-arc-flag)와 방향(sweep-flag) 설정
   const largeArcFlag = endAngle - startAngle <= 180 ? '0' : '1';
   const sweepFlag = '1';
 
@@ -122,51 +175,79 @@ const calculateArcLength = (r, startAngle, endAngle) => {
   return r * angle;
 };
 
+// 데이터를 가져오는 함수
+const fetchStatistics = async () => {
+  const response = await axios.get(`${process.env.REACT_APP_API_URL}statistics`, {
+    params: { page: 'fridge' },
+    headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+  });
+  return response.data.data;
+};
+
+// React Query 클라이언트 프로바이더로 감싸기
+const App = () => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <FridgeStatistics />
+    </QueryClientProvider>
+  );
+};
+
+export default App;
+
 // Styled Components
-const ActionButtons = styled.div`
+const MainContainer = styled.div`
+  background-color: #f5f5f5;
   display: flex;
-  justify-content: space-between;
-  width: 105%; /* Increase width to fit larger buttons */
-  max-width: 600px; /* Optional: Set a max width */
-`;
-
-const ActionButton = styled.button`
-  background-color: #ffffff;
-  color: black;
-  border: 2px solid #2D9CDB;
-  border-radius: ${props => props.isFirst ? '20px 0 0 20px' : '0 20px 20px 0'};
-  padding: 10px 40px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  width: 320px; /* 버튼의 너비를 고정 */
-  height: 50px;
-  font-size: 16px;
-  text-align: center;
-  overflow: hidden;
-  font-weight: bold;
-  white-space: nowrap; /* 텍스트가 줄 바꿈되지 않도록 설정 */
-  padding-left: 15px; /* 왼쪽 여백을 추가하여 텍스트가 더 많이 보이도록 설정 */
-
-  /* Hover effect */
-  &:hover {
-    background-color: #e7f1ff;
-  }
-
-  /* Remove margin between buttons */
-  &:not(:last-child) {
-    margin-right: 0;
-  }
-`;
-const Header = styled.header`
-  background-color: #D9D9D9;
-  padding: 20px; /* 패딩을 늘려서 길이를 확장 */
+  flex-direction: column;
+  align-items: center;
   width: 100%;
-  height: 100px; /* 원하는 높이로 설정 */
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+`;
+
+const Header = styled.header`
+  background-color: #d9d9d9;
+  padding: 20px;
+  width: 100%;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: center;
   border-radius: 0 0 15px 15px;
+`;
+
+const ActionButtons = styled.div`
+  display: flex;
+  justify-content: space-between;
+  width: 105%;
+  max-width: 600px;
+`;
+
+const ActionButton = styled.button`
+  background-color: #ffffff;
+  color: black;
+  border: 2px solid #2d9cdb;
+  border-radius: ${(props) => (props.isFirst ? '20px 0 0 20px' : '0 20px 20px 0')};
+  padding: 10px 40px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  width: 320px;
+  height: 50px;
+  font-size: 16px;
+  text-align: center;
+  overflow: hidden;
+  font-weight: bold;
+  white-space: nowrap;
+
+  &:hover {
+    background-color: #e7f1ff;
+  }
+
+  &:not(:last-child) {
+    margin-right: 0;
+  }
 `;
 
 const ScoreContainer = styled.div`
@@ -177,40 +258,13 @@ const ScoreContainer = styled.div`
   margin-bottom: 20px;
 `;
 
-const CategoryGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
-  margin-top: 20px;
-`;
-
-const CategoryItem = styled.div`
-  border: 2px solid #00a3ff;
-  border-radius: 10px;
-  padding: 20px;
-  text-align: center;
-  color: #00a3ff;
-  font-size: 18px;
-`;
-
-const SmallText = styled.div`
-  font-size: 12px;
-  color: #00a3ff;
-  margin-top: 10px;
-`;
-
-const MainContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  height: 100vh;
-  background-color: #f4f4f4;
-`;
-
 const CircularProgressBar = styled.svg`
-  width: 200px;
-  height: 200px;
+  width: 250px;
+  height: 250px;
+`;
+
+const AnimatedPath = styled.path`
+  transition: stroke-dashoffset 1s ease;
 `;
 
 const ScoreText = styled.div`
@@ -223,4 +277,75 @@ const ScoreText = styled.div`
 const ScoreLabel = styled.div`
   font-size: 18px;
   color: #666;
+`;
+
+const CategoryGrid = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 90%;
+`;
+
+const SectionTitle = styled.h3`
+  text-align: left;
+  color: #2d9cdb;
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 0px;
+  margin-left: -10px;
+`;
+
+const Dividers = styled.div`
+  border: 0;
+  height: 2px;
+  background-color: #2d9cdb;
+  margin-left: -30px;
+  margin-top: -10px;
+  margin-bottom: 10px;
+`;
+
+const AdditionalInfo = styled.div`
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr; /* 첫 번째 열을 두 배 넓게 설정 */
+  align-items: center;
+  width: 100%;
+  margin-bottom: 10px;
+  gap: 10px; /* 요소 간 간격 조정 */
+`;
+
+const LeftLabel = styled.div`
+  font-weight: bold;
+  text-align: left;
+  font-size: 16px;
+  color: ${(props) => props.color || '#00a3ff'};
+`;
+
+const CenterCount = styled.div`
+  font-weight: bold;
+  text-align: center;
+  font-size: 16px;
+  color: ${(props) => props.color || '#00a3ff'};
+`;
+
+const RightLabel = styled.div`
+  font-weight: bold;
+  text-align: right;
+  font-size: 16px;
+  color: ${(props) => props.color || '#00a3ff'};
+`;
+
+// 로딩 및 에러 상태 스타일링
+const Loading = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 18px;
+`;
+
+const Error = styled.div`
+  color: red;
+  font-size: 18px;
+  text-align: center;
+  margin-top: 20px;
 `;

@@ -18,9 +18,84 @@ function Recipe() {
   const [isSearching, setIsSearching] = useState(false);
   const [page, setPage] = useState(1); // 현재 페이지
   const [hasMore, setHasMore] = useState(true); // 더 많은 데이터가 있는지 여부
+  const [isModalOpen, setIsModalOpen] = useState(true); // 처음에 모달이 열려 있도록 설정
 
+  const Modal = ({ onClose }) => {
+    const [inputValues, setInputValues] = useState(Array(3).fill("")); // 3개의 입력값 상태 관리
+    const [radioValues, setRadioValues] = useState(Array(3).fill("포함")); // 3개의 라디오 버튼 상태 관리
+  
+    const handleInputChange = (index, value) => {
+      const newInputValues = [...inputValues];
+      newInputValues[index] = value;
+      setInputValues(newInputValues);
+    };
+  
+    const handleRadioChange = (index, value) => {
+      const newRadioValues = [...radioValues];
+      newRadioValues[index] = value;
+      setRadioValues(newRadioValues);
+    };
+  
+    return (
+      <ModalOverlay>
+        <ModalContent>
+          <ModalText>
+            최근 먹었던 음식을 입력해주세요
+          </ModalText>
+          <ModalText2>
+            (미포함을 선택할 시 추천에서 제외됩니다.)
+          </ModalText2>
+          {inputValues.map((inputValue, index) => (
+            <InputContainer key={index}>
+              <input
+                type="text"
+                placeholder={`음식 이름 ${index + 1}`}
+                value={inputValue}
+                onChange={(e) => handleInputChange(index, e.target.value)}
+                style={{ height: '40px' }} // 높이 조정
+              />
+              <RadioContainer>
+              <div>
+                <input
+                    type="checkbox"
+                    checked={radioValues[index] === "포함"}
+                    onChange={() => handleRadioChange(index, "포함")}
+                    id={`switch-include-${index}`}
+                />
+                <label className="switch" htmlFor={`switch-include-${index}`}>
+                    <span className="slider"></span>
+                </label>
+                <span>포함</span>
+
+                <input
+                    type="checkbox"
+                    checked={radioValues[index] === "미포함"}
+                    onChange={() => handleRadioChange(index, "미포함")}
+                    id={`switch-exclude-${index}`}
+                />
+                <label className="switch" htmlFor={`switch-exclude-${index}`}>
+                    <span className="slider"></span>
+                </label>
+                <span>미포함</span>
+                </div>
+              </RadioContainer>
+            </InputContainer>
+          ))}
+          <ModalButtonContainer>
+            <ModalButton>확인</ModalButton>
+            <ModalButton onClick={onClose}>취소</ModalButton>
+          </ModalButtonContainer>
+        </ModalContent>
+      </ModalOverlay>
+    );
+  };
+  
   const handleClick = (menuId) => {
     navigate(`details/${menuId}`); // 페이지 이동 처리
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
   };
 
   const fetchRecipes = async (pageNumber, reset = false) => {
@@ -225,6 +300,7 @@ const handleFoodCategoryChange = (e) => {
 
 return (
   <MainContainer>
+    {isModalOpen && <Modal onClose={handleCloseModal} />}
     <Header>
       <InputGroup>
         <Label>메인 식재료</Label>
@@ -488,4 +564,82 @@ const Label2 = styled.div`
   line-height: 30px; 
   border-right: 2px solid #2D9CDB;
   border-radius: 20px 0 0 20px;
+`;
+
+// 모달 스타일
+const ModalOverlay = styled.div`
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+`;
+
+const ModalContent = styled.div`
+    background: #fff;
+    border-radius: 10px;
+    padding: 10px; /* 패딩을 늘려서 내부 공간을 키움 */
+    width: 350px; /* 너비를 설정 */
+    height: 430px; /* 높이를 설정 (필요에 따라 조정) */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    text-align: center;
+`;
+
+const ModalText = styled.p`
+    font-size: 20px;
+    color: black;
+    margin-bottom: 5px;
+    margin-top: 30px;
+`;
+
+const ModalText2 = styled.p`
+    font-size: 15px;
+    color: black;
+    margin-bottom: 35px;
+     margin-top: 5px;
+`;
+
+const ModalButtonContainer = styled.div`
+    display: flex;
+    justify-content: center;
+    gap: 20px; // 버튼 간격을 늘립니다.
+    margin-top: 35px; // 버튼 위쪽 간격 추가
+`;
+
+const ModalButton = styled.button`
+    background-color: #2d9cdb;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 15px 30px; // 버튼의 세로 크기를 늘립니다.
+    cursor: pointer;
+
+    &:hover {
+        background-color: #1a7ab8;
+    }
+`;
+
+
+const InputContainer = styled.div`
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px; // 각 입력란 사이 간격
+  margin-left: 20px;
+  input {
+    background-color: #f5f5f5; // 입력란 배경색 지정
+    border: 1px solid #ccc; // 경계선 추가
+    border-radius: 5px; // 둥근 모서리
+    padding: 5px; // 내부 여백 추가
+  }
+`;
+
+
+const RadioContainer = styled.div`
+  display: flex;
+  align-items: center;
+  margin-left: 10px; // 라디오 버튼과 입력란 사이 간격
 `;
