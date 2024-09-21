@@ -143,21 +143,27 @@ const RecipeSteps = () => {
 
   // 마이크 상태를 토글하여 음성 인식 시작/종료 제어
   const toggleMic = () => {
-    console.log('Mic active before toggle:', micActive);
-
-    if (!micActive && recognition) {
-      recognition.start(); // 마이크 활성화 시 음성 인식 시작
-      console.log('음성 인식 시작됨');
-    } else if (micActive && recognition) {
-      recognition.stop(); // 마이크 비활성화 시 음성 인식 종료
-      console.log('음성 인식 강제 종료됨');
-    }
-
-    setMicActive((prevState) => {
-      console.log('Toggling mic active:', !prevState); // 상태가 변경되는 부분 확인
-      return !prevState;
+    // 마이크 권한 확인
+    navigator.permissions.query({ name: 'microphone' }).then(function(permissionStatus) {
+      if (permissionStatus.state === 'denied') {
+        console.log('마이크 사용이 차단되었습니다.');
+        return;  // 권한이 없으면 마이크 시작을 하지 않음
+      } else {
+        console.log('마이크 사용이 허용되었습니다.');
+        // 기존 toggleMic 로직
+        if (!micActive && recognition) {
+          recognition.start();  // 마이크 활성화 시 음성 인식 시작
+          console.log('음성 인식 시작됨');
+        } else if (micActive && recognition) {
+          recognition.stop();  // 마이크 비활성화 시 음성 인식 종료
+          console.log('음성 인식 강제 종료됨');
+        }
+  
+        setMicActive((prevState) => !prevState);
+      }
     });
   };
+  
 
   const handleIngredientCheck = (ingredientName) => {
     setSelectedIngredients((prevSelected) =>
