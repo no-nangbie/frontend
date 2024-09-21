@@ -30,20 +30,7 @@ function Recipe() {
     
     setLoading(true);
     try {
-      // const params = { page: pageNumber, size: 20, sort: sortOption === "likeList" ? "missingFoodsCount_asc" : sortOption };
-      // const response = menuCategory === "전체"
-      //   ? await axios.get(process.env.REACT_APP_API_URL + 'menus/test', {
-      //       params,
-      //       headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
-      //     })
-      //   : await axios.get(process.env.REACT_APP_API_URL + 'menus', {
-      //       params: { ...params, menuCategory: handleGetMenuCategory(menuCategory) },
-      //       headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
-      //     });
-
-      
-      console.warn("test:");
-      const params = { page: pageNumber, size: 700, sort: sortOption, keyword: searchKeyword.trim(),
+      const params = { page: pageNumber, size: 20, sort: sortOption, keyword: searchKeyword.trim(),
                        foodName: selectedFoodCategory, menuCategory:handleGetMenuCategory(menuCategory)  }; // keyword 추가
       const response = await axios.get(process.env.REACT_APP_API_URL + 'menus/test', {
             params: { ...params},
@@ -55,32 +42,6 @@ function Recipe() {
       if (sortOption === "likeList") {
         menuList = menuList.filter(menu => menu.likeCheck === "T");
       }
-  
-     // 메인 식재료를 기반으로 필터링 추가
-    // const filteredMenuList = selectedFoodCategory !== "전체" && selectedFoodCategory.length > 0
-    //   ? menuList.filter(menu => {
-    //       console.log("menu.foodMenuQuantityList 확인:", menu.foodMenuQuantityList); // 여기서 값 확인
-    //       return menu.foodMenuQuantityList.some(food => food.foodId === parseInt(selectedFoodCategory));
-    //     })
-    //   : menuList;
-
-     console.warn("메인식재료 확인: ", selectedFoodCategory);
-    //  console.warn("filteredMenuList 확인 :", filteredMenuList);
-
-     console.warn("menuList 확인 : ", menuList);
-
-
-
-      // missingFoodsCount 또는 menuLikeCount 정렬 적용
-      // if (sortOption === "menuLikeCount_desc") {
-      //   filteredMenuList.sort((a, b) => b.menuLikeCount - a.menuLikeCount);
-      // } else if (sortOption === "menuLikeCount_asc") {
-      //   filteredMenuList.sort((a, b) => a.menuLikeCount - b.menuLikeCount);
-      // } else if (sortOption === "missingFoodsCount_desc") {
-      //   filteredMenuList.sort((a, b) => b.missingFoodsCount - a.missingFoodsCount);
-      // } else if (sortOption === "missingFoodsCount_asc") {
-      //   filteredMenuList.sort((a, b) => a.missingFoodsCount - b.missingFoodsCount);
-      // }
   
        setRecipes(prevRecipes => {
       const uniqueRecipes = [...prevRecipes, ...menuList].reduce((acc, curr) => {
@@ -137,7 +98,6 @@ const handleFoodCategoryChange = (e) => {
   const searchMenu = async (pageNumber) => {
     setLoading(true);
     try {
-      console.warn("test:");
       const params = { page: pageNumber, size: 700, sort: sortOption, keyword: searchKeyword.trim(), foodName:"" , menuCategory:handleGetMenuCategory(menuCategory)  }; // keyword 추가
       const response = await axios.get(process.env.REACT_APP_API_URL + 'menus/test', {
             params: { ...params},
