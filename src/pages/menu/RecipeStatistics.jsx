@@ -1,5 +1,5 @@
 // RecipeStatistics.js
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 import axios from 'axios';
@@ -27,13 +27,21 @@ const fetchStatistics = async () => {
 
 const RecipeStatistics = () => {
   const navigate = useNavigate();
+  const [chartKey, setChartKey] = useState(0); // 애니메이션 트리거를 위한 키 상태
+
   // 서버에서 받아온 데이터를 fetchData로 설정
-  const { data: fetchData, isLoading, isError, error } = useQuery(
+  const { data: fetchData, isLoading, isError, error, refetch } = useQuery(
     'statistics',
     fetchStatistics,
     {
-      staleTime: Infinity, // 데이터가 변경되지 않는다고 가정
-      cacheTime: Infinity, // 캐시 유지 시간 설정
+      staleTime: 0, // 데이터가 즉시 오래된 것으로 간주되어 매번 refetch
+      cacheTime: 5 * 60 * 1000, // 캐시 유지 시간을 5분으로 설정
+      refetchOnMount: true, // 컴포넌트 마운트 시마다 refetch
+      refetchOnWindowFocus: true, // 창 포커스 시 refetch
+      onSuccess: () => {
+        // 데이터가 성공적으로 fetch되면 chartKey를 업데이트하여 PieChart 재마운트
+        setChartKey(prevKey => prevKey + 1);
+      }
     }
   );
 
@@ -42,7 +50,7 @@ const RecipeStatistics = () => {
   }
 
   if (isError) {
-    return <Error>에러 발생: {error.message}</Error>;
+    return <Error>에러 발생: {error.response?.data?.message || error.message}</Error>;
   }
 
   const ChangeTextToKorean = (e) => {
@@ -143,7 +151,8 @@ const RecipeStatistics = () => {
 
       <ChartContainer>
         <ResponsiveContainer width="100%" height={300}>
-          <PieChart>
+          {/* chartKey를 key로 전달하여 PieChart 재마운트 */}
+          <PieChart key={chartKey}>
             <Tooltip />
             <Pie
               data={menuCategoryData} // 전체 데이터를 파이 차트에 사용
@@ -153,6 +162,8 @@ const RecipeStatistics = () => {
               outerRadius={140} // outerRadius 증가
               paddingAngle={5}
               dataKey="value"
+              isAnimationActive={true} // 애니메이션 활성화
+              animationDuration={1500} // 애니메이션 지속 시간 설정 (기본값 1500ms)
             >
               {menuCategoryData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
