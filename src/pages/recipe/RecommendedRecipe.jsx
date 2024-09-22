@@ -22,7 +22,7 @@ function Recipe() {
   const [isSecondModalOpen, setIsSecondModalOpen] = useState(false); // 두번째 모달
   const [recentFoods, setRecentFoods] = useState(Array(3).fill("")); // 최근 먹었던 음식 리스트
   const [fetchData, setFetchData] = useState(null);
-  const [menuCategories, setMenuCategories] =  useState(Array(3).fill("")); // 자주 요리하는 음식 카테고리
+  const [menuCategories, setMenuCategories] =  useState(""); // 자주 요리하는 음식 카테고리
 
  // 데이터를 가져오는 함수 정의
  const fetchStatistics = async () => {
@@ -104,22 +104,60 @@ const menuCategoryData = fetchData
         // 두 번째 모달의 확인 버튼 클릭 시 로직 추가
         const excludedCategories = menuCategoryData.filter((_, index) => radioValues[index] === "미포함")
           .map(item => item.name); // 체크된 카테고리 이름 가져오기
+
+          const excludedCategoriesEnglish = excludedCategories.map(category => {
+            switch (category) {
+              case "밑 반찬":
+                return "menuCategorySide";
+              case "국/찌개":
+                return "menuCategorySoup";
+              case "디저트":
+                return "menuCategoryDessert";
+              case "면":
+                return "menuCategoryNoodle";
+              case "밥/죽/떡":
+                return "menuCategoryRice";
+              case "김치":
+                return "menuCategoryKimchi";
+              case "퓨전":
+                return "menuCategoryFusion";
+              case "양념":
+                return "menuCategorySeasoning";
+              case "양식":
+                return "menuCategoryWestern";
+              case "기타":
+                return "menuCategoryEtc";
+              default:
+                return category;
+            }
+          });
+
+         // excludedCategoriesEnglish가 2개 이상일 때 -로 연결
+         const formattedExcludedCategories = excludedCategoriesEnglish.length > 1 
+         ? excludedCategoriesEnglish.join('-') 
+         : excludedCategoriesEnglish[0]; 
   
-        // setMenuCategories에 미포함 카테고리 저장
-        setMenuCategories(excludedCategories);
+         // setMenuCategories에 미포함 카테고리 저장
+         setMenuCategories(formattedExcludedCategories);
+         fetchRecipes(1);
+
   
         // 콘솔에 확인
-        console.log('Excluded Categories:', excludedCategories);
+    console.log('Excluded Categories:', formattedExcludedCategories);
   
         onClose();
       } else {
         // "미포함" 체크된 음식 이름만 필터링
         const excludedFoods = inputValues.filter((_, index) => radioValues[index] === "미포함");
+
+        // excludedFoods가 2개 이상일 때 단어 사이에 '-' 추가
+        const formattedExcludedFoods = excludedFoods.length > 1 ? excludedFoods.join('-') : excludedFoods;
   
         // recentFoods 상태에 저장
-        setRecentFoods(excludedFoods);
+        setRecentFoods(formattedExcludedFoods);
+        
 
-        console.log('Excluded excludedFoods:', excludedFoods);
+        console.log('Excluded Foods:', formattedExcludedFoods);
   
         // 모달 상태 업데이트
         setIsModalOpen(false);
@@ -243,18 +281,14 @@ const menuCategoryData = fetchData
     
     setLoading(true);
     try {
-      const params = { page: pageNumber, size: 20, sort: sortOption, keyword: searchKeyword.trim(),
-                       foodName: selectedFoodCategory, menuCategory:handleGetMenuCategory(menuCategory)  }; // keyword 추가
-      const response = await axios.get(process.env.REACT_APP_API_URL + 'menus/test', {
+      const params = { page: pageNumber, size: 20, ateMenus: recentFoods,
+                        menuCategories:menuCategories  }; // keyword 추가
+      const response = await axios.get(process.env.REACT_APP_API_URL + 'menus/recommendations', {
             params: { ...params},
             headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
           });    
   
       let menuList = response.data.data;
-  
-      if (sortOption === "likeList") {
-        menuList = menuList.filter(menu => menu.likeCheck === "T");
-      }
   
        setRecipes(prevRecipes => {
       const uniqueRecipes = [...prevRecipes, ...menuList].reduce((acc, curr) => {
