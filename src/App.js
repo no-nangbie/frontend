@@ -73,6 +73,7 @@ function App() {
               <Route path="/menu" element={<MyPage />} />
               <Route path="/menu/change-nickname" element={<ChangeNickname />} />
               <Route path="/menu/change-password" element={<ChangePassword />} />
+              <Route path="/menu/change-nickname" element={<ChangeNickname />} />
               <Route path="/menu/statistics/1" element={<FridgeStatistics />} />
               <Route path="/menu/allergy-foods" element={<AllergyFoods/>} /> 
               <Route path="/menu/allergy-foods/add" element={<AllergyFoodsAdd/>} /> 

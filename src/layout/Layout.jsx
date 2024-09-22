@@ -17,6 +17,7 @@ import fridge_on from '../resources/icon/fridge_on.png';
 import allergyPlus from '../resources/icon/allergy_plus.png';
 import allergyMinus from '../resources/icon/allergy_minus.png';
 import recommended from '../resources/icon/recommended.png';
+import axios from 'axios';
 
 
 function Layout() {
@@ -25,6 +26,7 @@ function Layout() {
   const [boardData, setBoardData] = useState('');
   const [adminCheck, setAdminCheck] = useState(false);
   const [actionType, setActionType] = useState('');
+  const [nickname, setNickname] = useState('');
   
   /**
    * 자식 컴포넌트로 부터 받아온 정보 저장 메서드
@@ -76,6 +78,32 @@ function Layout() {
    */
   const hideLayout = location.pathname === '/login' || location.pathname === '/signup';
 
+   // 유저 정보 가져오기
+    useEffect(() => {
+      const fetchProfile = async () => {
+          try {
+              const accessToken = localStorage.getItem('accessToken'); // accessToken을 여기서 가져옴
+  
+              if (!accessToken) {
+                  alert('로그인 상태가 아닙니다.');
+                  navigate('/login');
+                  return;
+              }
+  
+              const response = await axios.get(process.env.REACT_APP_API_URL + 'info', {
+                  headers: {
+                      Authorization: `Bearer ${accessToken}`,
+                  },
+              });
+              const data = response.data.data;
+              setNickname(data.nickname);
+          } catch (error) {
+              console.error('프로필 정보를 불러오는 중 오류가 발생했습니다:', error.message);
+          }
+      };
+      
+      fetchProfile();
+    }, [navigate]); 
   
   /**
    * layout 상단 제목 설정
@@ -90,7 +118,7 @@ function Layout() {
      else if (location.pathname.includes('/recipe/recommended-recipe'))
       return '나에게 추천 레시피';
     else if (location.pathname.includes('/fridge'))
-      return '나의 냉장고';
+      return `${nickname}의 냉장고`;
     else if (location.pathname.includes('/recipe'))
       return '레시피';
     else if (location.pathname.includes('/menu'))
