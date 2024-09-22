@@ -20,9 +20,13 @@ function Recipe() {
   const [hasMore, setHasMore] = useState(true); // 더 많은 데이터가 있는지 여부
   const [isModalOpen, setIsModalOpen] = useState(true); // 처음에 모달이 열려 있도록 설정
   const [isSecondModalOpen, setIsSecondModalOpen] = useState(false); // 두번째 모달
-  const [recentFoods, setRecentFoods] = useState(""); // 최근 먹었던 음식 리스트
+  const [recentFoods, setRecentFoods] = useState(''); // 최근 먹었던 음식 리스트
   const [fetchData, setFetchData] = useState(null);
   const [menuCategories, setMenuCategories] =  useState(""); // 자주 요리하는 음식 카테고리
+  const [isThirdModalOpen, setIsThirdModalOpen] = useState(false); // 세 번째 모달 상태 추가
+  const [menuCategoryData, setMenuCategoryData] = useState([]); 
+
+  
 
  // 데이터를 가져오는 함수 정의
  const fetchStatistics = async () => {
@@ -37,10 +41,6 @@ useEffect(() => {
   const getData = async () => {
     const data = await fetchStatistics();
     setFetchData(data); // fetchData 상태에 저장
-  };
-  getData();
-}, []);
-
 
 const ChangeTextToKorean = (e) => {
   switch(e){
@@ -69,21 +69,37 @@ const ChangeTextToKorean = (e) => {
   }
 }
 
-// API 응답 데이터 중 "menuCategory..." 필드만 추출하여 파이 차트 데이터로 변환
-const menuCategoryData = fetchData
-  ? Object.entries(fetchData)
-      .filter(([key, value]) => key.startsWith('menuCategory') && value > 0)
-      .map(([key, value]) => {
-        const name = ChangeTextToKorean(key);
-        return { name, value };
-      })
-      .sort((a, b) => b.value - a.value)
-      .slice(0, 3) // 상위 3개 카테고리
-  : []; // fetchData가 없을 경우 빈 배열 반환
+// menuCategoryData 정의
+const newMenuCategoryData = data
+      ? Object.entries(data)
+          .filter(([key, value]) => key.startsWith('menuCategory') && value > 0)
+          .map(([key, value]) => {
+            const name = ChangeTextToKorean(key);
+            return { name, value };
+          })
+          .sort((a, b) => b.value - a.value)
+          .slice(0, 3) // 상위 3개 카테고리
+      : []; // fetchData가 없을 경우 빈 배열 반환
+
+    setMenuCategoryData(newMenuCategoryData); // 상태 업데이트
+
+    // menuCategoryData의 길이에 따라 모달 상태 설정
+    if (newMenuCategoryData.length < 3) {
+      setIsThirdModalOpen(true); // 3개 미만일 경우 세 번째 모달 열기
+      setIsModalOpen(false);
+      setIsSecondModalOpen(false);
+    } else {
+      setIsModalOpen(true); // 3개 이상일 경우 첫 번째 모달 열기
+      setIsThirdModalOpen(false);
+    }
+  };
+  getData();
+}, []);
+  
 
 
 
-  const Modal = ({ onClose, isSecondModal }) => {
+  const Modal = ({ onClose, isSecondModal, isThirdModal}) => {
     const [inputValues, setInputValues] = useState(Array(3).fill("")); // 3개의 입력값 상태 관리
     const [radioValues, setRadioValues] = useState(Array(3).fill("포함")); // 3개의 라디오 버튼 상태 관리
 
@@ -105,7 +121,7 @@ const menuCategoryData = fetchData
         // 두 번째 모달일 때만 fetchRecipes 호출
         const excludedCategories = menuCategoryData.filter((_, index) => radioValues[index] === "미포함")
           .map(item => item.name); // 제외할 카테고리 이름 가져오기
-    
+
         const excludedCategoriesEnglish = excludedCategories.map(category => {
           switch (category) {
             case "밑 반찬":
@@ -126,30 +142,31 @@ const menuCategoryData = fetchData
         });
     
         const formattedExcludedCategories = excludedCategoriesEnglish.length > 1 
-          ? excludedCategoriesEnglish.join('-') 
-          : excludedCategoriesEnglish[0];
-    
-        setMenuCategories(formattedExcludedCategories);
-    
-        // 두 번째 모달 닫기
-        setIsSecondModalOpen(false);
-    
-        // 두 번째 모달 값까지 포함하여 fetchRecipes 호출
-        fetchRecipes(1);
-      } else {
-        // 첫 번째 모달에서는 fetch 호출하지 않음
-        const excludedFoods = inputValues.filter((_, index) => radioValues[index] === "미포함");
-    
-        const formattedExcludedFoods = excludedFoods.length > 0 ? excludedFoods.join('-') : '';
-    
-        // recentFoods 상태에 저장
-        setRecentFoods(formattedExcludedFoods);
-    
-        // 모달 상태 업데이트
-        setIsModalOpen(false);
-        setIsSecondModalOpen(true); // 두 번째 모달 열기
-      }
-    };
+      ? excludedCategoriesEnglish.join('-') 
+      : excludedCategoriesEnglish[0];
+
+    setMenuCategories(formattedExcludedCategories);
+
+    // 두 번째 모달 닫기
+    setIsSecondModalOpen(false);
+
+    // 두 번째 모달 값까지 포함하여 fetchRecipes 호출
+    fetchRecipes(1);
+  } else {
+    // 첫 번째 모달에서는 fetch 호출하지 않음
+    const excludedFoods = inputValues.filter((_, index) => radioValues[index] === "미포함");
+
+    const formattedExcludedFoods = excludedFoods.length > 0 ? excludedFoods.join('-') : '';
+
+    // recentFoods 상태에 저장
+    setRecentFoods(formattedExcludedFoods);
+    console.warn("test", recentFoods);
+
+    // 모달 상태 업데이트
+    setIsModalOpen(false);
+    setIsSecondModalOpen(true); // 두 번째 모달 열기
+  }
+};
     
     const handleCancel = () => {
       onClose();
@@ -159,7 +176,24 @@ const menuCategoryData = fetchData
     return (
       <ModalOverlay>
         <ModalContent>
-          {!isSecondModal ? (
+        {isThirdModal ? (
+          <>
+             <ModalText_>
+             통계 데이터 부족
+            </ModalText_>
+            <ModalText2>
+             <LineBreak1 />
+              다양한 레시피로 요리 완료 후 
+              <LineBreak />
+              마이페이지 → 통계에서 
+              <LineBreak />
+              가장 많이 요리한 카테고리가 
+              <LineBreak />
+              3개 이상일 때, 이용 가능합니다. 
+              </ModalText2>
+            {/* 세 번째 모달에 필요한 추가 입력이나 버튼 등을 추가 */}
+          </>
+        ) : !isSecondModal ? (
             <>
               <ModalText>
                 최근 먹었던 음식을 입력해주세요
@@ -245,8 +279,8 @@ const menuCategoryData = fetchData
             </>
           )}
           <ModalButtonContainer>
-            <ModalButton onClick={handleConfirm}>확인</ModalButton>
-            <ModalButton onClick={handleCancel}>취소</ModalButton>
+          {!isThirdModal && <ModalButton onClick={handleConfirm}>확인</ModalButton>}
+            <ModalButton onClick={handleCancel}>{isThirdModal ? "확인" : "취소"}</ModalButton>
           </ModalButtonContainer>
         </ModalContent>
       </ModalOverlay>
@@ -465,10 +499,22 @@ const handleFoodCategoryChange = (e) => {
     getFoodName();
   }, []);
 
+    // 모달을 열기 위한 함수 추가
+    const handleOpenThirdModal = () => {
+      setIsThirdModalOpen(true);
+    };
+
+    // 모달을 닫기 위한 함수 추가
+    const handleCloseThirdModal = () => {
+      setIsThirdModalOpen(false);
+    };
+
+
 return (
-  <MainContainer>
-     {isModalOpen && <Modal onClose={handleCloseFirstModal} isSecondModal={false} />}
-     {isSecondModalOpen && <Modal onClose={handleCloseSecondModal} isSecondModal={true} />}
+  <MainContainer>   
+    {isModalOpen && <Modal onClose={handleCloseFirstModal} isSecondModal={false} />}
+    {isSecondModalOpen && <Modal onClose={handleCloseSecondModal} isSecondModal={true} />}
+    {isThirdModalOpen && <Modal onClose={handleCloseThirdModal} isThirdModal={true} />}
     <Header>
       <InputGroup>
         <Label>메인 식재료</Label>
@@ -761,6 +807,20 @@ const ModalText = styled.p`
     color: black;
     margin-bottom: 5px;
     margin-top: 30px;
+`;
+
+const ModalText_ = styled.p`
+    font-size: 30px;
+    color: black;
+    margin-bottom: 5px;
+    margin-top: 50px;
+`;
+const LineBreak1 = styled.div`
+   margin-top: 50px; /* 위아래 간격 조정 */
+`;
+
+const LineBreak = styled.div`
+    height: 15px; /* 위아래 간격 조정 */
 `;
 
 const ModalText2 = styled.p`
