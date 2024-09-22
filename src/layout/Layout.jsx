@@ -78,33 +78,31 @@ function Layout() {
    */
   const hideLayout = location.pathname === '/login' || location.pathname === '/signup';
 
-   // 유저 정보 가져오기
+    // 유저 정보 가져오기 (Fridge 페이지일 때만)
     useEffect(() => {
       const fetchProfile = async () => {
-          try {
-              const accessToken = localStorage.getItem('accessToken'); // accessToken을 여기서 가져옴
+        try {
+          const accessToken = localStorage.getItem('accessToken');
   
-              if (!accessToken) {
-                  alert('로그인 상태가 아닙니다.');
-                  navigate('/login');
-                  return;
-              }
-  
-              const response = await axios.get(process.env.REACT_APP_API_URL + 'info', {
-                  headers: {
-                      Authorization: `Bearer ${accessToken}`,
-                  },
-              });
-              const data = response.data.data;
-              setNickname(data.nickname);
-          } catch (error) {
-              console.error('프로필 정보를 불러오는 중 오류가 발생했습니다:', error.message);
+          if (!accessToken) {
+            alert('로그인 상태가 아닙니다.');
+            navigate('/login');
+            return;
           }
-      };
-      
-      fetchProfile();
-    }, [navigate]); 
   
+          const response = await axios.get(process.env.REACT_APP_API_URL + 'info', {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          });
+          const data = response.data.data;
+          setNickname(data.nickname);
+        } catch (error) {
+          console.error('프로필 정보를 불러오는 중 오류가 발생했습니다:', error.message);
+        }
+      };
+
+
   /**
    * layout 상단 제목 설정
    * 
@@ -112,23 +110,21 @@ function Layout() {
    * 
    * @Author : 신민준
    */
-  const getHeaderTitle = () => {
-    if (location.pathname.includes('/board'))
-      return '게시판';
-     else if (location.pathname.includes('/recipe/recommended-recipe'))
-      return '나에게 추천 레시피';
-    else if (location.pathname.includes('/fridge'))
-      return `${nickname}의 냉장고`;
-    else if (location.pathname.includes('/recipe'))
-      return '레시피';
-    else if (location.pathname.includes('/menu'))
-      return '마이페이지';
-    else if (location.pathname.includes('/signup'))
-      return '회원가입';
-    else if (location.pathname.includes('/login'))
-      return '로그인';
-  };
+  // /fridge 경로일 때만 프로필 정보를 가져옴
+    if (location.pathname.includes('/fridge')) {
+      fetchProfile();
+    }
+  }, [navigate, location.pathname]); 
 
+  const getHeaderTitle = () => {
+    if (location.pathname.includes('/board')) return '게시판';
+    else if (location.pathname.includes('/recipe/recommended-recipe')) return '나에게 추천 레시피';
+    else if (location.pathname.includes('/fridge')) return `${nickname}의 냉장고`;
+    else if (location.pathname.includes('/recipe')) return '레시피';
+    else if (location.pathname.includes('/menu')) return '마이페이지';
+    else if (location.pathname.includes('/signup')) return '회원가입';
+    else if (location.pathname.includes('/login')) return '로그인';
+  };
   
   /**
    * getButtonImage 메서드들
