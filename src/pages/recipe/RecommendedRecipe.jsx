@@ -143,7 +143,7 @@ const menuCategoryData = fetchData
 
   
         // 콘솔에 확인
-    console.log('Excluded Categories:', formattedExcludedCategories);
+    console.log('Excluded Categories : ', formattedExcludedCategories);
   
         onClose();
       } else {
@@ -276,7 +276,7 @@ const menuCategoryData = fetchData
 
   const fetchRecipes = async (pageNumber, reset = false) => {
     if (reset) {
-      setRecipes([]); // 기존 데이터를 비웁니다.
+      setRecipes([]); // 기존 데이터를 비웁니다....
     }
     
     setLoading(true);
