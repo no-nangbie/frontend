@@ -22,6 +22,7 @@ function Recipe() {
   const [isSecondModalOpen, setIsSecondModalOpen] = useState(false); // 두번째 모달
   const [recentFoods, setRecentFoods] = useState(Array(3).fill("")); // 최근 먹었던 음식 리스트
   const [fetchData, setFetchData] = useState(null);
+  const [menuCategories, setMenuCategories] =  useState(Array(3).fill("")); // 자주 요리하는 음식 카테고리
 
  // 데이터를 가져오는 함수 정의
  const fetchStatistics = async () => {
@@ -101,102 +102,119 @@ const menuCategoryData = fetchData
     const handleConfirm = () => {
       if (isSecondModal) {
         // 두 번째 모달의 확인 버튼 클릭 시 로직 추가
+        const excludedCategories = menuCategoryData.filter((_, index) => radioValues[index] === "미포함")
+          .map(item => item.name); // 체크된 카테고리 이름 가져오기
+  
+        // setMenuCategories에 미포함 카테고리 저장
+        setMenuCategories(excludedCategories);
+  
+        // 콘솔에 확인
+        console.log('Excluded Categories:', excludedCategories);
+  
         onClose();
       } else {
-        setRecentFoods(inputValues); // 입력된 값을 recentFoods에 저장
+        // "미포함" 체크된 음식 이름만 필터링
+        const excludedFoods = inputValues.filter((_, index) => radioValues[index] === "미포함");
+  
+        // recentFoods 상태에 저장
+        setRecentFoods(excludedFoods);
+
+        console.log('Excluded excludedFoods:', excludedFoods);
+  
+        // 모달 상태 업데이트
         setIsModalOpen(false);
         setIsSecondModalOpen(true);
       }
     };
-
+    
     return (
       <ModalOverlay>
         <ModalContent>
-           {!isSecondModal ? (
+          {!isSecondModal ? (
             <>
-          <ModalText>
-            최근 먹었던 음식을 입력해주세요
-          </ModalText>
-          <ModalText2>
-            (미포함을 선택할 시 추천에서 제외됩니다.)
-          </ModalText2>
-          {inputValues.map((inputValue, index) => (
-            <InputContainer key={index}>
-              <input
-                type="text"
-                placeholder={`음식 이름 ${index + 1}`}
-                value={inputValue}
-                onChange={(e) => handleInputChange(index, e.target.value)}
-                style={{ height: '40px' }} // 높이 조정
-              />
-              <RadioContainer>
-              <div>
-                <input
-                    type="checkbox"
-                    checked={radioValues[index] === "포함"}
-                    onChange={() => handleRadioChange(index, "포함")}
-                    id={`switch-include-${index}`}
-                />
-                <label className="switch" htmlFor={`switch-include-${index}`}>
-                    <span className="slider"></span>
-                </label>
-                <span>포함</span>
-
-                <input
-                    type="checkbox"
-                    checked={radioValues[index] === "미포함"}
-                    onChange={() => handleRadioChange(index, "미포함")}
-                    id={`switch-exclude-${index}`}
-                />
-                <label className="switch" htmlFor={`switch-exclude-${index}`}>
-                    <span className="slider"></span>
-                </label>
-                <span>미포함</span>
-                </div>
-              </RadioContainer>
-            </InputContainer>
-          ))}
-          </>
+              <ModalText>
+                최근 먹었던 음식을 입력해주세요
+              </ModalText>
+              <ModalText2>
+                (미포함을 선택할 시 추천에서 제외됩니다.)
+              </ModalText2>
+              {inputValues.map((inputValue, index) => (
+                <InputContainer key={index}>
+                  <input
+                    type="text"
+                    placeholder={`음식 이름 ${index + 1}`}
+                    value={inputValue}
+                    onChange={(e) => handleInputChange(index, e.target.value)}
+                    style={{ height: '40px' }} // 높이 조정
+                  />
+                  <RadioContainer>
+                    <div>
+                      <input
+                        type="checkbox"
+                        checked={radioValues[index] === "포함"}
+                        onChange={() => handleRadioChange(index, "포함")}
+                        id={`switch-include-${index}`}
+                      />
+                      <label className="switch" htmlFor={`switch-include-${index}`}>
+                        <span className="slider"></span>
+                      </label>
+                      <span>포함</span>
+  
+                      <input
+                        type="checkbox"
+                        checked={radioValues[index] === "미포함"}
+                        onChange={() => handleRadioChange(index, "미포함")}
+                        id={`switch-exclude-${index}`}
+                      />
+                      <label className="switch" htmlFor={`switch-exclude-${index}`}>
+                        <span className="slider"></span>
+                      </label>
+                      <span>미포함</span>
+                    </div>
+                  </RadioContainer>
+                </InputContainer>
+              ))}
+            </>
           ) : (
             <>
-         <ModalText>
-            자주 요리하는 레시피 카테고리입니다. 
-          </ModalText>
-            <ModalText2>
-            (미포함을 선택할 시 추천에서 제외됩니다.)
-          </ModalText2>
-          {menuCategoryData.map((item, index) => (
-            <InputContainer key={index}>
-              <span2 style={{ height: '40px' }}>{item.name}</span2>
-              <RadioContainer>
-                <div>
-                  <input
-                    type="checkbox"
-                    checked={radioValues[index] === "포함"}
-                    onChange={() => handleRadioChange(index, "포함")}
-                    id={`second-switch-include-${index}`}
-                  />
-                  <label className="switch" htmlFor={`second-switch-include-${index}`}>
-                    <span className="slider"></span>
-                  </label>
-                  <span>포함</span>
-
-                  <input
-                    type="checkbox"
-                    checked={radioValues[index] === "미포함"}
-                    onChange={() => handleRadioChange(index, "미포함")}
-                    id={`second-switch-exclude-${index}`}
-                  />
-                  <label className="switch" htmlFor={`second-switch-exclude-${index}`}>
-                    <span className="slider"></span>
-                  </label>
-                  <span>미포함</span>
-                </div>
-              </RadioContainer>
-            </InputContainer>
-          ))}
-        </>
-      )}
+              <ModalText>
+                자주 요리하는 레시피 카테고리입니다. 
+              </ModalText>
+              <ModalText2>
+                (미포함을 선택할 시 추천에서 제외됩니다.)
+              </ModalText2>
+              {menuCategoryData.map((item, index) => (
+                <InputContainer key={index}>
+                  <span2 style={{ height: '40px' }}>{item.name}</span2>
+                  <RadioContainer>
+                    <div>
+                      <input
+                        type="checkbox"
+                        checked={radioValues[index] === "포함"}
+                        onChange={() => handleRadioChange(index, "포함")}
+                        id={`second-switch-include-${index}`}
+                      />
+                      <label className="switch" htmlFor={`second-switch-include-${index}`}>
+                        <span className="slider"></span>
+                      </label>
+                      <span>포함</span>
+  
+                      <input
+                        type="checkbox"
+                        checked={radioValues[index] === "미포함"}
+                        onChange={() => handleRadioChange(index, "미포함")}
+                        id={`second-switch-exclude-${index}`}
+                      />
+                      <label className="switch" htmlFor={`second-switch-exclude-${index}`}>
+                        <span className="slider"></span>
+                      </label>
+                      <span>미포함</span>
+                    </div>
+                  </RadioContainer>
+                </InputContainer>
+              ))}
+            </>
+          )}
           <ModalButtonContainer>
             <ModalButton onClick={handleConfirm}>확인</ModalButton>
             <ModalButton onClick={onClose}>취소</ModalButton>
@@ -415,8 +433,6 @@ const handleFoodCategoryChange = (e) => {
   useEffect(() => {
     getFoodName();
   }, []);
-
-
 
 return (
   <MainContainer>
