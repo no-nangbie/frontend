@@ -98,7 +98,7 @@ const handleFoodCategoryChange = (e) => {
   const searchMenu = async (pageNumber) => {
     setLoading(true);
     try {
-      const params = { page: pageNumber, size: 700, sort: sortOption, keyword: searchKeyword.trim(), foodName:"" , menuCategory:handleGetMenuCategory(menuCategory)  }; // keyword 추가
+      const params = { page: pageNumber, size: 700, sort: sortOption, keyword: searchKeyword.trim(), foodName:selectedFoodCategory , menuCategory:handleGetMenuCategory(menuCategory)  }; // keyword 추가
       const response = await axios.get(process.env.REACT_APP_API_URL + 'menus/test', {
             params: { ...params},
             headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
@@ -142,7 +142,7 @@ const handleFoodCategoryChange = (e) => {
   const handleSearchClick = () => {
     const trimmedKeyword = searchKeyword.trim();
     setRecipes([]); // 검색할 때마다 기존 데이터를 리셋
-    setPage(1); // 페이지 초기화
+    setPage(1); // 페이지 초기화'
   
     if (trimmedKeyword === "") {
       // 검색어가 빈칸일 때, 전체 레시피 조회
