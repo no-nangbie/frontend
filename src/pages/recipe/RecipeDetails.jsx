@@ -94,7 +94,7 @@ const RecipeDetails = () => {
       throw new Error('잘못된 메뉴 ID 입니다.');
     }
     try {
-      const response = await axios.get(`http://localhost:8080/menus/${menuId}`, {
+      const response = await axios.get(process.env.REACT_APP_API_URL+ `menus/${menuId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('accessToken')}`, // 토큰 사용
         },

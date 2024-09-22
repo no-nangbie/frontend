@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
-import menu_1 from '../../resources/sample/menu_1.png';
+import styled, { keyframes } from 'styled-components';
 import micro_1 from '../../resources/icon/microphone.png';
 import micro_2 from '../../resources/icon/microphone_onclick.png';
 import axios from 'axios';
+import { motion } from 'framer-motion';
 
 const RecipeSteps = () => {
   const { menuId } = useParams();
@@ -17,6 +17,7 @@ const RecipeSteps = () => {
   const [recognition, setRecognition] = useState(null);
   const [menuImage, setMenuImage] = useState([]);
   const [transcript, setTranscript] = useState(''); // 인식된 텍스트 상태
+  const [menuTitle, setMenuTitle] = useState(''); // 메뉴 제목을 저장하는 상태 추가
 
 
    // 페이지, 사이즈, 정렬 파라미터 기본값 설정
@@ -28,7 +29,7 @@ const RecipeSteps = () => {
    useEffect(() => {
     const fetchRecipeData = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/menus/${menuId}`, {
+        const response = await axios.get(process.env.REACT_APP_API_URL+`menus/${menuId}`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
           },
@@ -38,6 +39,7 @@ const RecipeSteps = () => {
         setSteps(menuData.recipes);
         setIngredients(menuData.foodMenuQuantityList);
         setMenuImage(menuData.imageUrl);
+        setMenuTitle(menuData.menuTitle); // 메뉴 제목 설정
       } catch (error) {
         console.error('Error fetching recipe data:', error);
       }
@@ -50,7 +52,7 @@ const RecipeSteps = () => {
   useEffect(() => {
     const fetchMemberFoods = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/my-foods`, {
+        const response = await axios.get(process.env.REACT_APP_API_URL+'my-foods', {
           params: { page, size, sort },
           headers: {
             Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
@@ -143,21 +145,27 @@ const RecipeSteps = () => {
 
   // 마이크 상태를 토글하여 음성 인식 시작/종료 제어
   const toggleMic = () => {
-    console.log('Mic active before toggle:', micActive);
-
-    if (!micActive && recognition) {
-      recognition.start(); // 마이크 활성화 시 음성 인식 시작
-      console.log('음성 인식 시작됨');
-    } else if (micActive && recognition) {
-      recognition.stop(); // 마이크 비활성화 시 음성 인식 종료
-      console.log('음성 인식 강제 종료됨');
-    }
-
-    setMicActive((prevState) => {
-      console.log('Toggling mic active:', !prevState); // 상태가 변경되는 부분 확인
-      return !prevState;
+    // 마이크 권한 확인
+    navigator.permissions.query({ name: 'microphone' }).then(function(permissionStatus) {
+      if (permissionStatus.state === 'denied') {
+        console.log('마이크 사용이 차단되었습니다.');
+        return;  // 권한이 없으면 마이크 시작을 하지 않음
+      } else {
+        console.log('마이크 사용이 허용되었습니다.');
+        // 기존 toggleMic 로직
+        if (!micActive && recognition) {
+          recognition.start();  // 마이크 활성화 시 음성 인식 시작
+          console.log('음성 인식 시작됨');
+        } else if (micActive && recognition) {
+          recognition.stop();  // 마이크 비활성화 시 음성 인식 종료
+          console.log('음성 인식 강제 종료됨');
+        }
+  
+        setMicActive((prevState) => !prevState);
+      }
     });
   };
+  
 
   const handleIngredientCheck = (ingredientName) => {
     setSelectedIngredients((prevSelected) =>
@@ -209,7 +217,7 @@ const RecipeSteps = () => {
   return (
     <Container>
       <Header>
-        <Title>레시피 단계</Title>
+        <Title>{menuTitle}</Title>
         <Controls>
           <ButtonWrapper>
             <Button onClick={handlePrev} disabled={currentStep === 0}>
@@ -228,15 +236,39 @@ const RecipeSteps = () => {
           <BackgroundImage src={menuImage} alt="레시피 이미지" />
            {/* 이전 단계 설명을 흐릿하게 표시 */}
            {currentStep > 0 && (
-            <PreviousStepDescription>{steps[currentStep - 1]}</PreviousStepDescription>
+            <PreviousStepDescription
+            key={`previous-${currentStep}`}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            variants={variants}
+          >
+            {steps[currentStep - 1]}
+          </PreviousStepDescription>
           )}
           
           {/* 현재 단계 설명 */}
-          <StepDescription>{steps[currentStep]}</StepDescription>
+          <StepDescription
+          key={currentStep}  // key 속성으로 애니메이션이 적용되도록 함
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+          variants={variants}
+        >
+          {steps[currentStep]}
+        </StepDescription>
 
           {/* 다음 단계 설명을 흐릿하게 표시 */}
           {currentStep + 1 < steps.length && (
-            <NextStepDescription>{steps[currentStep + 1]}</NextStepDescription>
+            <NextStepDescription
+            key={`next-${currentStep}`}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            variants={variants}
+          >
+            {steps[currentStep + 1]}
+          </NextStepDescription>
           )}
 
           <MicButton onClick={toggleMic}>
@@ -269,42 +301,30 @@ const RecipeSteps = () => {
 
 export default RecipeSteps;
 
-// 스타일 추가
-const NextStepDescription = styled.p`
-  margin-top: 30px;  // 여유 공간을 위로 줌
+// 이전 단계 설명 스타일에 모션 적용
+const PreviousStepDescription = styled(motion.p)`
+  margin-bottom: 30px;
   font-size: 20px;
   font-weight: bold;
-  color: rgba(0, 0, 0, 0.441);  // 흐릿한 색상 적용
+  color: rgba(0, 0, 0, 0.441);
   text-align: center;
   position: absolute;
-  bottom: 300px;  // 현재 단계 아래에 위치하도록 조정
+  top: 150px;
   width: 100%;
 `;
 
-// 스타일 추가
-const PreviousStepDescription = styled.p`
-  margin-bottom: 30px;  // 여유 공간을 아래로 줌
+// 다음 단계 설명 스타일에 모션 적용
+const NextStepDescription = styled(motion.p)`
+  margin-top: 30px;
   font-size: 20px;
   font-weight: bold;
-  color: rgba(0, 0, 0, 0.441);  // 흐릿한 색상 적용
+  color: rgba(0, 0, 0, 0.441);
   text-align: center;
   position: absolute;
-  top: 150px;  // 현재 단계 위에 위치하도록 조정
+  bottom: 300px;
   width: 100%;
 `;
 
-const StepDescription = styled.p`
-  line-height: 1.5;
-  font-size: 27px;
-  font-weight: bold;
-  color: #333;
-  padding: 20px;
-  background-color: rgba(250, 205, 205, 0.021);
-  border-radius: 10px;
-  position: relative;
-  z-index: 2;  // 앞에 보이게 하기 위해 z-index 추가
-  margin-bottom: 160px;  // 여유 공간을 아래로 줌
-`;
 // styled-components
 const Container = styled.div`
   position: relative;
@@ -318,63 +338,73 @@ const Container = styled.div`
 
 const Header = styled.div`
   text-align: center;
-  font-size: 12px;
   padding: 10px;
-  background-color: #fafafa;
+  background-color: #f8f9fa; /* 부드러운 회색 배경 */
   border-radius: 10px 10px 0 0;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); /* 헤더에 약간의 그림자 추가 */
+  margin-bottom: 20px; /* 아래 컨텐츠와의 여백 추가 */
 `;
+
+// const Title = styled.h1`
+//   margin-bottom: 5px;
+// `;
 
 const Title = styled.h1`
-  margin-bottom: 5px;
+  font-size: 24px;
+  font-weight: bold;
+  color: #333; /* 텍스트 색상을 좀 더 선명하게 */
+  margin: 0; /* 마진 없애고 중앙 정렬 */
+
 `;
 
+// 컨트롤 버튼 영역 스타일
 const Controls = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  margin-top: 10px; /* 제목과 버튼 사이에 약간의 여백 */
 `;
 
+
 const ButtonWrapper = styled.div`
-  display: flex;
-  justify-content: space-around;
-  width: 80%;
-  padding: 10px;
-  border: 2px solid #007bff;
-  border-radius: 50px;
-  background-color: #f8f9fa;
-  box-shadow: 0px 4px 10px rgba(0, 123, 255, 0.1);
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr; /* 세 칸을 균등하게 나눔 */
+  width: 100%;
+  max-width: 400px; /* 적절한 크기로 버튼 그룹의 최대 너비 설정 */
+  padding: 5px;
+  border: 1px solid #007bff; /* 파란색 테두리 */
+  border-radius: 10px; /* 둥글게 설정 */
+  background-color: #ffffff; /* 배경색을 흰색으로 설정 */
+  box-shadow: 0px 4px 10px rgba(0, 123, 255, 0.1); /* 약간의 그림자 추가 */
 `;
 
 const Button = styled.button`
-  padding: 10px 20px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
+  padding: 8px 16px;
+  background-color: transparent; /* 버튼 배경 투명 */
+  color: #000000; /* 파란색 텍스트 */
+  border: none; /* 테두리 제거 */
   font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  text-align: center; /* 텍스트 중앙 정렬 */
+
   &:disabled {
-    background-color: #ccc;
+    color: #ccc; /* 비활성화된 버튼은 회색으로 표시 */
     cursor: not-allowed;
   }
 `;
 
 const StepIndicator = styled.span`
-  font-size: 20px;
+  font-size: 16px;
   font-weight: bold;
   color: #333;
+  text-align: center;
+  align-self: center; /* 페이지 인디케이터를 세로로 중앙 정렬 */
+  border-left: 1px solid #007bff; /* 왼쪽과 오른쪽에 구분선을 추가 */
+  border-right: 1px solid #007bff;
+  padding: 0 10px;
 `;
 
-const RecipeSection = styled.div`
-  position: relative;
-  border-radius: 0 0 10px 10px;
-  overflow: hidden;
-  flex-grow: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 20px;
-`;
 
 const BackgroundImage = styled.div`
   position: absolute;
@@ -474,4 +504,39 @@ const FinishButton = styled.button`
   cursor: pointer;
   font-size: 18px;
   width: 100%;
+`;
+
+// 애니메이션 변형 정의
+const variants = {
+  hidden: { opacity: 0, y: 100 },  // 요소가 화면 아래에서 나타남
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },  // 요소가 나타날 때
+  exit: { opacity: 0, y: -100, transition: { duration: 0.5 } },  // 요소가 사라질 때
+};
+
+// 현재 JSX에서 `StepDescription`과 같은 단계 설명 부분을 애니메이션 처리
+const StepDescription = styled(motion.p)`
+  line-height: 1.5;
+  font-size: 25px;
+  font-weight: bold;
+  color: #333;
+  padding: 20px;
+  background-color: rgba(250, 205, 205, 0.021);
+  border-radius: 10px;
+  position: relative;
+  z-index: 2;
+  margin-bottom: 160px;
+  text-align: center;
+`;
+
+
+// 레시피 설명 및 이미지 영역
+const RecipeSection = styled.div`
+  position: relative;
+  border-radius: 0 0 10px 10px;
+  overflow: hidden;
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
 `;

@@ -18,7 +18,7 @@ function Login() {
 
     console.log("로그인 버튼이 클릭되었습니다."); // 버튼 클릭 확인을 위한 로그
     try {
-      const response = await axios.post('http://localhost:8080/login', {
+      const response = await axios.post(process.env.REACT_APP_API_URL+'login', {
         email: email,
         password: password,
       }, {

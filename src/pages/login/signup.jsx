@@ -25,7 +25,7 @@ function Signup() {
 
   const verifyAuthCode = async () => {
     try {
-      const response = await axios.post('http://localhost:8080/verify-auth-code', {
+      const response = await axios.post(process.env.REACT_APP_API_URL+ 'verify-auth-code', {
         email,
         authCode,
       });
@@ -41,7 +41,7 @@ function Signup() {
 
   const checkNickname = async () => {
     try {
-      const response = await axios.get('http://localhost:8080/nickname-check', {
+      const response = await axios.get(process.env.REACT_APP_API_URL+ 'nickname-check', {
         params: { nickname },
       });
 
@@ -85,7 +85,7 @@ function Signup() {
     }
 
     try {
-      const response = await axios.post('http://localhost:8080/signup', {
+      const response = await axios.post(process.env.REACT_APP_API_URL+ 'signup', {
         email,
         password,
         confirmPassword,
