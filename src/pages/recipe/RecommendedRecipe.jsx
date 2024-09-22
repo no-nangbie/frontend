@@ -87,6 +87,7 @@ const menuCategoryData = fetchData
     const [inputValues, setInputValues] = useState(Array(3).fill("")); // 3개의 입력값 상태 관리
     const [radioValues, setRadioValues] = useState(Array(3).fill("포함")); // 3개의 라디오 버튼 상태 관리
 
+
     const handleInputChange = (index, value) => {
       const newInputValues = [...inputValues];
       newInputValues[index] = value;
@@ -150,7 +151,10 @@ const menuCategoryData = fetchData
       }
     };
     
-    
+    const handleCancel = () => {
+      onClose();
+      navigate('/recipe'); // 취소 버튼 클릭 시 페이지 이동
+    };
     
     return (
       <ModalOverlay>
@@ -242,7 +246,7 @@ const menuCategoryData = fetchData
           )}
           <ModalButtonContainer>
             <ModalButton onClick={handleConfirm}>확인</ModalButton>
-            <ModalButton onClick={onClose}>취소</ModalButton>
+            <ModalButton onClick={handleCancel}>취소</ModalButton>
           </ModalButtonContainer>
         </ModalContent>
       </ModalOverlay>
