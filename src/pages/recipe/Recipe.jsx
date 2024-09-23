@@ -12,7 +12,7 @@ function Recipe() {
   const [mainFoodCategory, setMainFoodCategory] = useState([]);
   const [selectedFoodCategory, setSelectedFoodCategory] = useState("전체"); 
   const [menuCategory, setMenuCategory] = useState("전체");
-  const [sortOption, setsortOption] = useState("missingFoodsCount_asc");
+  const [sortOption, setsortOption] = useState("menuLikeCount_desc");
   const navigate = useNavigate();
   const [searchKeyword, setSearchKeyword] = useState("");
   const [isSearching, setIsSearching] = useState(false);
