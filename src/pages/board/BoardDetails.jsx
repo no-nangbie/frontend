@@ -250,7 +250,7 @@ const BoardDetails = () => {
           <ul>
             <li>
               <Span>
-                {post.foodContent.split('\n').map((line, index) => (
+                {post.recipeContent.split('\n').map((line, index) => (
                   <React.Fragment key={index}>
                     {line}
                     <br />
