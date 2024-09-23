@@ -195,7 +195,6 @@ function MyPage() {
                 </InfoCard>
                 <ActionButton onClick={handleNicknameChange}>닉네임 변경</ActionButton>  {/* 닉네임 변경 페이지로 이동 */}
                 <ActionButton onClick={handlePasswordChange}>비밀번호 변경</ActionButton>  {/* 버튼 수정 */}
-                <ActionButton>선호 음식 변경</ActionButton>
                 <ActionButton onClick={handleAllergy}>알레르기 음식</ActionButton>
                 <ActionButton onClick={handleStatistics}>통계</ActionButton>
                 <ActionButton onClick={handleLogout}>로그아웃</ActionButton>
