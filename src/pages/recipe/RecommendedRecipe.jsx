@@ -119,7 +119,7 @@ const newMenuCategoryData = data
     const handleConfirm = () => {
       if (isSecondModal) {
         // 두 번째 모달일 때만 fetchRecipes 호출
-        const excludedCategories = menuCategoryData.filter((_, index) => radioValues[index] === "미포함")
+        const excludedCategories = menuCategoryData.filter((_, index) => radioValues[index] === "포함")
           .map(item => item.name); // 제외할 카테고리 이름 가져오기
 
         const excludedCategoriesEnglish = excludedCategories.map(category => {
